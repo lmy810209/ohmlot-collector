@@ -1,0 +1,31 @@
+name: probe-fcc
+on:
+  workflow_dispatch: {}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Probe FCC sources from a US runner
+        run: |
+          UA="OhmlotBot/0.1 (+https://ohmlot.com; daily list-price snapshot)"
+          mkdir -p out
+          echo "=== GET GenericSearch.cfm (form page) ==="
+          curl -sS -o out/form.html -w "HTTP %{http_code} size=%{size_download}\n" -m 60 -A "$UA" -H "accept: text/html" "https://apps.fcc.gov/oetcf/eas/reports/GenericSearch.cfm" || true
+          head -c 300 out/form.html; echo
+          echo "=== GET GenericSearchResult.cfm?grantee_code=2A5PE ==="
+          curl -sS -o out/result-get.html -w "HTTP %{http_code} size=%{size_download}\n" -m 120 -A "$UA" -H "accept: text/html" "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2A5PE&show_records=100" || true
+          grep -oE "2A5PE-?[A-Z0-9]{3,}" out/result-get.html | sort -u | head -40 || true
+          echo "=== POST GenericSearchResult.cfm grantee_code=2A5PE ==="
+          curl -sS -o out/result-post.html -w "HTTP %{http_code} size=%{size_download}\n" -m 120 -A "$UA" -H "accept: text/html" -H "referer: https://apps.fcc.gov/oetcf/eas/reports/GenericSearch.cfm" --data "RequestTimeout=500&calledFromFrame=N&application_status=&grantee_code=2A5PE&product_code=&applicant_name=&grant_date_from=&grant_date_to=&comments=&application_purpose=&application_purpose_description=&grant_code_1=&grant_code_2=&grant_code_3=&test_firm=&application_status_description=&equipment_class=&equipment_class_description=&lower_frequency=&upper_frequency=&freq_exact_match=on&bandwidth_from=&emission_designator=&tolerance_from=&tolerance_to=&tolerance_exact_match=on&power_output_from=&power_output_to=&power_exact_match=on&rule_part_1=&rule_part_2=&rule_part_3=&rule_part_exact_match=on&product_description=&modular_type_description=&tcb_code=&tcb_code_description=&tcb_scope=&tcb_scope_description=&outputformat=HTML&show_records=100&fetchfrom=0" "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm" || true
+          grep -oE "2A5PE-?[A-Z0-9]{3,}" out/result-post.html | sort -u | head -40 || true
+          echo "=== fccid.io (bot UA) ==="
+          curl -sS -o out/fccid.html -w "HTTP %{http_code} cf=%header{cf-mitigated}\n" -m 60 -A "$UA" "https://fccid.io/2A5PE" || true
+          echo "=== fcc.report (bot UA) ==="
+          curl -sS -o out/fccreport.html -w "HTTP %{http_code} cf=%header{cf-mitigated}\n" -m 60 -A "$UA" "https://fcc.report/company/Hangzhou-Yushu-Technology-Co-Ltd" || true
+          ls -la out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: probe
+          path: out
+          retention-days: 1
