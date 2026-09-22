@@ -1,0 +1,22 @@
+{
+  "name": "ohmlot-collector",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Ohmlot — daily collector for personal-robot list prices and FCC equipment grants",
+  "scripts": {
+    "collect": "tsx src/run.ts",
+    "collect:prices": "tsx src/run.ts prices",
+    "collect:fcc": "tsx src/run.ts fcc",
+    "test": "tsx --test test/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
