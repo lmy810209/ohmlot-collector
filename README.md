@@ -17,6 +17,7 @@
 | `supabase/schema.sql` | Supabase 테이블 (models, price_snapshots, fcc_grants, latest_prices 뷰) |
 | `.github/workflows/daily.yml` | 매일 00:17 UTC(09:17 KST) **가격만** 수집 후 `data/` 커밋 |
 | `.github/workflows/fcc.yml` | FCC 인증 수집. Actions에서 **수동 실행(Run workflow)** 전용 |
+| `web/` | ohmlot.com 사이트 v0 (Next.js). 빌드 시 `data/`를 읽어 정적 생성. 배포 방법은 `web/README.md` |
 
 ## 시작하기 (15분)
 
