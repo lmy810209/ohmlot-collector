@@ -1,0 +1,443 @@
+                               Federal Communications Commission
+                               Office of Engineering and Technology
+                                        Laboratory Division
+
+
+                                                                                          August 13, 2018
+
+     APPLICATION PROGRAMMING INTERFACE (API) FOR OET EQUIPMENT
+                      AUTHORIZATION SYSTEM
+
+1. OVERVIEW
+
+This publication describes the functions supported by the Application Programming Interfaces (API) for
+the OET Equipment Authorization System (EAS). The API currently has three method calls:
+getFCCIDList, getWhitespaceAuthorizations, and getCBSDAuthorizations. The following sections
+describe the details of the functions supported and the input and output fields. The getFCCIDList call
+takes either a full or partial FCC ID as a parameter and returns any matching approved equipment
+authorizations on file with the OET Laboratory. The getWhitespaceAuthorizations call takes a starting
+and ending date range as parameters and returns the FCC ID and equipment class combination for all
+whitespace-type equipment that was approved within that date range. The getCBSDAuthorizations call
+takes a starting and ending date range as parameters and returns all equipment authorizations for Citizens
+Broadband Radio Service Devices that have been approved over within that date range.
+
+2. DESCRIPTIONS OF THE SERVICES
+getFCCIDList: API allows users to enter a grantee code or the initial portion of an FCC ID and obtain a
+list of all granted FCC IDs that are an exact or partial match. The minimum search criterion that must be
+entered is a three or five-character grantee code. The return results include a list of FCC IDs that match
+the search parameters entered, the grant date and application purpose for each FCC ID, and the grantee
+name and address.
+
+getWhitespaceAuthorizations: API allows users to obtain a list of all white space equipment
+authorizations subject to Certification that have been approved over the specified date range. The date is
+entered in the format MM-DD-YYYY. A start and end date are both required. The results returned
+identify the FCC ID, Equipment Class, Status, Status Date, and Application Purpose. This includes eight
+equipment classes for White Space devices (WSS-White Space Device with Sensing, WSG-White Space
+device with Geo Location ,WSF-White Space Device with Sensing-Fixed, WS1-White Space Device with
+Sensing-Mode 1,WS2-White Space Device with Sensing-Mode 2,WGF-White Space Device with Geo-
+location- Fixed,WG1-White Space Device with Geo-location- Mode 1, and WG2-White Space Device
+with Geo-location- Mode 2).”
+
+getCBSDAuthorizations: API allows users to obtain a list of all Citizens Broadband Radio Service
+Device equipment authorizations subject to Certification that have been approved over the specified date
+range. The date is entered in the format MM-DD-YYYY. A start and end date are both required. The
+return results include the Application Purpose, Equipment Class, FCC ID, Grantee Name, Status, Status
+Date, Grant Notes, Description, Emission Designator, Frequency Max, Frequency Min, and Power
+Output. This includes all equipment authorizations under the equipment classes CBD-Citizens Band
+Category A and B Devices, and CBE-Citizens Band End User Devices.
+
+                                                               953436 D01 OET Laboratory Services API v02
+                                                                                                   Page 1
+3. SUMMARY OF RESULTS PARAMETERS RETURNED
+ Returned Result Field   Description
+ Application Purpose     The application purpose is a description required on each application submitted
+                         that indicates if the application is for a new product or a change to an already
+                         existing product. The description can be one of the following: Original
+                         Equipment, Class II Permissive Change, Change in Identification, or Class III
+                         Permissive Change.
+ Description             Product description includes additional information about the product that was
+                         entered on Form 731 by granting Telecommunication Certification Body
+                         (TCB).
+ Emission Designator     This is typically a 7-character alpha numeric classification that describes the
+                         nature of the type of signal being transmitted and specifies the necessary
+                         bandwidth. See Sections 2.201 and 2.202 of the FCC rules for more detail.
+ Equipment Class         The equipment class is a three character identifier assigned by the FCC to group
+                         similar types of equipment.
+ FCCID                   The FCC ID uniquely identifies the equipment authorization. It is made up of a
+                         three or five-character alpha-numeric grantee code that is assigned by the FCC,
+                         followed by the product code that is one to fourteen alpha-numeric characters
+                         assigned by the grantee and may include the “-“(dash or hyphen). Blank spaces
+                         are not allowed.
+ FreqMax                 The FreqMax field returns the highest operating frequency in MHz.
+ FreqMin                 The FreqMin field returns the lowest operating frequency in MHz.
+ Grantee Address         The getFCCID method call returns multiple parameters related to the Grantee
+   Address               address. The grantee is the party responsible for compliance of the device.
+   State                 Information returned is their address of record in the EAS. State is only
+   City                  returned if the grantee is located in the US.
+   Zip Code
+   Country
+ Grant Date              The date the device authorized in the FCC Database.
+ Grantee                 The grantee result field returns the grantee company name. The grantee is the
+                         party responsible for compliance of the device. Information returned is their
+                         company name of record in the EAS.
+ Notes                   The notes field returns grant note information. Grant notes are two-character
+                         standard text statements on equipment authorization grants that are commonly
+                         used that identify conditions of approval. A full list is available at:
+                         https://apps.fcc.gov/oetcf/eas/reports/GrantNotesList.cfm
+ Power Output            The power output is the amount of power of radio frequency (RF) energy that a
+                         transmitter produces at its output in watts. Unless specifically noted by a grant
+                         note, the power is measured as conducted power. If the grant note EP is
+                         specified, the measured power is EIRP.
+ Status                  The status is a two-character alphabetic identifier that indicates the status of an
+                         FCC ID. This search currently returns results for authorized devices. The
+                         status codes will be one of the following:
+                              GI - indicates that an original Grant has been issued
+                              IP - indicates that a Permissive Change grant has been issued
+                              IM - indicates that a Modification of a grant has been issued
+ Status Date             The status date is the date the application status was last updated in MM-DD-
+                         YYYY format.
+
+
+
+
+                                                              953436 D01 OET Laboratory Services API v02
+                                                                                                  Page 2
+4. WEB APPLICATION DESCRIPTION LANGUAGE (WADL)
+Endpoint - https://apps.fcc.gov/OETLabServices/application.wadl
+
+WADL Content
+ <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ <application xmlns="http://research.sun.com/wadl/2006/10">
+      <doc xmlns:jersey="http://jersey.dev.java.net/" jersey:generatedBy="Jersey: 1.4 09/11/2010 10:30
+ PM"/>
+      <resources base="https://appsat.fcc.gov:443/OETLabServices/">
+          <resource path="/getWhitespaceAuthorizations">
+              <method name="GET" id="getWhiteSpaceAuthorizations">
+                  <request>
+                      <param xmlns:xs="http://www.w3.org/2001/XMLSchema" type="xs:string"
+ style="query" name="beginDate"/>
+                      <param xmlns:xs="http://www.w3.org/2001/XMLSchema" type="xs:string"
+ style="query" name="endDate"/>
+                  </request>
+                  <response>
+                      <representation mediaType="application/xml"/>
+                      <representation mediaType="application/json"/>
+                  </response>
+              </method>
+          </resource>
+          <resource path="/getFCCIDList">
+              <method name="GET" id="getFCCIDList">
+                  <request>
+                      <param xmlns:xs="http://www.w3.org/2001/XMLSchema" type="xs:string"
+ style="query" name="fccId"/>
+                  </request>
+                  <response>
+                      <representation mediaType="application/xml"/>
+                      <representation mediaType="application/json"/>
+                  </response>
+              </method>
+          </resource>
+          <resource path="/getCBSDAuthorizations">
+              <method name="GET" id="getWhiteSpaceAuthorizations">
+                  <request>
+                      <param xmlns:xs="http://www.w3.org/2001/XMLSchema" type="xs:string"
+ style="query" name="beginDate"/>
+                      <param xmlns:xs="http://www.w3.org/2001/XMLSchema" type="xs:string"
+ style="query" name="endDate"/>
+                  </request>
+                  <response>
+                      <representation mediaType="application/xml"/>
+                      <representation mediaType="application/json"/>
+                  </response>
+              </method>
+          </resource>
+      </resources>
+ </application>
+
+
+
+
+                                                               953436 D01 OET Laboratory Services API v02
+                                                                                                   Page 3
+5. METHOD CALLS
+5.1       getFCCIDList
+
+Search for approved equipment authorizations on file with the OET Laboratory matching a specified FCC
+ID.
+api call
+https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=<parameter1>
+
+example call
+https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=OPS10
+
+parameters
+
+          The full grantee code followed by a full or partial product code.
+          FCCID – The full or partial FCC ID that uniquely identifies an equipment authorization (e.g.
+           "OPS"). The FCC ID is made up of a three or five character alpha-numeric grantee code and a
+           product code that can be one to fourteen characters and can be alpha-numeric and include the “-“
+           (dash or hyphen). Blank spaces are not allowed.
+
+response
+
+JSON
+
+ [
+      {
+          "address": "7435 Oakland Mills Road",
+          "state": "MD",
+          "country": "United States",
+          "fccid": "OPS10",
+          "applicationPurpose": "Original Equipment",
+          "grantDate": "08/01/2017",
+          "grantee": "FCC Laboratory Test Grantee Company",
+          "city": "Columbia",
+          "zipCode": "21044"
+      }
+ ]
+
+
+
+
+                                                                 953436 D01 OET Laboratory Services API v02
+                                                                                                     Page 4
+XML
+
+ <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ <fCCIDInfoes>
+    <fccidInfo>
+       <address>7435 Oakland Mills Road</address>
+       <applicationPurpose>Original Equipment</applicationPurpose>
+       <city>Columbia</city>
+       <country>United States</country>
+       <FCCId>OPS10</FCCId>
+       <grantDate>08/01/2017</grantDate>
+       <grantee>FCC Laboratory Test Grantee Company</grantee>
+       <state>MD</state>
+       <zipCode>21044</zipCode>
+    </fccidInfo>
+ </fCCIDInfoes>
+
+
+result fields
+
+           Grantee address (address, city, country, state, zip code)
+           Grantee name
+           Grant date
+           FCCID
+           Application Purpose
+
+error response
+
+204 (NO CONTENT): If the query is successful, but no results are returned, this code is returned along
+with the message “The search was successful, but no results were found matching the specified criteria.”
+
+400 (BAD REQUEST): This code, along with a specific error message is returned if the URL is not
+correctly entered (e.g. the FCCID parameter was not included on the URL).
+
+500 (INTERNAL SERVER ERROR): If there is any exception on the server side, it is identified and the
+http status code is returned. The status description contains the detailed reason for the failure.
+
+5.2       getWhitespaceAuthorizations
+
+Get information on approved white space equipment authorizations within a given grant date range.
+
+api call
+
+https://apps.fcc.gov/OETLabServices/getWhitespaceAuthorizations?beginDate=
+<parameter1>&endDate=<parameter2>
+
+example call
+
+https://apps.fcc.gov/OETLabServices/getWhitespaceAuthorizations?beginDate=02-06-
+2015&endDate=02-06-2015
+
+
+
+
+                                                                    953436 D01 OET Laboratory Services API v02
+                                                                                                        Page 5
+parameters
+
+         The beginning grant date range in mm-dd-yyyy format.
+         The ending grant date range in mm-dd-yyyy format.
+
+response
+
+JSON
+
+ [
+     {
+         "status": "GI",
+         "fccid": "OPS1",
+         "statusDate": "02/06/2015",
+         "equipmentClass": "WGF",
+         "applicationPurpose": "Original Equipment"
+     }
+ ]
+
+
+XML
+
+ <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ <equipmentAuthorizationVOes>
+   <equipmentAuthorizationVO>
+     <applicationPurpose>Original Equipment</applicationPurpose>
+     <equipmentClass>WGF</equipmentClass>
+     <FCCId>OPS1</FCCId>
+     <status>GI</status>
+     <statusDate>02/06/2015</statusDate>
+   </equipmentAuthorizationVO>
+ </equipmentAuthorizationVOes>
+
+
+result fields
+
+         FCCID
+         Application Purpose
+         Equipment Class
+         Status
+         Status Date
+
+error response
+
+204 (NO CONTENT): If the query is successful, but no results are returned, this code is returned along
+with the message “The search was successful, but no results were found matching the specified criteria.”
+
+400 (BAD REQUEST): This code, along with a specific error message is returned if the URL is not
+correctly entered (e.g. the beginning and ending dates were not included or not formatted properly on the
+URL).
+
+500 (INTERNAL SERVER ERROR): If there is any exception on the server side, it is identified and the
+
+
+                                                              953436 D01 OET Laboratory Services API v02
+                                                                                                  Page 6
+http status code is returned. The status description contains the detailed reason for the failure.
+
+5.3       getCBSDAuthorizations
+
+Get information on approved Citizens Broadband Radio Service Devices within a given grant date range.
+
+api call
+
+https://apps.fcc.gov/OETLabServices/getCBSDAuthorizations?beginDate=
+<parameter1>&endDate=<parameter2>
+
+example call
+
+https://apps.fcc.gov/OETLabServices/getCBSDAuthorizations?beginDate=08-01-2017&endDate=08-01-
+2017
+
+parameters
+
+          The beginning grant date range in mm-dd-yyyy format.
+          The ending grant date range in mm-dd-yyyy format.
+
+response
+
+JSON
+ [
+      {
+          "status": "GI",
+          "fccid": "OPS10",
+          "granteeName": "FCC Laboratory Test Grantee Company",
+          "statusDate": "08/01/2017",
+          "equipmentClass": "CBD",
+          "applicationPurpose": "Original Equipment",
+          "lSpecs": [
+             {
+               "description": "FCC example grant",
+               "emissionDesignator": "15M0F9W",
+               "powerOutput": 0.989,
+               "freqMin": 3550,
+               "freqMax": 3700
+             }
+          ],
+          "lNotes": [
+             {
+               "grantNote": "Output power is EIRP",
+               "grantNoteId": "EP"
+             }
+          ]
+      }
+ ]
+
+
+
+
+                                                                  953436 D01 OET Laboratory Services API v02
+                                                                                                      Page 7
+XML
+ <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+ <cBSDAuthorizationVOes>
+   <cbsdAuthorizationVO>
+     <applicationPurpose>Original Equipment</applicationPurpose>
+     <equipmentClass>CBD</equipmentClass>
+     <FCCId>OPS10</FCCId>
+     <granteeName>FCC Laboratory Test Grantee Company</granteeName>
+     <status>GI</status>
+     <statusDate>08/01/2017</statusDate>
+     <lNotes>
+        <notes>
+          <grantNote>Output power is EIRP</grantNote>
+          <grantNoteId>EP</grantNoteId>
+        </notes>
+     </lNotes>
+     <lSpecs>
+        <specs>
+          <description>FCC example grant</description>
+          <emissionDesignator>15M0F9W</emissionDesignator>
+          <freqMax>3700.00000000</freqMax>
+          <freqMin>3550.00000000</freqMin>
+          <powerOutput>0.9890000</powerOutput>
+        </specs>
+     </lSpecs>
+   </cbsdAuthorizationVO>
+ </cBSDAuthorizationVOes>
+
+result fields
+
+       Application Purpose
+       Equipment Class
+       FCCID
+       Grantee Name
+       Status
+       Status Date
+       Notes
+       Description
+       FreqMax
+       FreqMin
+       Power Output
+
+error response
+
+204 (NO CONTENT): If the query is successful, but no results are returned, this code is returned along
+with the message “The search was successful, but no results were found matching the specified criteria.”
+
+400 (BAD REQUEST): This code, along with a specific error message is returned if the URL is not
+correctly entered (e.g. the beginning and ending dates were not included or not formatted properly on the
+URL).
+
+
+
+                                                              953436 D01 OET Laboratory Services API v02
+                                                                                                  Page 8
+500 (INTERNAL SERVER ERROR): If there is any exception on the server side, it is identified and the
+http status code is returned. The status description contains the detailed reason for the failure.
+
+
+Change Notice
+
+08/13/2018: 953436 D01 OET Laboratory Services API v02 replaces 953436 D01 OET Laboratory
+Services API v01. Changes to the document include the following:
+     Added information on method call for Citizens Broadband Radio Service Devices.
+     Added table for summary of results parameters returned
+     Updated response examples
+
+
+
+
+                                                           953436 D01 OET Laboratory Services API v02
+                                                                                               Page 9
+
