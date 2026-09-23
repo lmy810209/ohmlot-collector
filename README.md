@@ -41,6 +41,7 @@
 
 - `data/logs/<날짜>.log` 에 실패한 URL이 있으면 `config/price-sources.json`의 주소를 고칩니다 (상품 handle이 바뀌었을 수 있음).
 - Shopify `.js` 주소가 `got HTML instead of JSON`으로 실패하면 스토어가 `.js`를 마케팅 사이트로 301시키는 경우입니다 (KEYi가 그랬음). 같은 handle의 `.json` 주소로 바꾸면 되고, 파서는 두 형식을 모두 처리합니다.
+- Shopify 스토어는 요청 지역에 따라 통화와 재고가 달라질 수 있습니다 (Pollen은 미국 밖에서 EUR 가격을 내려줌). 수집기는 `?country=US`로 미국 시장을 고정하므로 로컬에서 돌려도 GitHub 러너와 같은 USD 값이 나옵니다. 로컬과 러너 값이 다르면 이 부분을 먼저 의심하세요.
 - `HTTP 403 (cloudflare challenge)`는 봇 차단입니다. 재시도해도 소용없고 우회하지 않습니다. RobotShop은 모든 요청에 챌린지를 걸어 소스에서 뺐습니다.
 - FCC는 비공식 미러 `fccid.io`를 읽습니다. **2026-09-22 기준 자동 수집이 막혀 있습니다.** `fccid.io`·`fcc.report`는 Cloudflare 봇 챌린지(`HTTP 403 (cloudflare challenge)`), 공식 EAS(`apps.fcc.gov`)는 Akamai `Access Denied`를 돌려주며, 한국 가정용 IP와 GitHub Actions 미국 러너 양쪽에서 같았습니다. 봇 차단은 우회하지 않으므로 `data/logs`에 매일 `[fcc] ... 403`이 남고, 가격 수집과 `data/` 커밋은 그대로 진행됩니다. 접근 가능한 소스가 생기거나 페이지 구조가 달라 `0 grants parsed`가 나오면 `parseGranteePage`를 실제 HTML에 맞춰 조정하세요. 새 FCC ID는 공개 전에 FCC 공식 EAS(apps.fcc.gov)에서 교차 확인하세요.
 - `flags: ["placeholder_price"]`는 Unitree가 "문의" 상품에 넣는 $90,000/$100,000 임시 가격입니다. 시세 계산에서 빼세요.

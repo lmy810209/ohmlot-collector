@@ -1,5 +1,5 @@
 import sources from "../config/price-sources.json" with { type: "json" };
-import { parseRegexHtml, parseShopifyProduct, type PriceRow, type PriceSource } from "./lib/parse.ts";
+import { parseRegexHtml, parseShopifyProduct, withUsMarket, type PriceRow, type PriceSource } from "./lib/parse.ts";
 import { appendLog, fetchText, sleep, writeJsonl } from "./lib/io.ts";
 import { upsert } from "./lib/supabase.ts";
 
@@ -8,7 +8,7 @@ export async function collectPrices(date: string) {
   const errors: string[] = [];
   for (const s of sources as PriceSource[]) {
     try {
-      const body = await fetchText(s.url);
+      const body = await fetchText(s.type === "shopify_js" ? withUsMarket(s.url) : s.url);
       let got: PriceRow[];
       if (s.type === "shopify_js") {
         if (/^\s*</.test(body)) throw new Error("got HTML instead of JSON (redirect or bot challenge) — try the .json endpoint");

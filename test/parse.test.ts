@@ -6,6 +6,7 @@ import {
   parseGranteePage,
   parseRegexHtml,
   parseShopifyProduct,
+  withUsMarket,
   type PriceSource,
 } from "../src/lib/parse.ts";
 
@@ -172,4 +173,10 @@ test("regex html: price and label split across sibling tags (live 1X markup)", (
     ["Ownership", 20000],
     ["Subscription (per month)", 499],
   ]);
+});
+
+test("shopify: requests pin the US market (Pollen serves EUR elsewhere)", () => {
+  assert.equal(withUsMarket("https://store.pollen-robotics.com/products/reachy-mini-lite-version.js"),
+    "https://store.pollen-robotics.com/products/reachy-mini-lite-version.js?country=US");
+  assert.equal(withUsMarket("https://x/p.js?foo=1"), "https://x/p.js?foo=1&country=US");
 });

@@ -80,6 +80,15 @@ export function parseShopifyProduct(json: unknown, source: PriceSource, date: st
   });
 }
 
+/**
+ * Shopify Markets localizes the .js product endpoint to the caller's region: Pollen serves EUR prices
+ * and region-specific availability outside the US. Pin the US market so a run from anywhere records
+ * what a US buyer sees (the runner is in the US; local runs from Korea were getting EUR as "usd").
+ */
+export function withUsMarket(url: string): string {
+  return url + (url.includes("?") ? "&" : "?") + "country=US";
+}
+
 export function parseRegexHtml(html: string, source: PriceSource, date: string): PriceRow[] {
   const rows: PriceRow[] = [];
   const text = stripTags(html); // price and label are often in sibling tags: <span>$20,000</span><span>Ownership</span>
