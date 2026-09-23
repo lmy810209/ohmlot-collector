@@ -132,7 +132,7 @@ export function PriceChart({ dates, series }: { dates: string[]; series: PriceSe
 
       {hover != null && (
         <div
-          className="pointer-events-none absolute top-2 w-[200px] rounded-md border border-zinc-200 bg-white p-2 text-xs shadow-md dark:border-zinc-700 dark:bg-zinc-900"
+          className="pointer-events-none absolute top-2 w-[200px] rounded-md border border-border bg-popover p-2 text-xs shadow-md"
           style={{ left: tooltipLeft }}
         >
           <div className="mb-1 font-medium">{fmtDate(dates[hover])}</div>
@@ -143,7 +143,7 @@ export function PriceChart({ dates, series }: { dates: string[]; series: PriceSe
                 <li key={s.key} className="flex items-center gap-2">
                   <span className="inline-block h-0.5 w-3 shrink-0" style={{ background: `var(--series-${si + 1})` }} />
                   <span className="font-semibold tabular-nums">{p ? usd(p.price) : "—"}</span>
-                  <span className="truncate text-zinc-500 dark:text-zinc-400">{s.label}</span>
+                  <span className="truncate text-muted-foreground">{s.label}</span>
                 </li>
               );
             })}
@@ -152,7 +152,7 @@ export function PriceChart({ dates, series }: { dates: string[]; series: PriceSe
       )}
 
       {shown.length >= 2 && (
-        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-600 dark:text-zinc-400">
+        <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
           {shown.map((s, si) => (
             <li key={s.key} className="flex items-center gap-1.5">
               <span className="inline-block h-0.5 w-4" style={{ background: `var(--series-${si + 1})` }} />
@@ -162,7 +162,7 @@ export function PriceChart({ dates, series }: { dates: string[]; series: PriceSe
         </ul>
       )}
       {series.length > MAX_SERIES && (
-        <p className="mt-2 text-xs text-zinc-500">
+        <p className="mt-2 text-xs text-muted-foreground">
           Showing {MAX_SERIES} of {series.length} variants. The table below has all of them.
         </p>
       )}

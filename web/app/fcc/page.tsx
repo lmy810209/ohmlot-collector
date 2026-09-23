@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { FccSearch } from "@/components/FccSearch";
-import { COVERED_LIST_DATE, fccSearchItems } from "@/lib/data";
+import { fccSearchItems } from "@/lib/data";
+import { COVERED_LIST_LABEL } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "FCC ID search",
@@ -12,12 +13,12 @@ export default function FccPage() {
   return (
     <div className="py-10 sm:py-14">
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">FCC ID search</h1>
-      <p className="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
-        Equipment authorizations on file for the robots in this catalog. On {COVERED_LIST_DATE} the FCC added
+      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+        Equipment authorizations on file for the robots in this catalog. On {COVERED_LIST_LABEL} the FCC added
         foreign-produced advanced robotic devices to its Covered List; grants dated after that are flagged.
       </p>
       <div className="mt-6">
-        <FccSearch items={items} coveredListDate={COVERED_LIST_DATE} />
+        <FccSearch items={items} />
       </div>
     </div>
   );

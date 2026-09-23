@@ -1,95 +1,57 @@
-import Link from "next/link";
-import { Badge } from "@/components/Badge";
-import { getModels, lastUpdated, trackedModelIds, type Category } from "@/lib/data";
-import { CATEGORY_LABEL, CATEGORY_ORDER, fmtDate, priceRange, STATUS_LABEL } from "@/lib/format";
+import { RobotTable } from "@/components/RobotTable";
+import { priceChanges, robotDetails, robotRows } from "@/lib/data";
+import { fmtDate } from "@/lib/format";
 
 export default function Home() {
-  const models = getModels();
-  const tracked = trackedModelIds();
-  const updated = lastUpdated();
-  const fccCount = models.reduce((n, m) => n + m.fcc_ids.length, 0);
+  const rows = robotRows();
+  const details = robotDetails();
+  const { changes, latest, previous, first, snapshots } = priceChanges();
+  const tracked = rows.filter((r) => r.tracked).length;
+  const fccIds = rows.reduce((n, r) => n + r.fcc_ids.length, 0);
 
-  const byCategory = new Map<Category, typeof models>();
-  for (const cat of CATEGORY_ORDER) byCategory.set(cat, []);
-  for (const m of models) byCategory.get(m.category)?.push(m);
-  const sortKey = (m: (typeof models)[number]) => (m.price_model === "quote" ? Infinity : m.price_usd_min ?? Infinity);
-  for (const list of byCategory.values()) list.sort((a, b) => sortKey(a) - sortKey(b) || a.name.localeCompare(b.name));
+  const stats = [
+    {
+      label: "Robots tracked daily",
+      value: tracked,
+      note: first ? `of ${rows.length} in the catalog · since ${fmtDate(first)}` : `of ${rows.length} in the catalog`,
+    },
+    {
+      label: "Price changes today",
+      value: changes.length,
+      note: latest && previous ? `${fmtDate(latest)} vs ${fmtDate(previous)}` : latest ? `first snapshot ${fmtDate(latest)}` : "no snapshots yet",
+    },
+    { label: "FCC IDs on file", value: fccIds, note: `${rows.filter((r) => r.fcc_status !== "none").length} robots with an authorization` },
+  ];
 
   return (
     <>
-      <section className="py-12 sm:py-16">
-        <h1 className="max-w-2xl text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
+      <section className="pt-10 sm:pt-16">
+        <h1 className="max-w-2xl text-3xl font-semibold leading-tight tracking-tight text-balance sm:text-5xl">
           The original marketplace for personal robots.
         </h1>
-        <p className="mt-4 max-w-xl text-base text-zinc-600 dark:text-zinc-400 sm:text-lg">
-          List prices from manufacturer stores, collected every day, and FCC authorization records for{" "}
-          {models.length} humanoids, robot dogs, and desktop robots.
+        <p className="mt-3 max-w-xl text-base text-muted-foreground sm:text-lg">
+          List prices from manufacturer stores, collected every day, and FCC authorization records for humanoids, robot
+          dogs, and desktop robots.
         </p>
-        <dl className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-          <div>
-            <dt className="sr-only">Robots</dt>
-            <dd>
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{models.length}</span> robots
-            </dd>
-          </div>
-          <div>
-            <dt className="sr-only">Price-tracked</dt>
-            <dd>
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{tracked.size}</span> tracked daily
-            </dd>
-          </div>
-          <div>
-            <dt className="sr-only">FCC IDs</dt>
-            <dd>
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{fccCount}</span> FCC IDs on file
-            </dd>
-          </div>
-          {updated && (
-            <div>
-              <dt className="sr-only">Last update</dt>
-              <dd>Updated {fmtDate(updated)}</dd>
-            </div>
-          )}
-        </dl>
       </section>
 
-      {CATEGORY_ORDER.map((cat) => {
-        const list = byCategory.get(cat) ?? [];
-        if (list.length === 0) return null;
-        return (
-          <section key={cat} aria-labelledby={`cat-${cat}`} className="mb-10">
-            <h2 id={`cat-${cat}`} className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-              {CATEGORY_LABEL[cat]} · {list.length}
-            </h2>
-            <ul className="divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
-              {list.map((m) => (
-                <li key={m.id}>
-                  <Link
-                    href={`/robots/${m.id}`}
-                    className="flex items-center justify-between gap-4 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900/60 sm:px-2"
-                  >
-                    <div className="min-w-0">
-                      <div className="font-medium leading-snug">{m.name}</div>
-                      <div className="truncate text-sm text-zinc-600 dark:text-zinc-400">
-                        {m.manufacturer}
-                        {m.hq_country ? ` · ${m.hq_country}` : ""}
-                        {m.launch_year ? ` · ${m.launch_year}` : ""}
-                      </div>
-                    </div>
-                    <div className="flex shrink-0 flex-col items-end gap-1 text-right">
-                      <div className="text-sm font-medium tabular-nums sm:text-base">{priceRange(m)}</div>
-                      <div className="flex items-center gap-1.5">
-                        {tracked.has(m.id) && <Badge tone="info">Tracked</Badge>}
-                        <Badge tone={m.status === "shipping" ? "good" : "warn"}>{STATUS_LABEL[m.status] ?? m.status}</Badge>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        );
-      })}
+      <section aria-label="Today at a glance" className="mt-8 grid grid-cols-1 divide-y divide-border border-y border-border sm:mt-10 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        {stats.map((s) => (
+          <div key={s.label} className="py-4 sm:px-6 sm:first:pl-0 sm:last:pr-0">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">{s.label}</div>
+            <div className="mt-1 text-3xl font-semibold leading-none">{s.value}</div>
+            <div className="mt-1.5 text-xs text-muted-foreground">{s.note}</div>
+          </div>
+        ))}
+      </section>
+
+      <section className="mt-8 sm:mt-10">
+        <h2 className="sr-only">All robots</h2>
+        <RobotTable rows={rows} details={details} />
+        {snapshots > 0 && snapshots < 7 && (
+          <p className="sr-only">Price history is {snapshots} day{snapshots === 1 ? "" : "s"} long so far.</p>
+        )}
+      </section>
     </>
   );
 }

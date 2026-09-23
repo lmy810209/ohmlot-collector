@@ -3,8 +3,8 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-/** FCC DA 26-786: foreign-produced advanced robotic devices were added to the Covered List on this date. */
-export const COVERED_LIST_DATE = "2026-07-28";
+import { COVERED_LIST_DATE } from "./format";
+export { COVERED_LIST_DATE };
 
 export const DATA_DIR = process.env.OHMLOT_DATA_DIR ?? path.resolve(process.cwd(), "..", "data");
 
@@ -134,10 +134,21 @@ export function sellerName(seller: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+export type VariantKind = "purchase" | "subscription" | "accessory";
+
+/** Store variants that are not the robot itself. They stay in the price list but never set the range or the chart. */
+export function variantKind(variant: string): VariantKind {
+  if (/subscription|per month|\/mo\b/i.test(variant)) return "subscription";
+  // An accessory is *named* as one ("Lite3 Controller"); a robot sold "with controller" is still the robot.
+  if (/^(?!.*\bwith(out)?\b).*\b(controller|remote|charging dock|dock|battery|keychain|collar|tote bag|tote|ball)\s*$/i.test(variant)) return "accessory";
+  return "purchase";
+}
+
 export interface SellerPrice {
   seller: string;
   sellerName: string;
   variant: string;
+  kind: VariantKind;
   price_usd: number;
   available: boolean | null;
   url: string;
@@ -157,6 +168,7 @@ export function latestPrices(modelId: string): SellerPrice[] {
       seller: r.seller,
       sellerName: sellerName(r.seller),
       variant: r.variant,
+      kind: variantKind(r.variant),
       price_usd: r.price_usd,
       available: r.available,
       url: r.url,
@@ -173,14 +185,15 @@ export interface PriceSeries {
 
 /** One series per seller + variant, ordered by first-seen price so colors stay stable as data grows. */
 export function priceHistory(modelId: string): { dates: string[]; series: PriceSeries[] } {
-  const rows = getPriceRows(modelId);
+  const rows = getPriceRows(modelId).filter((r) => variantKind(r.variant) === "purchase");
   const dates = [...new Set(rows.map((r) => r.date))].sort();
+  const sellers = new Set(rows.map((r) => r.seller));
   const map = new Map<string, PriceSeries>();
   for (const r of rows) {
     const key = `${r.seller}|${r.variant}`;
     let s = map.get(key);
     if (!s) {
-      s = { key, label: `${sellerName(r.seller)} · ${r.variant}`, points: [] };
+      s = { key, label: sellers.size > 1 ? `${sellerName(r.seller)} · ${r.variant}` : r.variant, points: [] };
       map.set(key, s);
     }
     s.points.push({ date: r.date, price: r.price_usd });
@@ -260,4 +273,141 @@ export function fccSearchItems(): FccSearchItem[] {
     });
   }
   return items.sort((a, b) => (b.grant_date ?? "").localeCompare(a.grant_date ?? "") || a.fcc_id.localeCompare(b.fcc_id));
+}
+
+/* ---------- Home page: stats, table rows, drawer payloads ---------- */
+
+export interface PriceChange {
+  model_id: string;
+  seller: string;
+  variant: string;
+  from: number;
+  to: number;
+  date: string;
+  prev_date: string;
+}
+
+/** Seller+variant rows whose price in the latest snapshot differs from the previous snapshot. */
+export function priceChanges(): { changes: PriceChange[]; latest: string | null; previous: string | null; first: string | null; snapshots: number } {
+  const rows = load().prices;
+  const dates = [...new Set(rows.map((r) => r.date))].sort();
+  const latest = dates.at(-1) ?? null;
+  const previous = dates.at(-2) ?? null;
+  const first = dates[0] ?? null;
+  if (!latest || !previous) return { changes: [], latest, previous, first, snapshots: dates.length };
+  const key = (r: PriceRow) => `${r.model_id}|${r.seller}|${r.variant}`;
+  const prev = new Map(rows.filter((r) => r.date === previous).map((r) => [key(r), r]));
+  const changes: PriceChange[] = [];
+  for (const r of rows) {
+    if (r.date !== latest) continue;
+    const p = prev.get(key(r));
+    if (p && p.price_usd !== r.price_usd) {
+      changes.push({ model_id: r.model_id, seller: r.seller, variant: r.variant, from: p.price_usd, to: r.price_usd, date: latest, prev_date: previous });
+    }
+  }
+  return { changes, latest, previous, first, snapshots: dates.length };
+}
+
+/** Cheapest tracked price per snapshot date for a model (the sparkline series). */
+export function sparkline(modelId: string): { dates: string[]; values: number[] } {
+  const byDate = new Map<string, number>();
+  for (const r of getPriceRows(modelId)) {
+    if (variantKind(r.variant) !== "purchase") continue;
+    const cur = byDate.get(r.date);
+    if (cur == null || r.price_usd < cur) byDate.set(r.date, r.price_usd);
+  }
+  const dates = [...byDate.keys()].sort();
+  return { dates, values: dates.map((d) => byDate.get(d) as number) };
+}
+
+export type FccStatus = "before" | "after" | "unknown" | "none";
+
+export interface RobotRow {
+  id: string;
+  name: string;
+  manufacturer: string;
+  hq_country: string | null;
+  category: Category;
+  status: string;
+  launch_year: number | null;
+  price_model: string;
+  price_usd_min: number | null;
+  price_usd_max: number | null;
+  subscription_usd_month: number | null;
+  tracked: boolean;
+  /** Cheapest / dearest variant in the latest snapshot, when tracked. */
+  latest_min: number | null;
+  latest_max: number | null;
+  latest_date: string | null;
+  /** What the table sorts on: the tracked minimum when available, else the published minimum. */
+  sort_price: number;
+  spark: number[];
+  spark_dates: string[];
+  /** % change of the cheapest tracked price, latest vs previous snapshot. */
+  change_pct: number | null;
+  fcc_status: FccStatus;
+  fcc_ids: string[];
+  fcc_grant_date: string | null;
+}
+
+export function robotRows(): RobotRow[] {
+  const tracked = trackedModelIds();
+  return getModels().map((m) => {
+    const sp = sparkline(m.id);
+    const latest = sp.values.at(-1) ?? null;
+    const prev = sp.values.length >= 2 ? sp.values.at(-2)! : null;
+    const latestRows = latestPrices(m.id).filter((p) => p.kind === "purchase");
+    const latestMax = latestRows.length ? latestRows[latestRows.length - 1].price_usd : null;
+    const latestDate = latestRows.reduce<string | null>((acc, p) => (acc && acc > p.date ? acc : p.date), null);
+    const publishedMin = m.price_model === "quote" || m.price_usd_min == null ? Number.POSITIVE_INFINITY : m.price_usd_min;
+    const facts = fccFacts(m);
+    const fcc_status: FccStatus =
+      facts.length === 0 ? "none" : facts.some((f) => f.after_covered_list === true) ? "after" : facts.every((f) => f.after_covered_list === false) ? "before" : "unknown";
+    return {
+      id: m.id,
+      name: m.name,
+      manufacturer: m.manufacturer,
+      hq_country: m.hq_country,
+      category: m.category,
+      status: m.status,
+      launch_year: m.launch_year,
+      price_model: m.price_model,
+      price_usd_min: m.price_usd_min,
+      price_usd_max: m.price_usd_max,
+      subscription_usd_month: m.subscription_usd_month,
+      tracked: tracked.has(m.id),
+      latest_min: latest,
+      latest_max: latestMax,
+      latest_date: latestDate,
+      sort_price: latest ?? publishedMin,
+      spark: sp.values,
+      spark_dates: sp.dates,
+      change_pct: latest != null && prev != null && prev !== 0 ? ((latest - prev) / prev) * 100 : null,
+      fcc_status,
+      fcc_ids: m.fcc_ids,
+      fcc_grant_date: facts[0]?.grant_date ?? null,
+    };
+  });
+}
+
+/** Headline range from the latest snapshot's purchase variants, or null when not tracked. */
+export function trackedRange(latest: SellerPrice[]): { min: number; max: number } | null {
+  const p = latest.filter((x) => x.kind === "purchase");
+  return p.length ? { min: p[0].price_usd, max: p[p.length - 1].price_usd } : null;
+}
+
+export interface RobotDetail {
+  model: Model;
+  latest: SellerPrice[];
+  history: { dates: string[]; series: PriceSeries[] };
+  fcc: FccFact[];
+}
+
+/** Everything the detail drawer needs, keyed by model id (serialized into the home page). */
+export function robotDetails(): Record<string, RobotDetail> {
+  const out: Record<string, RobotDetail> = {};
+  for (const m of getModels()) {
+    out[m.id] = { model: m, latest: latestPrices(m.id), history: priceHistory(m.id), fcc: fccFacts(m) };
+  }
+  return out;
 }
