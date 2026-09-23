@@ -1,30 +1,33 @@
 import { Badge, type Tone } from "./Badge";
 import type { UsStatusKind } from "@/lib/data";
 
-/** The four US regulatory states, worded and colored the same everywhere they appear. */
-export const US_STATUS_LABEL: Record<UsStatusKind, string> = {
-  before: "Authorized before the Covered List",
-  conditional: "Conditionally approved",
-  after: "After the Covered List — check before buying",
-  unknown: "No FCC record on file",
-};
+/**
+ * The four US regulatory states, worded and colored the same everywhere they appear. "unknown" reads
+ * differently depending on whether an FCC ID exists at all: an ID without a confirmed grant date is
+ * "date unknown", no ID is "no record".
+ */
+export function usStatusLabel(kind: UsStatusKind, { short = false, hasFccId = true } = {}): string {
+  switch (kind) {
+    case "before":
+      return short ? "Before Covered List" : "Authorized before the Covered List";
+    case "conditional":
+      return short ? "Conditional approval" : "Conditionally approved";
+    case "after":
+      return short ? "After Covered List" : "After the Covered List — check before buying";
+    case "unknown":
+      if (hasFccId) return short ? "Date unknown" : "Grant date unknown";
+      return short ? "No FCC record" : "No FCC record on file";
+  }
+}
 
-/** Shorter wording for table cells and the search list. */
-export const US_STATUS_SHORT: Record<UsStatusKind, string> = {
-  before: "Before Covered List",
-  conditional: "Conditional approval",
-  after: "After Covered List",
-  unknown: "No FCC record",
-};
-
-/** before = plain fact (neutral), conditional = caution (amber), after = warning (down), unknown = grey. */
+/** before = plain fact (outlined), conditional = caution (amber), after = warning (down), unknown = grey fill. */
 export const US_STATUS_TONE: Record<UsStatusKind, Tone> = {
-  before: "neutral",
+  before: "outline",
   conditional: "amber",
   after: "down",
   unknown: "muted",
 };
 
-export function UsStatusBadge({ kind, short = false }: { kind: UsStatusKind; short?: boolean }) {
-  return <Badge tone={US_STATUS_TONE[kind]}>{short ? US_STATUS_SHORT[kind] : US_STATUS_LABEL[kind]}</Badge>;
+export function UsStatusBadge({ kind, short = false, hasFccId = true }: { kind: UsStatusKind; short?: boolean; hasFccId?: boolean }) {
+  return <Badge tone={US_STATUS_TONE[kind]}>{usStatusLabel(kind, { short, hasFccId })}</Badge>;
 }

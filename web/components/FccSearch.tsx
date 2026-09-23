@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { FccSearchItem, UsStatusKind } from "@/lib/data";
 import { fmtDate } from "@/lib/format";
-import { US_STATUS_SHORT, UsStatusBadge } from "./UsStatusBadge";
+import { UsStatusBadge, usStatusLabel } from "./UsStatusBadge";
 
 type StatusFilter = UsStatusKind | "all";
 const STATUS_ORDER: UsStatusKind[] = ["before", "conditional", "after", "unknown"];
@@ -30,20 +30,23 @@ export function FccSearch({ items }: { items: FccSearchItem[] }) {
     });
   }, [items, q, status]);
 
+  // Same chip pattern as the home quick filters (accent-soft when pressed); empty states are not offered.
   const chip = (value: StatusFilter, label: string, count: number) => {
     const on = status === value;
+    const empty = count === 0 && !on;
     return (
       <button
         key={value}
         type="button"
         aria-pressed={on}
+        disabled={empty}
         onClick={() => setStatus(value)}
-        className={`inline-flex h-10 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-medium ${
-          on ? "border-ink bg-ink text-bg" : "border-line bg-card text-ink-2 hover:bg-sunk"
-        }`}
+        className={`inline-flex h-10 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-medium transition-colors duration-150 ${
+          on ? "border-accent/40 bg-accent-soft text-accent-ink" : "border-line bg-card text-ink-2 hover:bg-sunk hover:text-ink"
+        } disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-card disabled:hover:text-ink-2`}
       >
         {label}
-        <span className={`num text-[11px] ${on ? "text-bg/80" : "text-ink-3"}`}>{count}</span>
+        <span className="num text-[11px] text-ink-2">{count}</span>
       </button>
     );
   };
@@ -64,11 +67,11 @@ export function FccSearch({ items }: { items: FccSearchItem[] }) {
       />
       <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Covered List status">
         {chip("all", "All", items.length)}
-        {STATUS_ORDER.map((k) => chip(k, US_STATUS_SHORT[k], counts[k]))}
+        {STATUS_ORDER.map((k) => chip(k, usStatusLabel(k, { short: true }), counts[k]))}
       </div>
       <p className="mt-2 font-mono text-[11px] text-ink-3" role="status">
         {results.length} of {items.length} FCC IDs
-        {status !== "all" ? ` · ${US_STATUS_SHORT[status]}` : ""}
+        {status !== "all" ? ` · ${usStatusLabel(status, { short: true })}` : ""}
         {q.trim() ? ` · match “${q.trim()}”` : ""}
       </p>
 

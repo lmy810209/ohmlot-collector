@@ -77,7 +77,12 @@ export function fccRecordUrl(fccId: string | null | undefined): string | null {
 }
 
 /** The one-line rule every FCC surface repeats, worded once. */
-export const COVERED_LIST_RULE = `Since ${COVERED_LIST_LABEL} foreign-produced robots can no longer receive a new FCC authorization; devices authorized before that date can still be sold, imported, and used in the US.`;
+export const COVERED_LIST_RULE = `Since ${COVERED_LIST_LABEL}, foreign-produced robots can no longer receive a new FCC authorization; devices authorized before that date can still be sold, imported, and used in the US.`;
+
+/** Data notes keep ISO dates (machine-friendly); the page shows them like every other date. */
+export function humanizeIsoDates(text: string): string {
+  return text.replace(/\b\d{4}-\d{2}-\d{2}\b/g, (iso) => fmtDate(iso));
+}
 
 export const CATEGORY_LABEL: Record<Category, string> = {
   humanoid: "Humanoids",

@@ -2,7 +2,7 @@ import { collectPrices } from "./prices.ts";
 import { collectFcc } from "./fcc.ts";
 import { todayUTC } from "./lib/io.ts";
 
-// `prices` runs daily (daily.yml). `fcc` runs weekly and on demand (fcc.yml). `all` is for local runs.
+// `prices` runs daily (daily.yml). `fcc` runs on demand (fcc.yml; weekly once the API answers from a runner). `all` is for local runs.
 const which = process.argv[2] ?? "all";
 const date = process.env.COLLECT_DATE ?? todayUTC();
 

@@ -1,12 +1,14 @@
 name: fcc-collect
 
-# Weekly on Mondays (01:00 UTC = 10:00 KST) plus manual runs from Actions → fcc-collect → Run workflow.
-# Reads the official FCC OET Laboratory Services API (KDB 953436, getFCCIDList); see context/fcc-api-notes.md.
-# A blocked run (HTTP 403 / HTML instead of JSON) is logged and skipped — nothing is bypassed, and when no
-# grantee code answers nothing is written to data/.
+# Manual only, for now. Reads the official FCC OET Laboratory Services API (KDB 953436, getFCCIDList); see
+# context/fcc-api-notes.md. The API is behind an Akamai edge rule that answers 403 to GitHub's US runners as
+# well as to non-US home IPs (last checked 2026-09-24, run 35890991314: all 8 grantee codes → HTTP 403), so the
+# weekly Monday schedule stays off until a run from Actions → fcc-collect → Run workflow succeeds. Then add:
+#   schedule:
+#     - cron: "0 1 * * 1"
+# A blocked run is logged and skipped — nothing is bypassed, and when no grantee code answers nothing is
+# written to data/ (exit 1).
 on:
-  schedule:
-    - cron: "0 1 * * 1"
   workflow_dispatch: {}
 
 permissions:

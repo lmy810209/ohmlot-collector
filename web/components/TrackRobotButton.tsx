@@ -1,7 +1,7 @@
 "use client";
 
 import { BellIcon } from "lucide-react";
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 
 /**
  * "Track this robot" — email capture on the model page. v0 logs to the browser console only; the TODO
@@ -13,6 +13,18 @@ export function TrackRobotButton({ modelId, modelName }: { modelId: string; mode
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   const inputId = useId();
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const statusRef = useRef<HTMLParagraphElement>(null);
+  const returnFocus = useRef(false);
+
+  // Keyboard users never lose their place: the status message takes focus after submit, the trigger after cancel.
+  useEffect(() => {
+    if (done) statusRef.current?.focus();
+    else if (!open && returnFocus.current) {
+      triggerRef.current?.focus();
+      returnFocus.current = false;
+    }
+  }, [open, done]);
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -23,10 +35,15 @@ export function TrackRobotButton({ modelId, modelName }: { modelId: string; mode
     setDone(true);
   }
 
+  function cancel() {
+    returnFocus.current = true;
+    setOpen(false);
+  }
+
   if (done) {
     return (
-      <p role="status" className="inline-flex h-11 items-center rounded-ctl border border-line bg-sunk px-4 text-sm text-ink-2">
-        Tracking {modelName}. We&rsquo;ll email you when its price or US status changes.
+      <p ref={statusRef} tabIndex={-1} role="status" className="max-w-md rounded-ctl border border-line bg-sunk px-4 py-2.5 text-sm text-ink-2 outline-none">
+        You&rsquo;re on the list for {modelName}. One email per change, nothing else.
       </p>
     );
   }
@@ -34,6 +51,7 @@ export function TrackRobotButton({ modelId, modelName }: { modelId: string; mode
   if (!open) {
     return (
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         className="inline-flex h-11 items-center gap-2 rounded-ctl border border-line bg-card px-5 text-sm font-medium hover:bg-sunk"
@@ -60,10 +78,10 @@ export function TrackRobotButton({ modelId, modelName }: { modelId: string; mode
         onChange={(e) => setEmail(e.target.value)}
         className="h-11 w-56 rounded-ctl border border-line bg-card px-3 text-[15px] text-ink placeholder:text-ink-3"
       />
-      <button type="submit" className="h-11 rounded-ctl bg-accent px-4 text-sm font-semibold text-accent-fg hover:brightness-95">
+      <button type="submit" className="h-11 rounded-ctl border border-line bg-card px-4 text-sm font-semibold hover:bg-sunk">
         Track
       </button>
-      <button type="button" onClick={() => setOpen(false)} className="h-11 rounded-ctl px-3 text-sm text-ink-2 hover:bg-sunk">
+      <button type="button" onClick={cancel} className="h-11 rounded-ctl px-3 text-sm text-ink-2 hover:bg-sunk">
         Cancel
       </button>
     </form>

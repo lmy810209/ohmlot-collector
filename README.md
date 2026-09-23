@@ -16,7 +16,7 @@
 | `src/fcc.ts` | FCC 공식 API(KDB 953436 `getFCCIDList`)로 인증 수집 → `data/fcc/grants.json` (누적), 응답 원문 `data/fcc/raw/<날짜>-<코드>.json`, 새 인증은 `data/fcc/new-grants.log`, `data/models.json`의 `us_status` 갱신. 아무 코드도 응답하지 않으면 파일을 쓰지 않음. 조사 노트: `context/fcc-api-notes.md` |
 | `supabase/schema.sql` | Supabase 테이블 (models, price_snapshots, fcc_grants, latest_prices 뷰) |
 | `.github/workflows/daily.yml` | 매일 00:17 UTC(09:17 KST) **가격만** 수집 후 `data/` 커밋 |
-| `.github/workflows/fcc.yml` | FCC 인증 수집. **매주 월요일 01:07 UTC** 자동 + Actions에서 수동 실행(Run workflow) |
+| `.github/workflows/fcc.yml` | FCC 인증 수집. 지금은 Actions **수동 실행(Run workflow)** 전용 — 러너에서 한 번 성공하면 매주 월요일 스케줄(`0 1 * * 1`)을 켠다 (파일 안 주석 참고) |
 | `web/` | ohmlot.com 사이트 v0 (Next.js). 빌드 시 `data/`를 읽어 정적 생성. 배포 방법은 `web/README.md` |
 
 ## 시작하기 (15분)
@@ -40,7 +40,7 @@
    - GitHub 저장소 Settings → Secrets → Actions 에 같은 두 값을 등록
    - Supabase 없이도 파일(`data/`)로만 동작합니다.
 4. GitHub → Actions → `daily-collect` → **Run workflow** 로 첫 실행. 이후 매일 자동.
-5. FCC는 매주 월요일 `fcc-collect`가 돌고, 필요하면 Actions → `fcc-collect` → **Run workflow** 로 바로 실행합니다. 매일 실행에는 들어 있지 않습니다.
+5. FCC는 Actions → `fcc-collect` → **Run workflow** 로 직접 실행합니다. 러너에서 성공하는 것을 확인하면 주 1회(월요일) 스케줄을 켭니다. 매일 실행에는 들어 있지 않습니다.
 
 ## 첫 실행 때 확인할 것
 
@@ -48,7 +48,7 @@
 - Shopify `.js` 주소가 `got HTML instead of JSON`으로 실패하면 스토어가 `.js`를 마케팅 사이트로 301시키는 경우입니다 (KEYi가 그랬음). 같은 handle의 `.json` 주소로 바꾸면 되고, 파서는 두 형식을 모두 처리합니다.
 - Shopify 스토어는 요청 지역에 따라 통화와 재고가 달라질 수 있습니다 (Pollen은 미국 밖에서 EUR 가격을 내려줌). 수집기는 `?country=US`로 미국 시장을 고정하므로 로컬에서 돌려도 GitHub 러너와 같은 USD 값이 나옵니다. 로컬과 러너 값이 다르면 이 부분을 먼저 의심하세요.
 - `HTTP 403 (cloudflare challenge)`는 봇 차단입니다. 재시도해도 소용없고 우회하지 않습니다. RobotShop은 모든 요청에 챌린지를 걸어 소스에서 뺐습니다.
-- FCC는 매일 실행에서 빠져 있고 `fcc-collect`가 주 1회(월요일) 돕니다. 2026-09-24부터 `fccid.io` 스크래핑 대신 **FCC 공식 EAS Web API**(KDB 953436, `https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=<grantee 코드>`)를 읽습니다. 한국 가정용 IP에서는 이 엔드포인트도 Akamai `Access Denied`(403)라 로컬 실행은 실패하는 게 정상이고, 러너에서 열리는지는 Actions 로그로 확인합니다. 봇 차단은 우회하지 않습니다. `got HTML instead of JSON`은 차단, `unexpected response shape`은 응답 스키마가 예상과 다른 경우입니다 — 후자는 `data/fcc/raw/`에 남은 원문을 보고 `parseFccIdList`를 맞추세요(스키마 메모: `context/fcc-api-notes.md`). 아무 코드도 응답하지 않은 실행은 Actions 로그에만 빨간색으로 표시되고 `data/`에는 아무것도 남기지 않습니다 (`data/logs`는 가격 실패 전용).
+- FCC는 매일 실행에서 빠져 있고 `fcc-collect`를 수동으로 돌립니다. 2026-09-24부터 `fccid.io` 스크래핑 대신 **FCC 공식 EAS Web API**(KDB 953436, `https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=<grantee 코드>`)를 읽습니다. 다만 이 엔드포인트는 한국 가정용 IP뿐 아니라 **GitHub Actions 미국 러너에서도 Akamai `Access Denied`(403)**입니다(2026-09-24 run 35890991314: 8개 코드 전부 403). 그래서 주간 스케줄은 아직 꺼 두었고, 러너에서 한 번 성공하면 켭니다. 봇 차단은 우회하지 않습니다. `got HTML instead of JSON`은 차단, `unexpected response shape`은 응답 스키마가 예상과 다른 경우입니다 — 후자는 `data/fcc/raw/`에 남은 원문을 보고 `parseFccIdList`를 맞추세요(스키마 메모: `context/fcc-api-notes.md`). 아무 코드도 응답하지 않은 실행은 Actions 로그에만 빨간색으로 표시되고 `data/`에는 아무것도 남기지 않습니다 (`data/logs`는 가격 실패 전용).
 - `flags: ["placeholder_price"]`는 Unitree가 "문의" 상품에 넣는 $90,000/$100,000 임시 가격입니다. 시세 계산에서 빼세요.
 
 ## 지키는 규칙

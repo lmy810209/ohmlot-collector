@@ -187,7 +187,7 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
           </dl>
         </Card>
 
-        <Card title="US Regulatory Status" id="fcc-heading">
+        <Card title="US regulatory status" id="fcc-heading">
           <UsRegulatoryStatus model={m} facts={fcc} />
         </Card>
 

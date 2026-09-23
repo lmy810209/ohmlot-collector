@@ -96,13 +96,14 @@ export function RobotExplorer({
                 {r.manufacturer}
                 {r.hq_country ? ` · ${r.hq_country}` : ""}
               </span>
-              <span className="mt-1.5 flex gap-1.5 sm:hidden">
+              <span className="mt-1.5 flex flex-wrap gap-1.5 sm:hidden">
                 <StatusPill status={r.status} />
                 {r.tracked && (
                   <Badge tone="accent" mono>
                     Tracked
                   </Badge>
                 )}
+                {r.fcc_ids.length > 0 && <UsStatusBadge kind={r.fcc_status} short />}
               </span>
             </button>
           );
@@ -178,7 +179,7 @@ export function RobotExplorer({
           return (
             <span className="flex flex-col items-start gap-1">
               <UsStatusBadge kind={r.fcc_status} short />
-              <span className="font-mono text-[11px] text-ink-3">{r.fcc_grant_date ? `granted ${fmtMonth(r.fcc_grant_date)}` : "grant date unknown"}</span>
+              {r.fcc_grant_date && <span className="font-mono text-[11px] text-ink-3">granted {fmtMonth(r.fcc_grant_date)}</span>}
             </span>
           );
         },

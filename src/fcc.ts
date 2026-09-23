@@ -10,11 +10,11 @@ const MODELS = "data/models.json";
 const apiUrl = (code: string) => `https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=${encodeURIComponent(code)}`;
 
 /**
- * Weekly collector (fcc.yml, Mondays) that can also be run by hand. Errors are returned for the console /
- * Actions log and are NOT written to data/logs, which is reserved for the daily price run. A blocked run
- * (HTTP 403, HTML instead of JSON) is logged and skipped — never retried with a different identity, never
- * proxied. When no grantee code answered, nothing is written to data/ either, so a blocked run leaves no
- * trace in the repo.
+ * FCC collector (fcc.yml — manual runs until the API answers from a runner, then weekly). Errors are returned
+ * for the console / Actions log and are NOT written to data/logs, which is reserved for the daily price run.
+ * A blocked run (HTTP 403, HTML instead of JSON) is logged and skipped — never retried with a different
+ * identity, never proxied. When no grantee code answered, nothing is written to data/ either, so a blocked
+ * run leaves no trace in the repo.
  */
 export async function collectFcc(date: string) {
   const registry = await readJson<Record<string, FccGrant & { first_seen: string }>>(REGISTRY, {});

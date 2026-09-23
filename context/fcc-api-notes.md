@@ -201,7 +201,13 @@ https://errors.edgesuite.net/18.e5263e17.1790178919.b3c60547
 - 개발·시험 목적의 소량 수입은 47 CFR § 2.1204(a)(3)에 따라 가능(원문 일부만 확보).
 - 정의 문단은 §7.2 OCR과 글자 단위로 일치(오탈자 제외).
 
-### 7.6 정정·보완 요약
+### 7.6 교체한 수집기의 첫 러너 실행 — 실패 (2026-09-24, run 35890991314)
+- `npm run collect:fcc`(공식 API 호출로 교체한 `src/fcc.ts`)를 Actions → fcc-collect → Run workflow로 실행: 8개 grantee 코드 **전부 `HTTP 403`**
+  (`2A5PE, 2AAIC, 2ACUO, 2BKMI, 2BTPT, 2AWR5, 2ATBY, 2BFQD`), "nothing written", exit 1. §2의 프로브 결과와 같다.
+- 따라서 주간 스케줄(`0 1 * * 1`)은 켜지 않고 `workflow_dispatch`만 남겼다(fcc.yml 주석에 켜는 법 적어 둠). 러너에서 한 번 성공하면 켠다.
+- 로그에 `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`가 빈 값으로 찍혔다 — 저장소 시크릿이 등록돼 있지 않은 상태(파일 전용 모드로 동작, 오류 아님).
+
+### 7.7 정정·보완 요약
 - §5 항목 2: ANSCER는 웹페이지뿐 아니라 **DA 26-996 공지**로도 발표됨(1차 출처 확보).
 - §6: `conditional_approval`은 `null`이 아니라 검증 결과인 `false`로 기록(§7.3).
 - 2단계 구현 메모: 응답 원문은 `data/fcc/raw/<날짜>-<코드>.json`(오늘 지시서 기준 경로)에 바이트 그대로 보관, 스키마는 §1의 v02 예시를
