@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/Badge";
+import { Delta } from "@/components/Delta";
 import { FccLine } from "@/components/FccLine";
 import { PriceChart } from "@/components/PriceChart";
-import { buttonVariants } from "@/components/ui/button";
-import { fccFacts, getModel, getModels, latestPrices, priceHistory } from "@/lib/data";
-import { CATEGORY_LABEL, COVERED_LIST_LABEL, fmtDate, priceRange, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
+import { AlertSignup } from "@/components/AlertSignup";
+import { CHART_MIN_SNAPSHOTS, fccFacts, getModel, getModels, latestPrices, priceHistory, variantDeltas } from "@/lib/data";
+import { CATEGORY_LABEL, COVERED_LIST_LABEL, fmtDate, fmtDay, priceRange, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
 
 export const dynamicParams = false;
 
@@ -24,11 +25,13 @@ export async function generateMetadata({ params }: PageProps<"/robots/[id]">): P
   };
 }
 
-function Section({ title, children, aside }: { title: string; children: React.ReactNode; aside?: React.ReactNode }) {
+function Card({ title, aside, children, id }: { title: string; aside?: React.ReactNode; children: React.ReactNode; id?: string }) {
   return (
-    <section className="border-t border-border py-8">
+    <section className="card p-5 sm:p-6" aria-labelledby={id}>
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-semibold">{title}</h2>
+        <h2 id={id} className="text-[18px] font-bold">
+          {title}
+        </h2>
         {aside}
       </div>
       {children}
@@ -39,13 +42,13 @@ function Section({ title, children, aside }: { title: string; children: React.Re
 function Spec({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <dt className="text-xs uppercase tracking-wider text-muted-foreground">{label}</dt>
-      <dd className="mt-0.5 text-sm">{children}</dd>
+      <dt className="micro">{label}</dt>
+      <dd className="mt-1 text-[14px]">{children}</dd>
     </div>
   );
 }
 
-const ext = "underline decoration-border underline-offset-2 hover:decoration-foreground";
+const ext = "underline decoration-line underline-offset-2 hover:decoration-ink";
 
 export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
   const { id } = await params;
@@ -53,6 +56,7 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
   if (!m) notFound();
 
   const latest = latestPrices(m.id);
+  const deltas = variantDeltas(m.id);
   const history = priceHistory(m.id);
   const fcc = fccFacts(m);
   const purchase = latest.filter((p) => p.kind === "purchase");
@@ -61,170 +65,169 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
   const headline = tracked ? rangeText(purchase[0].price_usd, purchase[purchase.length - 1].price_usd) : purchaseRange(m);
   const sub = subscriptionLabel(m);
   const sellers = [...new Set(latest.map((p) => p.sellerName))];
+  const cheapest = deltas.filter((d) => d.kind === "purchase").sort((a, b) => a.price_usd - b.price_usd)[0];
+  const headDelta = cheapest && cheapest.from != null ? { amount: cheapest.price_usd - cheapest.from, pct: cheapest.from ? ((cheapest.price_usd - cheapest.from) / cheapest.from) * 100 : 0 } : null;
+  const snapshots = history.dates.length;
 
   return (
     <article className="py-8 sm:py-12">
-      <nav className="mb-4 text-sm text-muted-foreground" aria-label="Breadcrumb">
+      <nav className="mb-4 text-[13px] text-ink-2" aria-label="Breadcrumb">
         <Link href="/" className="hover:underline">
           Robots
         </Link>{" "}
         / {CATEGORY_LABEL[m.category]}
       </nav>
-      <header>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{m.name}</h1>
-        <p className="mt-1 text-muted-foreground">
-          {m.manufacturer}
-          {m.hq_country ? ` · ${m.hq_country}` : ""}
-          {m.launch_year ? ` · ${m.launch_year}` : ""}
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <span className="text-2xl font-semibold">{headline}</span>
-          <Badge tone={m.status === "shipping" ? "good" : "warn"}>{STATUS_LABEL[m.status] ?? m.status}</Badge>
-          {m.price_model === "quote" && <Badge>Price on request</Badge>}
+      <header className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div>
+          <h1 className="text-[34px] font-extrabold leading-[1.05] sm:text-[44px]">{m.name}</h1>
+          <p className="mt-2 text-ink-2">
+            {m.manufacturer}
+            {m.hq_country ? ` · ${m.hq_country}` : ""}
+            {m.launch_year ? ` · ${m.launch_year}` : ""}
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <span className="num text-[28px] text-ink">{headline}</span>
+            {headDelta && <Delta amount={headDelta.amount} pct={headDelta.pct} className="text-[14px]" />}
+            <Badge tone={m.status === "shipping" ? "up" : "amber"}>{STATUS_LABEL[m.status] ?? m.status}</Badge>
+            {tracked ? (
+              <Badge tone="accent" mono>
+                Tracked
+              </Badge>
+            ) : (
+              <Badge mono>Not tracked</Badge>
+            )}
+            {m.price_model === "quote" && <Badge>Price on request</Badge>}
+          </div>
+          <p className="mt-1 font-mono text-[11.5px] text-ink-3">
+            {tracked && lastSeen ? `latest snapshot ${fmtDate(lastSeen)} UTC` : "published list price · not tracked daily yet"}
+            {sub ? ` · ${sub}` : ""}
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            {m.buy_url && (
+              <a href={m.buy_url} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center rounded-ctl bg-accent px-5 text-sm font-semibold text-accent-fg hover:brightness-95">
+                Buy from manufacturer
+              </a>
+            )}
+            {m.official_url && (
+              <a href={m.official_url} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center rounded-ctl border border-line bg-card px-5 text-sm font-medium hover:bg-sunk">
+                Official site
+              </a>
+            )}
+          </div>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {tracked && lastSeen ? `Tracked daily · latest snapshot ${fmtDate(lastSeen)} (UTC)` : "Published list price · not tracked daily yet"}
-          {sub ? ` · ${sub}` : ""}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {m.buy_url && (
-            <a href={m.buy_url} target="_blank" rel="noopener noreferrer" className={buttonVariants({ size: "lg" })}>
-              Buy from manufacturer
-            </a>
+
+        <Card title={tracked ? "Yesterday → today" : "Latest prices"} id="prices-heading" aside={sellers.length === 1 ? <span className="text-[12px] text-ink-3">{sellers[0]}</span> : undefined}>
+          {!tracked ? (
+            <p className="text-[13.5px] text-ink-2">Not tracked daily yet. The range shown is the manufacturer&rsquo;s published list price.</p>
+          ) : (
+            <ul className="divide-y divide-line-soft">
+              {deltas.map((p) => (
+                <li key={`${p.seller}|${p.variant}`} className="flex items-start justify-between gap-3 py-2.5">
+                  <div className="min-w-0">
+                    <div className="text-[13.5px] font-medium leading-snug">{p.variant}</div>
+                    <div className="text-[12px] text-ink-3">
+                      {p.kind === "subscription" ? "per month · not in the range · " : p.kind === "accessory" ? "accessory · not in the range · " : sellers.length > 1 ? `${p.sellerName} · ` : ""}
+                      <a href={p.url} target="_blank" rel="noopener noreferrer" className={ext}>
+                        store
+                      </a>
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <span className="num text-[14px]">{usd(p.price_usd)}</span>
+                      {p.available === true ? <Badge tone="up">In stock</Badge> : p.available === false ? <Badge tone="amber">Sold out</Badge> : <Badge>Stock unknown</Badge>}
+                    </div>
+                    <div className="mt-0.5 font-mono text-[11px] text-ink-3">
+                      {p.from != null && p.from_date ? (
+                        p.from === p.price_usd ? (
+                          `same as ${fmtDay(p.from_date)}`
+                        ) : (
+                          <>
+                            {usd(p.from)} → <Delta amount={p.price_usd - p.from} pct={p.from ? ((p.price_usd - p.from) / p.from) * 100 : 0} className="text-[11px]" />
+                          </>
+                        )
+                      ) : (
+                        "first day"
+                      )}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
-          {m.official_url && (
-            <a href={m.official_url} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline", size: "lg" })}>
-              Official site
-            </a>
-          )}
-        </div>
+        </Card>
       </header>
 
-      <Section title="Latest prices" aside={sellers.length === 1 ? <span className="text-xs text-muted-foreground">{sellers[0]}</span> : undefined}>
-        {!tracked ? (
-          <p className="text-sm text-muted-foreground">Not tracked daily yet. The range above is the manufacturer&rsquo;s published list price.</p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {latest.map((p) => (
-              <li key={`${p.seller}|${p.variant}`} className="flex items-start justify-between gap-4 py-3">
-                <div className="min-w-0">
-                  <div className="text-sm font-medium leading-snug">{p.variant}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {p.kind === "subscription" ? "Per month · not in the range above · " : p.kind === "accessory" ? "Accessory · not in the range above · " : ""}
-                    <a href={p.url} target="_blank" rel="noopener noreferrer" className={ext}>
-                      {sellers.length > 1 ? p.sellerName : "View on store"}
-                    </a>
-                  </div>
-                </div>
-                <div className="flex shrink-0 items-center gap-2 pt-0.5">
-                  <span className="font-semibold">{usd(p.price_usd)}</span>
-                  {p.available === true ? <Badge tone="good">In stock</Badge> : p.available === false ? <Badge tone="warn">Sold out</Badge> : <Badge>Stock unknown</Badge>}
-                </div>
+      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {snapshots >= CHART_MIN_SNAPSHOTS && history.series.length > 0 && (
+          <div className="lg:col-span-2">
+            <Card title="Price history" id="history-heading" aside={<span className="text-[12px] text-ink-3">since {fmtDate(history.dates[0])} · {snapshots} daily snapshots</span>}>
+              <PriceChart dates={history.dates} series={history.series} />
+            </Card>
+          </div>
+        )}
+
+        <Card title="Specs" id="specs-heading">
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-4">
+            <Spec label="Category">{CATEGORY_LABEL[m.category]}</Spec>
+            <Spec label="Weight">{m.weight_kg != null ? `${m.weight_kg} kg` : "—"}</Spec>
+            <Spec label="Height">{m.height_cm != null ? `${m.height_cm} cm` : "—"}</Spec>
+            <Spec label="Launched">{m.launch_year ?? "—"}</Spec>
+            <Spec label="Published range">
+              <span className="num">{purchaseRange(m)}</span>
+            </Spec>
+            <Spec label="Pricing">
+              {m.price_model === "quote" ? "Quote" : m.price_model === "subscription" ? "Subscription" : "Purchase"}
+              {sub ? ` · ${sub}` : ""}
+            </Spec>
+            <Spec label="HQ">{m.hq_country ?? "—"}</Spec>
+            <Spec label="FCC grantee">{m.fcc_grantee_code ? <span className="font-mono">{m.fcc_grantee_code}</span> : "—"}</Spec>
+          </dl>
+        </Card>
+
+        <Card title="FCC authorization" id="fcc-heading">
+          {fcc.length === 0 ? (
+            <p className="text-[13.5px] text-ink-2">
+              No FCC ID on file for this model. For US use the unit should carry an FCC ID label; check{" "}
+              <a href="https://apps.fcc.gov/oetcf/eas/reports/GenericSearch.cfm" target="_blank" rel="noopener noreferrer" className={ext}>
+                the FCC equipment authorization search
+              </a>
+              .
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {fcc.map((f) => (
+                <FccLine key={f.fcc_id} fact={f} />
+              ))}
+            </ul>
+          )}
+          <p className="mt-4 text-[12px] text-ink-3">
+            Since {COVERED_LIST_LABEL} the FCC does not issue new authorizations for foreign-produced advanced robotic devices. Models authorized
+            before that date can generally still be marketed and used in the US.
+          </p>
+        </Card>
+
+        <Card title="Resale notes" id="resale-heading">
+          <p className="max-w-prose text-[14px] leading-relaxed text-ink-2">{m.resale_policy_note ?? "No resale notes yet."}</p>
+        </Card>
+
+        <Card title="Sources" id="sources-heading">
+          <ul className="space-y-1.5 text-[13.5px]">
+            {m.sources.map((s) => (
+              <li key={s} className="min-w-0 truncate">
+                <a href={s} target="_blank" rel="noopener noreferrer" className={ext}>
+                  {s.replace(/^https?:\/\//, "")}
+                </a>
               </li>
             ))}
           </ul>
-        )}
-      </Section>
+          {m.data_source_license && <p className="mt-3 text-[12px] text-ink-3">{m.data_source_license}</p>}
+        </Card>
+      </div>
 
-      {history.series.length > 0 && (
-        <Section
-          title="Price history"
-          aside={
-            <span className="text-xs text-muted-foreground">
-              since {fmtDate(history.dates[0])} · {history.dates.length} daily snapshot{history.dates.length === 1 ? "" : "s"}
-            </span>
-          }
-        >
-          <PriceChart dates={history.dates} series={history.series} />
-          <details className="mt-4 text-sm">
-            <summary className="cursor-pointer text-muted-foreground hover:text-foreground">Table view</summary>
-            <div className="mt-2 overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead className="text-left text-muted-foreground">
-                  <tr>
-                    <th className="py-1 pr-3 font-medium">Date</th>
-                    {history.series.map((s) => (
-                      <th key={s.key} className="py-1 pr-3 text-right font-medium">
-                        {s.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {history.dates.map((d) => (
-                    <tr key={d}>
-                      <td className="py-1 pr-3">{fmtDate(d)}</td>
-                      {history.series.map((s) => {
-                        const p = s.points.find((pt) => pt.date === d);
-                        return (
-                          <td key={s.key} className="py-1 pr-3 text-right">
-                            {p ? usd(p.price) : "—"}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </details>
-        </Section>
-      )}
-
-      <Section title="Specs">
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
-          <Spec label="Category">{CATEGORY_LABEL[m.category]}</Spec>
-          <Spec label="Weight">{m.weight_kg != null ? `${m.weight_kg} kg` : "—"}</Spec>
-          <Spec label="Height">{m.height_cm != null ? `${m.height_cm} cm` : "—"}</Spec>
-          <Spec label="Launched">{m.launch_year ?? "—"}</Spec>
-          <Spec label="Published range">{purchaseRange(m)}</Spec>
-          <Spec label="Pricing">
-            {m.price_model === "quote" ? "Quote" : m.price_model === "subscription" ? "Subscription" : "Purchase"}
-            {sub ? ` · ${sub}` : ""}
-          </Spec>
-          <Spec label="HQ">{m.hq_country ?? "—"}</Spec>
-          <Spec label="FCC grantee">{m.fcc_grantee_code ? <span className="font-mono">{m.fcc_grantee_code}</span> : "—"}</Spec>
-        </dl>
-      </Section>
-
-      <Section title="FCC authorization">
-        {fcc.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No FCC ID on file for this model. For US use the unit should carry an FCC ID label; check{" "}
-            <a href="https://apps.fcc.gov/oetcf/eas/reports/GenericSearch.cfm" target="_blank" rel="noopener noreferrer" className={ext}>
-              the FCC equipment authorization search
-            </a>
-            .
-          </p>
-        ) : (
-          <ul className="space-y-3">
-            {fcc.map((f) => (
-              <FccLine key={f.fcc_id} fact={f} />
-            ))}
-          </ul>
-        )}
-        <p className="mt-4 text-xs text-muted-foreground">
-          Since {COVERED_LIST_LABEL} the FCC does not issue new authorizations for foreign-produced advanced robotic devices. Models authorized before
-          that date can generally still be marketed and used in the US.
-        </p>
-      </Section>
-
-      <Section title="Resale notes">
-        <p className="max-w-prose text-sm leading-relaxed text-foreground/85">{m.resale_policy_note ?? "No resale notes yet."}</p>
-      </Section>
-
-      <Section title="Sources">
-        <ul className="space-y-1 text-sm">
-          {m.sources.map((s) => (
-            <li key={s} className="truncate">
-              <a href={s} target="_blank" rel="noopener noreferrer" className={ext}>
-                {s.replace(/^https?:\/\//, "")}
-              </a>
-            </li>
-          ))}
-        </ul>
-        {m.data_source_license && <p className="mt-3 text-xs text-muted-foreground">{m.data_source_license}</p>}
-      </Section>
+      <div className="mt-10">
+        <AlertSignup />
+      </div>
     </article>
   );
 }

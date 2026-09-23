@@ -1,19 +1,23 @@
 import type { ReactNode } from "react";
 
-/** Status pill. Tones map to the reserved status tokens; "info" is the brand tint for non-state labels. */
-type Tone = "neutral" | "good" | "warn" | "critical" | "info";
+/** Pill badge (guide §3). Status = up/amber; tracked = accent-soft + mono; neutral for unknowns; down for warnings. */
+export type Tone = "up" | "amber" | "down" | "accent" | "neutral";
 
 const TONE: Record<Tone, string> = {
-  neutral: "border-border bg-transparent text-muted-foreground",
-  good: "border-good/25 bg-good-soft text-good",
-  warn: "border-caution/25 bg-caution-soft text-caution",
-  critical: "border-critical/25 bg-critical-soft text-critical",
-  info: "border-brand/25 bg-brand-soft text-brand-strong",
+  up: "bg-up-soft text-up",
+  amber: "bg-amber-soft text-amber",
+  down: "bg-down-soft text-down",
+  accent: "bg-accent-soft text-accent-ink",
+  neutral: "bg-sunk text-ink-2",
 };
 
-export function Badge({ tone = "neutral", children }: { tone?: Tone; children: ReactNode }) {
+export function Badge({ tone = "neutral", mono = false, children }: { tone?: Tone; mono?: boolean; children: ReactNode }) {
   return (
-    <span className={`inline-flex h-5 items-center whitespace-nowrap rounded-full border px-2 text-[11px] font-medium leading-none ${TONE[tone]}`}>
+    <span
+      className={`inline-flex h-[22px] items-center whitespace-nowrap rounded-full px-2.5 leading-none ${TONE[tone]} ${
+        mono ? "font-mono text-[10.5px] font-medium tracking-[0.08em] uppercase" : "text-[12px] font-medium"
+      }`}
+    >
       {children}
     </span>
   );

@@ -2,10 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { buttonVariants } from "@/components/ui/button";
 
 /**
- * Email alert signup. v0 only logs to the browser console; the TODO below is the Supabase hook-up
+ * Email alert CTA (guide §4.6). v0 only logs to the browser console; the TODO below is the Supabase hook-up
  * (table: alert_signups {email, model_id, created_at}).
  */
 export function AlertSignup() {
@@ -24,21 +23,22 @@ export function AlertSignup() {
   }
 
   return (
-    <section aria-labelledby="alerts-heading" className="max-w-xl">
-      <h2 id="alerts-heading" className="text-base font-semibold">
-        Get price and FCC alerts
-      </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {modelId
-          ? "We'll email you when this robot's price changes or a new FCC grant appears."
-          : "We'll email you when a tracked price changes or a new FCC grant appears."}
-      </p>
+    <section aria-labelledby="alerts-heading" className="card grid grid-cols-1 gap-6 p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_minmax(0,420px)] md:items-center">
+      <div>
+        <div className="micro mb-2">Alerts</div>
+        <h2 id="alerts-heading" className="text-[22px] font-bold sm:text-2xl">
+          {modelId ? "Know when this robot's price moves." : "Know when a tracked price moves."}
+        </h2>
+        <p className="mt-2 max-w-md text-[14px] text-ink-2">
+          One email per change, nothing else. New FCC grants for a robot you watch count as a change.
+        </p>
+      </div>
       {done ? (
-        <p role="status" className="mt-4 rounded-md border border-border bg-background px-3 py-2 text-sm">
+        <p role="status" className="rounded-ctl border border-line bg-sunk px-4 py-3 text-sm">
           You&rsquo;re on the list. We&rsquo;ll be in touch.
         </p>
       ) : (
-        <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <form onSubmit={onSubmit} className="flex flex-col gap-2 sm:flex-row">
           <label htmlFor="alert-email" className="sr-only">
             Email address
           </label>
@@ -50,9 +50,9 @@ export function AlertSignup() {
             placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-11 flex-1 rounded-md border border-input bg-background px-3 text-base outline-none focus:border-ring focus:ring-2 focus:ring-ring/40"
+            className="h-11 flex-1 rounded-ctl border border-line bg-card px-3 text-[15px] text-ink placeholder:text-ink-3"
           />
-          <button type="submit" className={buttonVariants({ size: "lg", className: "h-11 px-5" })}>
+          <button type="submit" className="h-11 rounded-ctl bg-accent px-5 text-sm font-semibold text-accent-fg hover:brightness-95">
             Notify me
           </button>
         </form>

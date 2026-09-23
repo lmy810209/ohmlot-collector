@@ -31,26 +31,26 @@ export function FccSearch({ items }: { items: FccSearchItem[] }) {
         placeholder="Model name, manufacturer, or FCC ID (e.g. 2A5PE-YUSHU008)"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        className="h-12 w-full rounded-md border border-input bg-background px-4 text-base outline-none focus:border-ring focus:ring-2 focus:ring-ring/40"
+        className="h-12 w-full rounded-ctl border border-line bg-card px-4 text-[15px] text-ink shadow-card placeholder:text-ink-3"
       />
-      <p className="mt-2 text-xs text-muted-foreground" role="status">
+      <p className="mt-2 font-mono text-[11px] text-ink-3" role="status">
         {results.length} of {items.length} FCC IDs
         {q.trim() ? ` match “${q.trim()}”` : ""}
       </p>
 
       {results.length === 0 ? (
-        <p className="mt-8 rounded-md border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+        <p className="mt-8 rounded-card border border-dashed border-line p-6 text-center text-sm text-ink-2">
           No match. Try the grantee code (Unitree is 2A5PE) or part of the model name.
         </p>
       ) : (
-        <ul className="mt-4 divide-y divide-border border-y border-border">
+        <ul className="card mt-4 divide-y divide-line-soft px-4">
           {results.map((it) => (
             <li key={it.fcc_id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div className="min-w-0">
-                <div className="font-mono text-sm font-medium">{it.fcc_id}</div>
-                <div className="truncate text-sm text-muted-foreground">
+                <div className="font-mono text-[13.5px] font-medium">{it.fcc_id}</div>
+                <div className="truncate text-sm text-ink-2">
                   {it.model_id ? (
-                    <Link href={`/robots/${it.model_id}`} className="underline decoration-border underline-offset-2 hover:decoration-foreground">
+                    <Link href={`/robots/${it.model_id}`} className="underline decoration-line underline-offset-2 hover:decoration-ink">
                       {it.model_name}
                     </Link>
                   ) : (
@@ -60,13 +60,13 @@ export function FccSearch({ items }: { items: FccSearchItem[] }) {
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2 text-sm">
-                <span className="tabular-nums text-foreground/85">
+                <span className="num text-[13px] text-ink-2">
                   {it.grant_date ? fmtDate(it.grant_date) : "Date unknown"}
                 </span>
                 {it.after_covered_list === true ? (
-                  <Badge tone="warn">After Covered List ({COVERED_LIST_LABEL})</Badge>
+                  <Badge tone="amber">After Covered List ({COVERED_LIST_LABEL})</Badge>
                 ) : it.after_covered_list === false ? (
-                  <Badge tone="good">Before Covered List ({COVERED_LIST_LABEL})</Badge>
+                  <Badge tone="up">Before Covered List ({COVERED_LIST_LABEL})</Badge>
                 ) : (
                   <Badge>Date unknown</Badge>
                 )}

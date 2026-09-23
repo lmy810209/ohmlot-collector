@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Mono, Schibsted_Grotesk } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { lastUpdated } from "@/lib/data";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const schibsted = Schibsted_Grotesk({ variable: "--font-schibsted", subsets: ["latin"], weight: "variable" });
+const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ohmlot.com"),
@@ -16,12 +16,13 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  const updated = lastUpdated();
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
-        <SiteHeader />
+    <html lang="en" className={`${schibsted.variable} ${plexMono.variable} h-full`}>
+      <body className="flex min-h-full flex-col bg-bg font-sans text-ink">
+        <SiteHeader lastUpdated={updated} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 sm:px-6">{children}</main>
-        <SiteFooter lastUpdated={lastUpdated()} />
+        <SiteFooter lastUpdated={updated} />
       </body>
     </html>
   );

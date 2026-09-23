@@ -12,8 +12,9 @@ export default function FccPage() {
   const items = fccSearchItems();
   return (
     <div className="py-10 sm:py-14">
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">FCC ID search</h1>
-      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+      <div className="micro mb-2">FCC</div>
+      <h1 className="text-[30px] font-extrabold sm:text-[38px]">FCC ID search</h1>
+      <p className="mt-3 max-w-2xl text-[15px] text-ink-2">
         Equipment authorizations on file for the robots in this catalog. On {COVERED_LIST_LABEL} the FCC added
         foreign-produced advanced robotic devices to its Covered List; grants dated after that are flagged.
       </p>

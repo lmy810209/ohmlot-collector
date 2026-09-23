@@ -3,8 +3,8 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import { COVERED_LIST_DATE } from "./format";
-export { COVERED_LIST_DATE };
+import { BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE } from "./format";
+export { BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE };
 
 export const DATA_DIR = process.env.OHMLOT_DATA_DIR ?? path.resolve(process.cwd(), "..", "data");
 
@@ -75,7 +75,9 @@ function load(): Store {
           readFileSync(path.join(pricesDir, f), "utf8")
             .split("\n")
             .filter(Boolean)
-            .map((line) => JSON.parse(line) as PriceRow),
+            .map((line) => JSON.parse(line) as PriceRow)
+            // Shopify's placeholder name for a single-variant product.
+            .map((r) => (r.variant === "Default Title" ? { ...r, variant: "Standard" } : r)),
         )
         // "Contact us" items carry $90,000 / $100,000 placeholders; they never reach the UI.
         .filter((r) => !r.flags?.includes("placeholder_price"))
@@ -345,6 +347,10 @@ export interface RobotRow {
   spark_dates: string[];
   /** % change of the cheapest tracked price, latest vs previous snapshot. */
   change_pct: number | null;
+  /** Yesterday → today move of the cheapest purchase variant; null when untracked or on the first day. */
+  delta: Delta | null;
+  /** Purchase variants in the latest snapshot. */
+  variants: number;
   fcc_status: FccStatus;
   fcc_ids: string[];
   fcc_grant_date: string | null;
@@ -383,6 +389,8 @@ export function robotRows(): RobotRow[] {
       spark: sp.values,
       spark_dates: sp.dates,
       change_pct: latest != null && prev != null && prev !== 0 ? ((latest - prev) / prev) * 100 : null,
+      delta: deltaFor(m.id),
+      variants: latestRows.length,
       fcc_status,
       fcc_ids: m.fcc_ids,
       fcc_grant_date: facts[0]?.grant_date ?? null,
@@ -399,6 +407,8 @@ export function trackedRange(latest: SellerPrice[]): { min: number; max: number 
 export interface RobotDetail {
   model: Model;
   latest: SellerPrice[];
+  /** Latest rows with their previous-snapshot price, for the "yesterday → today" view. */
+  deltas: VariantDelta[];
   history: { dates: string[]; series: PriceSeries[] };
   fcc: FccFact[];
 }
@@ -407,7 +417,80 @@ export interface RobotDetail {
 export function robotDetails(): Record<string, RobotDetail> {
   const out: Record<string, RobotDetail> = {};
   for (const m of getModels()) {
-    out[m.id] = { model: m, latest: latestPrices(m.id), history: priceHistory(m.id), fcc: fccFacts(m) };
+    out[m.id] = { model: m, latest: latestPrices(m.id), deltas: variantDeltas(m.id), history: priceHistory(m.id), fcc: fccFacts(m) };
   }
   return out;
+}
+
+/* ---------- Low-data rules (guide §6) ---------- */
+
+
+export interface Delta {
+  from: number;
+  to: number;
+  amount: number;
+  pct: number;
+  from_date: string;
+  to_date: string;
+}
+
+/** Cheapest purchase variant, latest vs previous snapshot. */
+export function deltaFor(modelId: string): Delta | null {
+  const sp = sparkline(modelId);
+  if (sp.values.length < 2) return null;
+  const from = sp.values[sp.values.length - 2];
+  const to = sp.values[sp.values.length - 1];
+  return { from, to, amount: to - from, pct: from ? ((to - from) / from) * 100 : 0, from_date: sp.dates[sp.dates.length - 2], to_date: sp.dates[sp.dates.length - 1] };
+}
+
+export interface VariantDelta extends SellerPrice {
+  from: number | null;
+  from_date: string | null;
+}
+
+/** Every latest row paired with the same seller+variant from the previous snapshot. */
+export function variantDeltas(modelId: string): VariantDelta[] {
+  const rows = getPriceRows(modelId);
+  const dates = [...new Set(rows.map((r) => r.date))].sort();
+  const prevDate = dates.length >= 2 ? dates[dates.length - 2] : null;
+  const prev = new Map(rows.filter((r) => r.date === prevDate).map((r) => [`${r.seller}|${r.variant}`, r]));
+  return latestPrices(modelId).map((p) => {
+    const q = prevDate ? prev.get(`${p.seller}|${p.variant}`) : undefined;
+    return { ...p, from: q?.price_usd ?? null, from_date: q ? prevDate : null };
+  });
+}
+
+export interface RunSummary {
+  latest: string | null;
+  previous: string | null;
+  first: string | null;
+  snapshots: number;
+  /** Price rows and distinct stores in the latest snapshot. */
+  rows: number;
+  sellers: number;
+  tracked: number;
+  models: number;
+  changes: PriceChange[];
+  baselineDay: number;
+  baselineDays: number;
+}
+
+/** What "Today's run" and the three summary cards show. */
+export function runSummary(): RunSummary {
+  const all = load().prices;
+  const pc = priceChanges();
+  const latestRows = pc.latest ? all.filter((r) => r.date === pc.latest) : [];
+  return {
+    latest: pc.latest,
+    previous: pc.previous,
+    first: pc.first,
+    snapshots: pc.snapshots,
+    rows: latestRows.length,
+    sellers: new Set(latestRows.map((r) => r.seller)).size,
+    tracked: trackedModelIds().size,
+    models: getModels().length,
+    changes: pc.changes,
+    baselineDay: Math.min(pc.snapshots, BASELINE_DAYS),
+    baselineDays: BASELINE_DAYS,
+  };
 }

@@ -3,6 +3,11 @@ import type { Category, Model } from "./data";
 /** FCC DA 26-786: foreign-produced advanced robotic devices were added to the Covered List on this date. */
 export const COVERED_LIST_DATE = "2026-07-28";
 
+/** Low-data rules (guide §6): lowest-price badges and charts wait for this many daily snapshots … */
+export const BASELINE_DAYS = 14;
+/** … and below this many snapshots the UI shows yesterday → today deltas instead of a chart. */
+export const CHART_MIN_SNAPSHOTS = 7;
+
 export type Priced = Pick<Model, "price_model" | "price_usd_min" | "price_usd_max" | "subscription_usd_month">;
 
 export function usd(n: number): string {
@@ -78,4 +83,17 @@ export const STATUS_LABEL: Record<string, string> = {
 export function pct(n: number): string {
   const s = n.toFixed(Math.abs(n) < 10 ? 1 : 0);
   return (n > 0 ? "+" : "") + s + "%";
+}
+
+/** "+$50" / "−$50" / "$0". */
+export function signedUsd(n: number): string {
+  if (n > 0) return `+${usd(n)}`;
+  if (n < 0) return `−${usd(-n)}`;
+  return usd(0);
+}
+
+/** "Sep 23" (no year) for tight labels. */
+export function fmtDay(iso: string): string {
+  const [y, mo, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, mo - 1, d)).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 }

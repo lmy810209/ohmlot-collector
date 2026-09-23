@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { XIcon } from "lucide-react";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "./Badge";
-import { PriceChart } from "./PriceChart";
+import { Delta } from "./Delta";
 import { FccLine } from "./FccLine";
+import { PriceChart } from "./PriceChart";
 import type { RobotDetail } from "@/lib/data";
-import { CATEGORY_SINGULAR, fmtDate, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
+import { CATEGORY_SINGULAR, CHART_MIN_SNAPSHOTS, fmtDate, fmtDay, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
 
 function subscribe(cb: () => void) {
   const mq = window.matchMedia("(max-width: 639px)");
@@ -24,25 +24,29 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
   const phone = useIsPhone();
   const m = detail?.model;
   const latest = detail?.latest ?? [];
+  const deltas = detail?.deltas ?? [];
   const purchase = latest.filter((p) => p.kind === "purchase");
   const tracked = purchase.length > 0;
   const headline = tracked ? rangeText(purchase[0].price_usd, purchase[purchase.length - 1].price_usd) : m ? purchaseRange(m) : "";
   const lastSeen = latest.reduce<string | null>((acc, p) => (acc && acc > p.date ? acc : p.date), null);
   const sellers = [...new Set(latest.map((p) => p.sellerName))];
   const sub = m ? subscriptionLabel(m) : null;
+  const cheapest = deltas.filter((d) => d.kind === "purchase").sort((a, b) => a.price_usd - b.price_usd)[0];
+  const headDelta = cheapest && cheapest.from != null ? { amount: cheapest.price_usd - cheapest.from, pct: cheapest.from ? ((cheapest.price_usd - cheapest.from) / cheapest.from) * 100 : 0 } : null;
+  const snapshots = detail?.history.dates.length ?? 0;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side={phone ? "bottom" : "right"} showCloseButton={false} className={phone ? "max-h-[88vh] rounded-t-xl" : "sm:max-w-md"}>
-        <SheetClose render={<Button variant="ghost" className="absolute top-2 right-2 size-10" aria-label="Close" />}>
+      <SheetContent side={phone ? "bottom" : "right"} showCloseButton={false} className={`bg-card ${phone ? "max-h-[88vh] rounded-t-[var(--r)]" : "sm:max-w-md"}`}>
+        <SheetClose className="absolute top-3 right-3 inline-flex size-10 items-center justify-center rounded-ctl text-ink-2 hover:bg-sunk hover:text-ink" aria-label="Close">
           <XIcon className="size-5" />
         </SheetClose>
         {m && detail && (
           <>
-            <SheetHeader className="pr-14">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">{CATEGORY_SINGULAR[m.category]}</p>
-              <SheetTitle className="text-2xl font-semibold tracking-tight">{m.name}</SheetTitle>
-              <SheetDescription>
+            <SheetHeader className="pr-14 pb-0">
+              <p className="micro">{CATEGORY_SINGULAR[m.category]}</p>
+              <SheetTitle className="text-[24px] font-bold tracking-[-0.03em] text-ink">{m.name}</SheetTitle>
+              <SheetDescription className="text-ink-2">
                 {m.manufacturer}
                 {m.hq_country ? ` · ${m.hq_country}` : ""}
                 {m.launch_year ? ` · ${m.launch_year}` : ""}
@@ -51,19 +55,25 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
 
             <div className="flex-1 overflow-y-auto px-4 pb-6">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xl font-semibold">{headline}</span>
-                <Badge tone={m.status === "shipping" ? "good" : "warn"}>{STATUS_LABEL[m.status] ?? m.status}</Badge>
+                <span className="num text-[22px] text-ink">{headline}</span>
+                {headDelta && <Delta amount={headDelta.amount} pct={headDelta.pct} className="text-[13px]" />}
+                <Badge tone={m.status === "shipping" ? "up" : "amber"}>{STATUS_LABEL[m.status] ?? m.status}</Badge>
+                {tracked && (
+                  <Badge tone="accent" mono>
+                    Tracked
+                  </Badge>
+                )}
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {tracked && lastSeen ? `Tracked daily · latest ${fmtDate(lastSeen)}` : "Published list price · not tracked yet"}
+              <p className="mt-1 font-mono text-[11px] text-ink-3">
+                {tracked && lastSeen ? `latest ${fmtDate(lastSeen)} UTC` : "published list price · not tracked"}
                 {sub ? ` · ${sub}` : ""}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <Link href={`/robots/${m.id}`} className={buttonVariants({ variant: "default", size: "sm" })}>
+                <Link href={`/robots/${m.id}`} className="inline-flex h-9 items-center rounded-ctl bg-accent px-3.5 text-[13px] font-semibold text-accent-fg hover:brightness-95">
                   Open full page
                 </Link>
                 {m.buy_url && (
-                  <a href={m.buy_url} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline", size: "sm" })}>
+                  <a href={m.buy_url} target="_blank" rel="noopener noreferrer" className="inline-flex h-9 items-center rounded-ctl border border-line px-3.5 text-[13px] font-medium hover:bg-sunk">
                     Manufacturer store
                   </a>
                 )}
@@ -71,26 +81,41 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
 
               <section className="mt-6">
                 <div className="flex items-baseline justify-between gap-2">
-                  <h3 className="text-sm font-semibold">Latest prices</h3>
-                  {sellers.length === 1 && <span className="text-xs text-muted-foreground">{sellers[0]}</span>}
+                  <h3 className="text-[15px] font-semibold">{tracked ? "Yesterday → today" : "Latest prices"}</h3>
+                  {sellers.length === 1 && <span className="text-[12px] text-ink-3">{sellers[0]}</span>}
                 </div>
                 {!tracked ? (
-                  <p className="mt-1 text-sm text-muted-foreground">Not tracked daily yet. The range above is the manufacturer&rsquo;s published list price.</p>
+                  <p className="mt-1 text-[13px] text-ink-2">Not tracked daily yet. The range above is the manufacturer&rsquo;s published list price.</p>
                 ) : (
-                  <ul className="mt-1 divide-y divide-border">
-                    {latest.map((p) => (
+                  <ul className="mt-1 divide-y divide-line-soft">
+                    {deltas.map((p) => (
                       <li key={`${p.seller}|${p.variant}`} className="flex items-start justify-between gap-3 py-2">
                         <div className="min-w-0">
-                          <div className="text-sm font-medium leading-snug">{p.variant}</div>
+                          <div className="text-[13.5px] font-medium leading-snug">{p.variant}</div>
                           {(sellers.length > 1 || p.kind !== "purchase") && (
-                            <div className="text-xs text-muted-foreground">
-                              {p.kind === "subscription" ? "Per month · not in the range above" : p.kind === "accessory" ? "Accessory · not in the range above" : p.sellerName}
+                            <div className="text-[12px] text-ink-3">
+                              {p.kind === "subscription" ? "per month · not in the range" : p.kind === "accessory" ? "accessory · not in the range" : p.sellerName}
                             </div>
                           )}
                         </div>
-                        <div className="flex shrink-0 items-center gap-2 pt-0.5">
-                          <span className="text-sm font-semibold">{usd(p.price_usd)}</span>
-                          {p.available === true ? <Badge tone="good">In stock</Badge> : p.available === false ? <Badge tone="warn">Sold out</Badge> : null}
+                        <div className="shrink-0 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <span className="num text-[14px]">{usd(p.price_usd)}</span>
+                            {p.available === true ? <Badge tone="up">In stock</Badge> : p.available === false ? <Badge tone="amber">Sold out</Badge> : null}
+                          </div>
+                          <div className="mt-0.5 font-mono text-[11px] text-ink-3">
+                            {p.from != null && p.from_date ? (
+                              p.from === p.price_usd ? (
+                                `same as ${fmtDay(p.from_date)}`
+                              ) : (
+                                <>
+                                  {usd(p.from)} → <Delta amount={p.price_usd - p.from} pct={p.from ? ((p.price_usd - p.from) / p.from) * 100 : 0} className="text-[11px]" />
+                                </>
+                              )
+                            ) : (
+                              "first day"
+                            )}
+                          </div>
                         </div>
                       </li>
                     ))}
@@ -98,12 +123,12 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
                 )}
               </section>
 
-              {detail.history.series.length > 0 && (
+              {snapshots >= CHART_MIN_SNAPSHOTS && detail.history.series.length > 0 && (
                 <section className="mt-6">
                   <div className="flex items-baseline justify-between gap-2">
-                    <h3 className="text-sm font-semibold">Price history</h3>
-                    <span className="text-xs text-muted-foreground">
-                      since {fmtDate(detail.history.dates[0])} · {detail.history.dates.length} snapshot{detail.history.dates.length === 1 ? "" : "s"}
+                    <h3 className="text-[15px] font-semibold">Price history</h3>
+                    <span className="text-[12px] text-ink-3">
+                      since {fmtDate(detail.history.dates[0])} · {snapshots} snapshots
                     </span>
                   </div>
                   <div className="mt-2">
@@ -113,9 +138,9 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
               )}
 
               <section className="mt-6">
-                <h3 className="text-sm font-semibold">FCC authorization</h3>
+                <h3 className="text-[15px] font-semibold">FCC authorization</h3>
                 {detail.fcc.length === 0 ? (
-                  <p className="mt-1 text-sm text-muted-foreground">No FCC ID on file.</p>
+                  <p className="mt-1 text-[13px] text-ink-2">No FCC ID on file.</p>
                 ) : (
                   <ul className="mt-1 space-y-2">
                     {detail.fcc.map((f) => (
@@ -127,9 +152,9 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
 
               {m.resale_policy_note && (
                 <section className="mt-6">
-                  <h3 className="text-sm font-semibold">Resale notes</h3>
-                  <p className="mt-1 line-clamp-5 text-sm leading-relaxed text-foreground/85">{m.resale_policy_note}</p>
-                  <Link href={`/robots/${m.id}`} className="mt-1 inline-flex h-8 items-center text-sm text-brand underline-offset-4 hover:underline">
+                  <h3 className="text-[15px] font-semibold">Resale notes</h3>
+                  <p className="mt-1 line-clamp-5 text-[13.5px] leading-relaxed text-ink-2">{m.resale_policy_note}</p>
+                  <Link href={`/robots/${m.id}`} className="mt-1 inline-flex h-8 items-center text-[13px] text-accent-ink underline-offset-4 hover:underline">
                     Read all on the full page
                   </Link>
                 </section>

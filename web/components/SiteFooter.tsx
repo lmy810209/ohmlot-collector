@@ -1,22 +1,31 @@
-import { AlertSignup } from "./AlertSignup";
+import { fmtDate } from "@/lib/format";
 
 export function SiteFooter({ lastUpdated }: { lastUpdated: string | null }) {
   return (
-    <footer className="mt-16 border-t border-border bg-muted/40">
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-        <AlertSignup />
-        <div className="mt-10 space-y-2 text-xs leading-relaxed text-muted-foreground">
+    <footer className="mt-20 border-t border-line">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-8 px-4 py-10 text-[13px] leading-relaxed text-ink-2 sm:px-6 md:grid-cols-3">
+        <div>
+          <div className="micro mb-2">Sources</div>
           <p>
-            Prices are manufacturer list prices collected once a day from official stores (US market). &ldquo;Contact
-            us&rdquo; placeholder prices are hidden. FCC data is from public equipment-authorization records; verify new
-            IDs on apps.fcc.gov before relying on them.
-            {lastUpdated ? ` Last price snapshot: ${lastUpdated} (UTC).` : ""}
+            Prices: manufacturer and official-reseller stores, US market. Model data: Robot Price Index (CC BY 4.0) and humanoidrecord.com
+            (CC BY 4.0). FCC: public equipment-authorization records; verify new IDs on apps.fcc.gov.
           </p>
+        </div>
+        <div>
+          <div className="micro mb-2">Methodology</div>
           <p>
-            Model data includes CC BY 4.0 material from Robot Price Index (robotpriceindex.com) and humanoidrecord.com.
-            Nothing here is legal advice; import and resale rules change.
+            One snapshot per store per day at 00:17 UTC. &ldquo;Contact us&rdquo; placeholder prices are hidden. Ranges cover the robot&rsquo;s own
+            variants; subscriptions and accessories are listed but never set a range. Lowest-price badges wait for a 14-day baseline.
+            {lastUpdated ? ` Last collection: ${fmtDate(lastUpdated)} (UTC).` : ""}
           </p>
-          <p>&copy; {new Date().getUTCFullYear()} Ohmlot</p>
+        </div>
+        <div>
+          <div className="micro mb-2">Not affiliated</div>
+          <p>
+            Ohmlot is independent and not affiliated with any manufacturer or store. Figures are list prices, not offers, and nothing here is
+            legal advice. Import and resale rules change.
+          </p>
+          <p className="mt-3 text-ink-3">&copy; {new Date().getUTCFullYear()} Ohmlot</p>
         </div>
       </div>
     </footer>

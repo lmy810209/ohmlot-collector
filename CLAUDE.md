@@ -7,14 +7,14 @@ Daily collector (`src/`) for personal-robot list prices and FCC grants → `data
 
 ### Design Principles
 - Comprehensive design checklist in `context/design-principles.md`
-- Brand style guide in `context/style-guide.md`
+- Brand style guide in `context/style-guide-modern.md` (tokens, type, home order, low-data rules)
 - When making visual (front-end, UI/UX) changes, always refer to these files for guidance
 
 ### Quick Visual Check
 IMMEDIATELY after implementing any front-end change:
 1. **Identify what changed** - Review the modified components/pages
 2. **Navigate to affected pages** - Use `mcp__playwright__browser_navigate` to visit each changed view (local preview: `cd web && npm run build && npm start -- -p 3210`)
-3. **Verify design compliance** - Compare against `context/design-principles.md` and `context/style-guide.md`
+3. **Verify design compliance** - Compare against `context/design-principles.md` and `context/style-guide-modern.md`
 4. **Validate feature implementation** - Ensure the change fulfills the user's specific request
 5. **Check acceptance criteria** - Review any provided context files or requirements
 6. **Capture evidence** - Take full page screenshots at desktop (1440px) and phone (390px) widths, light and dark

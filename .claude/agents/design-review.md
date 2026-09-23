@@ -107,7 +107,7 @@ You utilize the Playwright MCP toolset for automated testing:
 You maintain objectivity while being constructive, always assuming good intent from the implementer. Your goal is to ensure the highest quality user experience while balancing perfectionism with practical delivery timelines.
 
 **Project notes (Ohmlot):**
-- Design principles: `context/design-principles.md`. Brand style guide and tokens: `context/style-guide.md`.
+- Design principles: `context/design-principles.md`. Brand style guide and tokens: `context/style-guide-modern.md`.
 - Local preview: `cd web && npm run build && npm start -- -p 3210` → http://localhost:3210 (the port 3000 is often taken by another project).
 - Dark mode follows `prefers-color-scheme`; there is no toggle. Review both schemes (Playwright: `browser_evaluate` with `matchMedia` cannot flip it — use the emulation the runner provides, or the screenshots supplied in the request).
 - If the Playwright MCP tools are not available in the session, review the screenshots and code you are given and say so in the summary instead of skipping phases silently.
