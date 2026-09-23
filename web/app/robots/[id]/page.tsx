@@ -3,11 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/Badge";
 import { Delta } from "@/components/Delta";
-import { FccLine } from "@/components/FccLine";
 import { PriceChart } from "@/components/PriceChart";
 import { AlertSignup } from "@/components/AlertSignup";
+import { TrackRobotButton } from "@/components/TrackRobotButton";
+import { UsRegulatoryStatus } from "@/components/UsRegulatoryStatus";
 import { CHART_MIN_SNAPSHOTS, fccFacts, getModel, getModels, latestPrices, priceHistory, variantDeltas } from "@/lib/data";
-import { CATEGORY_LABEL, COVERED_LIST_LABEL, fmtDate, fmtDay, priceRange, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
+import { CATEGORY_LABEL, fmtDate, fmtDay, priceRange, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
 
 export const dynamicParams = false;
 
@@ -20,8 +21,8 @@ export async function generateMetadata({ params }: PageProps<"/robots/[id]">): P
   const m = getModel(id);
   if (!m) return {};
   return {
-    title: `${m.name} price and FCC status`,
-    description: `${m.name} by ${m.manufacturer}: ${priceRange(m)}. Daily list prices, FCC ID, and resale notes.`,
+    title: `${m.name} price and US regulatory status`,
+    description: `${m.name} by ${m.manufacturer}: ${priceRange(m)}. Daily list prices, FCC ID, Covered List status, and resale notes.`,
   };
 }
 
@@ -113,6 +114,7 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
                 Official site
               </a>
             )}
+            <TrackRobotButton modelId={m.id} modelName={m.name} />
           </div>
         </div>
 
@@ -185,26 +187,8 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
           </dl>
         </Card>
 
-        <Card title="FCC authorization" id="fcc-heading">
-          {fcc.length === 0 ? (
-            <p className="text-[13.5px] text-ink-2">
-              No FCC ID on file for this model. For US use the unit should carry an FCC ID label; check{" "}
-              <a href="https://apps.fcc.gov/oetcf/eas/reports/GenericSearch.cfm" target="_blank" rel="noopener noreferrer" className={ext}>
-                the FCC equipment authorization search
-              </a>
-              .
-            </p>
-          ) : (
-            <ul className="space-y-3">
-              {fcc.map((f) => (
-                <FccLine key={f.fcc_id} fact={f} />
-              ))}
-            </ul>
-          )}
-          <p className="mt-4 text-[12px] text-ink-3">
-            Since {COVERED_LIST_LABEL} the FCC does not issue new authorizations for foreign-produced advanced robotic devices. Models authorized
-            before that date can generally still be marketed and used in the US.
-          </p>
+        <Card title="US Regulatory Status" id="fcc-heading">
+          <UsRegulatoryStatus model={m} facts={fcc} />
         </Card>
 
         <Card title="Resale notes" id="resale-heading">

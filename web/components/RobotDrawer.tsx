@@ -138,7 +138,7 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
               )}
 
               <section className="mt-6">
-                <h3 className="text-[15px] font-semibold">FCC authorization</h3>
+                <h3 className="text-[15px] font-semibold">US regulatory status</h3>
                 {detail.fcc.length === 0 ? (
                   <p className="mt-1 text-[13px] text-ink-2">No FCC ID on file.</p>
                 ) : (

@@ -1,8 +1,12 @@
 name: fcc-collect
 
-# Manual only. FCC sources (fccid.io, fcc.report, apps.fcc.gov) currently block unattended clients,
-# so this is not on the daily schedule. Run it from Actions → fcc-collect → Run workflow.
+# Weekly on Mondays (01:00 UTC = 10:00 KST) plus manual runs from Actions → fcc-collect → Run workflow.
+# Reads the official FCC OET Laboratory Services API (KDB 953436, getFCCIDList); see context/fcc-api-notes.md.
+# A blocked run (HTTP 403 / HTML instead of JSON) is logged and skipped — nothing is bypassed, and when no
+# grantee code answers nothing is written to data/.
 on:
+  schedule:
+    - cron: "0 1 * * 1"
   workflow_dispatch: {}
 
 permissions:
@@ -19,7 +23,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Collect FCC grants
+      - run: npm test
+      - name: Collect FCC grants (official API)
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -29,7 +34,7 @@ jobs:
         run: |
           git config user.name "collector-bot"
           git config user.email "collector-bot@users.noreply.github.com"
-          git add data/fcc
+          git add data/fcc data/models.json
           git diff --cached --quiet || git commit -m "fcc snapshot $(date -u +%F)"
           git pull --rebase -q
           git push

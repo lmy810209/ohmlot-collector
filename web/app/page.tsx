@@ -10,9 +10,10 @@ export default function Home() {
   const details = robotDetails();
   const run = runSummary();
   const nameById = new Map(rows.map((r) => [r.id, r.name]));
-  const fccIds = rows.reduce((n, r) => n + r.fcc_ids.length, 0);
-  const fccRobots = rows.filter((r) => r.fcc_status !== "none").length;
+  const fccBefore = rows.filter((r) => r.fcc_status === "before").length;
+  const fccConditional = rows.filter((r) => r.fcc_status === "conditional").length;
   const fccAfter = rows.filter((r) => r.fcc_status === "after").length;
+  const fccUnknown = rows.filter((r) => r.fcc_status === "unknown").length;
   const changes = run.changes.slice(0, 3);
 
   const aside = (
@@ -122,7 +123,7 @@ export default function Home() {
 
       {/* 5. FCC */}
       <div className="mt-14 sm:mt-20">
-        <FccSection ids={fccIds} robotsWithId={fccRobots} afterCoveredList={fccAfter} />
+        <FccSection before={fccBefore} conditional={fccConditional} after={fccAfter} unknown={fccUnknown} />
       </div>
 
       {/* 6. Alerts */}

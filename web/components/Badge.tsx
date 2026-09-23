@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
 
-/** Pill badge (guide §3). Status = up/amber; tracked = accent-soft + mono; neutral for unknowns; down for warnings. */
-export type Tone = "up" | "amber" | "down" | "accent" | "neutral";
+/** Pill badge (guide §3). Status = up/amber; tracked = accent-soft + mono; neutral for plain facts; muted for "no record"; down for warnings. */
+export type Tone = "up" | "amber" | "down" | "accent" | "neutral" | "muted";
 
 const TONE: Record<Tone, string> = {
   up: "bg-up-soft text-up",
   amber: "bg-amber-soft text-amber",
   down: "bg-down-soft text-down",
   accent: "bg-accent-soft text-accent-ink",
-  neutral: "bg-sunk text-ink-2",
+  neutral: "bg-sunk text-ink",
+  muted: "bg-sunk text-ink-3",
 };
 
 export function Badge({ tone = "neutral", mono = false, children }: { tone?: Tone; mono?: boolean; children: ReactNode }) {

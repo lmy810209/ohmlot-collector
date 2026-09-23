@@ -1,12 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  buildUsStatus,
+  fccSourceUrl,
   mergeGrants,
   normalizeDate,
-  parseGranteePage,
+  parseFccIdList,
   parseRegexHtml,
   parseShopifyProduct,
+  syncUsStatus,
   withUsMarket,
+  type ModelSeed,
   type PriceSource,
 } from "../src/lib/parse.ts";
 
@@ -87,20 +91,90 @@ test("dates normalize from FCC / fccid formats", () => {
   assert.equal(normalizeDate("garbage"), null);
 });
 
-test("grantee page: rows parsed, covered-list flag, earliest date kept", () => {
-  const html = `<table>
-    <tr><th>FCC ID</th><th>Name</th><th>Date</th></tr>
-    <tr><td><a href="/2A5PE-YUSHU008">2A5PE-YUSHU008</a></td><td>Humanoid Robot</td><td>2025-03-03</td></tr>
-    <tr><td><a href="/2A5PE-YUSHU008">2A5PE-YUSHU008</a></td><td>Class II change</td><td>2026-08-10</td></tr>
-    <tr><td><a href="/2A5PE-YUSHU013">2A5PE-YUSHU013</a></td><td>Quadruped</td><td>2026-08-02</td></tr>
-    <tr><td>unrelated row</td></tr>
-  </table>`;
-  const g = parseGranteePage(html, "2A5PE");
+test("getFCCIDList: bare array, MM/DD/YYYY dates, covered-list flag, earliest date kept, other grantees dropped", () => {
+  const g = parseFccIdList(
+    [
+      { fccid: "2A5PE-YUSHU008", grantee: "Hangzhou Yushu Technology Co., Ltd.", grantDate: "03/03/2025", applicationPurpose: "Original Equipment" },
+      { fccid: "2A5PE-YUSHU008", grantee: "Hangzhou Yushu Technology Co., Ltd.", grantDate: "08/10/2026", applicationPurpose: "Class II Permissive Change" },
+      { fccid: "2A5PE-YUSHU013", grantee: "Hangzhou Yushu Technology Co., Ltd.", grantDate: "08/02/2026", applicationPurpose: "Original Equipment" },
+      { fccid: "BCG-E2430A", grantee: "Apple Inc.", grantDate: "09/09/2009", applicationPurpose: "Original Equipment" },
+    ],
+    "2A5PE",
+  );
   const byId = Object.fromEntries(g.map((x) => [x.fcc_id, x]));
   assert.equal(g.length, 2);
   assert.equal(byId["2A5PE-YUSHU008"].grant_date, "2025-03-03");
   assert.equal(byId["2A5PE-YUSHU008"].after_covered_list, false);
   assert.equal(byId["2A5PE-YUSHU013"].after_covered_list, true);
+  assert.equal(byId["2A5PE-YUSHU013"].description, null);
+});
+
+test("getFCCIDList: wrapped array and alternative field names are accepted; missing date stays null", () => {
+  const g = parseFccIdList({ status: "ok", results: [{ FCC_ID: "2bkmidigitv4", grant_date: "2025-09-12" }, { FCC_ID: "2BKMI-X1" }] }, "2BKMI");
+  assert.deepEqual(
+    g.map((x) => [x.fcc_id, x.grant_date, x.after_covered_list]),
+    [
+      ["2BKMIDIGITV4", "2025-09-12", false],
+      ["2BKMI-X1", null, null],
+    ],
+  );
+});
+
+test("getFCCIDList: a body without any array of rows is rejected", () => {
+  assert.throws(() => parseFccIdList({ message: "Access Denied" }, "2A5PE"), /unexpected response shape/);
+  assert.throws(() => parseFccIdList("<html>", "2A5PE"), /unexpected response shape/);
+});
+
+test("fccSourceUrl points at the FCC's own record for hyphenated and 5+N style IDs", () => {
+  assert.equal(
+    fccSourceUrl("2A5PE-YUSHU008"),
+    "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU008",
+  );
+  assert.equal(fccSourceUrl("2AAIC00010")?.endsWith("grantee_code=2AAIC&product_code=00010"), true);
+  assert.equal(fccSourceUrl(null), null);
+});
+
+test("us_status: before/after/unknown from the grant date, registry date wins, conditional approval only from the FCC list", () => {
+  const registry = {
+    "2A5PE-YUSHU008": { fcc_id: "2A5PE-YUSHU008", grantee_code: "2A5PE", grant_date: "2025-03-01", description: null, after_covered_list: false, first_seen: "2026-09-29" },
+  };
+  const base = { manufacturer: "Unitree Robotics", fcc_grantee_code: "2A5PE", fcc_grant_date: "2025-03-03" };
+  const before = buildUsStatus({ ...base, id: "unitree-g1", name: "Unitree G1", fcc_ids: ["2A5PE-YUSHU008"] }, registry, "2026-09-29");
+  assert.equal(before.grant_date, "2025-03-01"); // registry over seed
+  assert.equal(before.covered_list, "before");
+  assert.equal(before.conditional_approval, false);
+  assert.match(before.conditional_approval_note, /Not on the FCC's Robotic Devices Conditional Approvals list/);
+  assert.equal(before.last_verified, "2026-09-29");
+  assert.equal(before.source_url?.includes("product_code=YUSHU008"), true);
+
+  const after = buildUsStatus({ ...base, id: "x", name: "X", fcc_ids: ["2A5PE-YUSHU099"], fcc_grant_date: "2026-08-02" }, registry, "2026-09-29");
+  assert.equal(after.covered_list, "after");
+
+  const unknown = buildUsStatus({ ...base, id: "y", name: "Y", fcc_ids: [], fcc_grant_date: null }, registry, "2026-09-29");
+  assert.deepEqual([unknown.fcc_id, unknown.grant_date, unknown.covered_list, unknown.source_url], [null, null, "unknown", null]);
+
+  const husq = buildUsStatus({ id: "h", name: "Husqvarna 305v IQ", manufacturer: "Husqvarna AB", fcc_grantee_code: null, fcc_ids: [], fcc_grant_date: "2026-09-01" }, {}, "2026-09-29");
+  assert.equal(husq.conditional_approval, true);
+  assert.match(husq.conditional_approval_note, /2026-09-09/);
+});
+
+test("syncUsStatus: only models whose grantee code answered get a new last_verified; unchanged blocks are not counted", () => {
+  const models: (ModelSeed & { extra?: number })[] = [
+    { id: "a", name: "A", manufacturer: "M", fcc_grantee_code: "2A5PE", fcc_ids: ["2A5PE-YUSHU008"], fcc_grant_date: "2025-03-03", extra: 1 },
+    { id: "b", name: "B", manufacturer: "M", fcc_grantee_code: "2BKMI", fcc_ids: ["2BKMIDIGITV4"], fcc_grant_date: "2025-09-12" },
+  ];
+  const first = syncUsStatus(models, {}, "2026-09-24", "all");
+  assert.equal(first.changed, 2);
+  assert.equal(first.models[0].extra, 1); // other seed fields survive
+  assert.equal(first.models[1].us_status?.last_verified, "2026-09-24");
+
+  const second = syncUsStatus(first.models, {}, "2026-10-05", new Set(["2A5PE"]));
+  assert.equal(second.changed, 1);
+  assert.equal(second.models[0].us_status?.last_verified, "2026-10-05");
+  assert.equal(second.models[1].us_status?.last_verified, "2026-09-24"); // 2BKMI did not answer
+
+  const third = syncUsStatus(second.models, {}, "2026-10-05", new Set(["2A5PE"]));
+  assert.equal(third.changed, 0);
 });
 
 test("mergeGrants stamps first_seen only for new IDs", () => {

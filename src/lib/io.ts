@@ -42,6 +42,12 @@ export async function writeJson(path: string, data: unknown) {
   await writeFile(path, JSON.stringify(data, null, 2) + "\n");
 }
 
+/** Byte-for-byte archive of a response body (no re-serialization). */
+export async function writeText(path: string, text: string) {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, text);
+}
+
 export async function writeJsonl(path: string, rows: unknown[]) {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, rows.map((r) => JSON.stringify(r)).join("\n") + (rows.length ? "\n" : ""));

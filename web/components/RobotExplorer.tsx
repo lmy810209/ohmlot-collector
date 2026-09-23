@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "./Badge";
 import { Delta } from "./Delta";
 import { RobotDrawer } from "./RobotDrawer";
+import { UsStatusBadge } from "./UsStatusBadge";
 import type { Category, RobotDetail, RobotRow } from "@/lib/data";
 import { CATEGORY_SINGULAR, COVERED_LIST_LABEL, fmtMonth, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel } from "@/lib/format";
 
@@ -67,7 +68,7 @@ export function RobotExplorer({
       if (filters.category !== "all" && r.category !== filters.category) return false;
       if (filters.status !== "all" && r.status !== filters.status) return false;
       if (filters.trackedOnly && !r.tracked) return false;
-      if (filters.fccOnly && r.fcc_status === "none") return false;
+      if (filters.fccOnly && r.fcc_ids.length === 0) return false;
       if (filters.maxPrice != null && !(r.sort_price <= filters.maxPrice)) return false;
       return true;
     });
@@ -165,22 +166,20 @@ export function RobotExplorer({
       {
         id: "fcc",
         accessorKey: "fcc_status",
-        header: "FCC",
+        header: "US status",
         sortingFn: (a, b) => {
-          const order = { before: 0, after: 1, unknown: 2, none: 3 } as const;
+          const order = { before: 0, conditional: 1, after: 2, unknown: 3 } as const;
           const d = order[a.original.fcc_status] - order[b.original.fcc_status];
           return d !== 0 ? d : (b.original.fcc_grant_date ?? "").localeCompare(a.original.fcc_grant_date ?? "");
         },
         cell: ({ row }) => {
           const r = row.original;
-          return r.fcc_status === "before" && r.fcc_grant_date ? (
-            <Badge tone="up">Granted {fmtMonth(r.fcc_grant_date)}</Badge>
-          ) : r.fcc_status === "after" ? (
-            <Badge tone="amber">After Covered List</Badge>
-          ) : r.fcc_status === "unknown" || r.fcc_status === "before" ? (
-            <Badge>Date unknown</Badge>
-          ) : (
-            <span className="font-mono text-[11px] text-ink-3">no ID on file</span>
+          if (r.fcc_ids.length === 0) return <span className="font-mono text-[11px] text-ink-3">no ID on file</span>;
+          return (
+            <span className="flex flex-col items-start gap-1">
+              <UsStatusBadge kind={r.fcc_status} short />
+              <span className="font-mono text-[11px] text-ink-3">{r.fcc_grant_date ? `granted ${fmtMonth(r.fcc_grant_date)}` : "grant date unknown"}</span>
+            </span>
           );
         },
         meta: { className: "hidden md:table-cell", width: "md:w-[18%] lg:w-[18%]" } satisfies Meta,
@@ -346,8 +345,8 @@ export function RobotExplorer({
           </Table>
         </div>
         <p className="mt-3 text-[12px] text-ink-3">
-          USD list prices from official stores. 24h compares the cheapest variant with the previous daily snapshot. FCC shows the grant date;
-          grants after {COVERED_LIST_LABEL} fall under the Covered List for foreign-made robots.
+          USD list prices from official stores. 24h compares the cheapest variant with the previous daily snapshot. US status places the FCC grant
+          before or after the Covered List ({COVERED_LIST_LABEL}); robots authorized before it can still be sold and used in the US.
         </p>
       </section>
 

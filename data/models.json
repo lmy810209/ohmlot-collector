@@ -29,7 +29,16 @@
       "https://fcc.report/FCC-ID/2A5PE-YUSHU008/8087916.pdf",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com",
+    "us_status": {
+      "fcc_id": "2A5PE-YUSHU008",
+      "grant_date": "2025-03-03",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU008"
+    }
   },
   {
     "id": "unitree-r1",
@@ -60,7 +69,16 @@
       "https://blog.robozaps.com/b/humanoid-robots-legal-in-us",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com",
+    "us_status": {
+      "fcc_id": "2A5PE-YUSHU010",
+      "grant_date": "2026-06-22",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU010"
+    }
   },
   {
     "id": "unitree-h1",
@@ -89,7 +107,16 @@
       "https://shop.unitree.com/",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com; CC BY 4.0 - Integrarobot"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com; CC BY 4.0 - Integrarobot",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "unitree-h2",
@@ -120,7 +147,16 @@
       "https://blog.robozaps.com/b/humanoid-robots-legal-in-us",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com",
+    "us_status": {
+      "fcc_id": "2A5PE-YUSHU012",
+      "grant_date": "2026-06-30",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU012"
+    }
   },
   {
     "id": "unitree-go2-air",
@@ -152,7 +188,16 @@
       "https://fcc.report/FCC-ID/2A5PE-YUSHU004/7349899.pdf",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": "2A5PE-YUSHU004",
+      "grant_date": "2024-05-27",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU004"
+    }
   },
   {
     "id": "unitree-go2-pro",
@@ -184,7 +229,16 @@
       "https://fcc.report/FCC-ID/2A5PE-YUSHU004/7349899.pdf",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": "2A5PE-YUSHU004",
+      "grant_date": "2024-05-27",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU004"
+    }
   },
   {
     "id": "unitree-go2-edu",
@@ -216,7 +270,16 @@
       "https://fcc.report/FCC-ID/2A5PE-YUSHU004/7349899.pdf",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": "2A5PE-YUSHU004",
+      "grant_date": "2024-05-27",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU004"
+    }
   },
   {
     "id": "unitree-go2-w",
@@ -244,7 +307,16 @@
       "https://blog.robozaps.com/b/humanoid-robots-legal-in-us",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "unitree-go1",
@@ -278,7 +350,16 @@
       "https://fcc.report/FCC-ID/2A5PE-YUSHU002/5834801.pdf",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": null
+    "data_source_license": null,
+    "us_status": {
+      "fcc_id": "2A5PE-YUSHU001",
+      "grant_date": "2022-05-05",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU001"
+    }
   },
   {
     "id": "1x-neo",
@@ -306,7 +387,16 @@
       "https://www.1x.tech/discover/neo-home-robot",
       "https://www.1x.tech/order"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "booster-t1",
@@ -335,7 +425,16 @@
       "https://www.generationrobots.com/en/404278-booster-t1-humanoid-robot.html",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "booster-k1",
@@ -362,7 +461,16 @@
       "https://www.booster.tech/booster-k1/",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "engineai-pm01",
@@ -390,7 +498,16 @@
       "https://www.therobotreport.com/engineai-releases-pm01-humanoid-robot-for-commercial-educational-use/",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "engineai-se01",
@@ -417,7 +534,16 @@
       "https://github.com/integrarobot/integrarobot-robotics-database",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - Integrarobot"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - Integrarobot",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "fourier-n1",
@@ -443,7 +569,16 @@
       "https://github.com/tdvchina/robot-price-index-data/blob/main/data/robot-price-index.csv",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "agibot-x2",
@@ -473,7 +608,16 @@
       "https://globaldronehq.com/blogs/guides/agibot-robot-price-guide-2026",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": "2BTPT-LX2501",
+      "grant_date": "2026-04-17",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2BTPT&product_code=LX2501"
+    }
   },
   {
     "id": "noetix-n2",
@@ -503,7 +647,16 @@
       "https://github.com/integrarobot/integrarobot-robotics-database",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": null
+    "data_source_license": null,
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "limx-tron-1",
@@ -530,7 +683,16 @@
       "https://github.com/integrarobot/integrarobot-robotics-database",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - Integrarobot"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - Integrarobot",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "pollen-reachy-2",
@@ -557,7 +719,16 @@
       "https://github.com/integrarobot/integrarobot-robotics-database",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - Integrarobot"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - Integrarobot",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "pollen-reachy-mini",
@@ -584,7 +755,16 @@
       "https://huggingface.co/docs/reachy_mini/en/platforms/reachy_mini/hardware",
       "https://www.seeedstudio.com/Reachy-Mini-Wireless-Kit-p-6724.html"
     ],
-    "data_source_license": null
+    "data_source_license": null,
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "so-101-arm-kit",
@@ -611,7 +791,16 @@
       "https://www.cnx-software.com/2025/05/02/so-arm101-open-source-dual-robotic-arm-kit-works-with-hugging-faces-lerobot/",
       "https://shop.wowrobo.com/collections/so-arm-lerobot-kits"
     ],
-    "data_source_license": null
+    "data_source_license": null,
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "deep-robotics-lite3",
@@ -639,7 +828,16 @@
       "https://www.fccidlookup.com/fccid/2BFQD-LYNXM20",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "xiaomi-cyberdog-2",
@@ -667,7 +865,16 @@
       "https://www.giztop.com/xiaomi-cyberdog-2.html",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "petoi-bittle",
@@ -693,7 +900,16 @@
       "https://www.petoi.com/products/petoi-bittle-robot-dog",
       "https://docs.petoi.com/"
     ],
-    "data_source_license": null
+    "data_source_license": null,
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "petoi-nybble-q",
@@ -718,7 +934,16 @@
     "sources": [
       "https://www.petoi.com/products/petoi-nybble-q-robot-cat"
     ],
-    "data_source_license": null
+    "data_source_license": null,
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "keyi-loona",
@@ -746,7 +971,16 @@
       "https://keyirobot.com/products/petbot",
       "https://manuals.plus/loona/ky004ln01-smart-toy-robot-manual"
     ],
-    "data_source_license": null
+    "data_source_license": null,
+    "us_status": {
+      "fcc_id": "2AWR5-KY004LN01",
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2AWR5&product_code=KY004LN01"
+    }
   },
   {
     "id": "ddl-vector-2",
@@ -777,7 +1011,16 @@
       "https://fcc.report/FCC-ID/2AAIC00010",
       "https://fccid.io/2AAIC00011"
     ],
-    "data_source_license": null
+    "data_source_license": null,
+    "us_status": {
+      "fcc_id": "2AAIC00010",
+      "grant_date": "2018-11-15",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2AAIC&product_code=00010"
+    }
   },
   {
     "id": "boston-dynamics-spot",
@@ -804,7 +1047,16 @@
       "https://bostondynamics.com/products/spot/",
       "https://fccid.io/2ATBY-NMDB-2"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com)",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   },
   {
     "id": "agility-digit",
@@ -835,7 +1087,16 @@
       "https://fccid.io/2BKMIDIGITV4",
       "https://blog.robozaps.com/b/humanoid-robots-legal-in-us"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com; CC BY 4.0 - Integrarobot"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - humanoidrecord.com; CC BY 4.0 - Integrarobot",
+    "us_status": {
+      "fcc_id": "2BKMIDIGITV4",
+      "grant_date": "2025-09-12",
+      "covered_list": "before",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2BKMI&product_code=DIGITV4"
+    }
   },
   {
     "id": "rainbow-robotics-rb-y1",
@@ -862,6 +1123,15 @@
       "https://github.com/integrarobot/integrarobot-robotics-database",
       "https://natlawreview.com/article/fcc-adds-foreign-produced-advanced-robotic-devices-covered-list-five-things-know"
     ],
-    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - Integrarobot"
+    "data_source_license": "CC BY 4.0 - Robot Price Index (robotpriceindex.com); CC BY 4.0 - Integrarobot",
+    "us_status": {
+      "fcc_id": null,
+      "grant_date": null,
+      "covered_list": "unknown",
+      "conditional_approval": false,
+      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
+      "last_verified": "2026-09-24",
+      "source_url": null
+    }
   }
 ]

@@ -32,6 +32,28 @@ export interface Model {
   resale_policy_note: string | null;
   sources: string[];
   data_source_license: string | null;
+  /** Written by the collector (src/lib/parse.ts buildUsStatus); older seed rows may not have it yet. */
+  us_status?: UsStatus | null;
+}
+
+/** "Can I buy this in the US?" — one block per model, mirrored from data/models.json. */
+export interface UsStatus {
+  fcc_id: string | null;
+  grant_date: string | null; // YYYY-MM-DD
+  covered_list: "before" | "after" | "unknown";
+  conditional_approval: boolean | null;
+  conditional_approval_note: string;
+  last_verified: string | null; // YYYY-MM-DD
+  source_url: string | null;
+}
+
+/** The four states the site shows. "conditional" only exists after the Covered List date. */
+export type UsStatusKind = "before" | "conditional" | "after" | "unknown";
+
+export function usStatusKind(s: Pick<UsStatus, "covered_list" | "conditional_approval"> | null | undefined): UsStatusKind {
+  if (!s || s.covered_list === "unknown") return "unknown";
+  if (s.covered_list === "before") return "before";
+  return s.conditional_approval === true ? "conditional" : "after";
 }
 
 export interface PriceRow {
@@ -211,13 +233,20 @@ export interface FccFact {
   grant_date: string | null;
   after_covered_list: boolean | null;
   description: string | null;
-  /** "registry" when the daily FCC collector has seen the ID; "model" when only the seed data has it. */
+  /** "registry" when the weekly FCC collector has seen the ID; "model" when only the seed data has it. */
   source: "registry" | "model";
+  /** This ID's own position, with the model's conditional-approval flag applied. */
+  status: UsStatusKind;
+}
+
+function coveredList(date: string | null): UsStatus["covered_list"] {
+  return date ? (date < COVERED_LIST_DATE ? "before" : "after") : "unknown";
 }
 
 /** FCC facts for a model: the collector's registry wins, the seed grant date is the fallback. */
 export function fccFacts(model: Model): FccFact[] {
   const grants = getGrants();
+  const conditional = model.us_status?.conditional_approval ?? null;
   return model.fcc_ids.map((id) => {
     const g = grants[id];
     const date = g?.grant_date ?? model.fcc_grant_date ?? null;
@@ -227,8 +256,28 @@ export function fccFacts(model: Model): FccFact[] {
       after_covered_list: date ? date >= COVERED_LIST_DATE : null,
       description: g?.description ?? null,
       source: g ? "registry" : "model",
+      status: usStatusKind({ covered_list: coveredList(date), conditional_approval: conditional }),
     };
   });
+}
+
+/**
+ * The model's us_status block, or — for seed rows the collector has not stamped yet — the same block derived
+ * from the registry / seed grant date with conditional approval and last_verified left unknown.
+ */
+export function modelUsStatus(model: Model): UsStatus {
+  if (model.us_status) return model.us_status;
+  const facts = fccFacts(model);
+  const date = facts.find((f) => f.grant_date)?.grant_date ?? null;
+  return {
+    fcc_id: model.fcc_ids[0] ?? null,
+    grant_date: date,
+    covered_list: coveredList(date),
+    conditional_approval: null,
+    conditional_approval_note: "",
+    last_verified: null,
+    source_url: null,
+  };
 }
 
 export interface FccSearchItem {
@@ -240,6 +289,7 @@ export interface FccSearchItem {
   grant_date: string | null;
   after_covered_list: boolean | null;
   description: string | null;
+  status: UsStatusKind;
 }
 
 /** Everything the /fcc search can match: every model FCC ID plus registry grants not tied to a model. */
@@ -258,6 +308,7 @@ export function fccSearchItems(): FccSearchItem[] {
         grant_date: f.grant_date,
         after_covered_list: f.after_covered_list,
         description: f.description,
+        status: f.status,
       });
     }
   }
@@ -272,6 +323,8 @@ export function fccSearchItems(): FccSearchItem[] {
       grant_date: g.grant_date,
       after_covered_list: g.after_covered_list,
       description: g.description,
+      // Not one of our models, so no conditional-approval check: after-date grants stay "after".
+      status: usStatusKind({ covered_list: coveredList(g.grant_date), conditional_approval: null }),
     });
   }
   return items.sort((a, b) => (b.grant_date ?? "").localeCompare(a.grant_date ?? "") || a.fcc_id.localeCompare(b.fcc_id));
@@ -322,7 +375,7 @@ export function sparkline(modelId: string): { dates: string[]; values: number[] 
   return { dates, values: dates.map((d) => byDate.get(d) as number) };
 }
 
-export type FccStatus = "before" | "after" | "unknown" | "none";
+export type FccStatus = UsStatusKind;
 
 export interface RobotRow {
   id: string;
@@ -366,9 +419,8 @@ export function robotRows(): RobotRow[] {
     const latestMax = latestRows.length ? latestRows[latestRows.length - 1].price_usd : null;
     const latestDate = latestRows.reduce<string | null>((acc, p) => (acc && acc > p.date ? acc : p.date), null);
     const publishedMin = m.price_model === "quote" || m.price_usd_min == null ? Number.POSITIVE_INFINITY : m.price_usd_min;
-    const facts = fccFacts(m);
-    const fcc_status: FccStatus =
-      facts.length === 0 ? "none" : facts.some((f) => f.after_covered_list === true) ? "after" : facts.every((f) => f.after_covered_list === false) ? "before" : "unknown";
+    const us = modelUsStatus(m);
+    const fcc_status: FccStatus = usStatusKind(us);
     return {
       id: m.id,
       name: m.name,
@@ -393,7 +445,7 @@ export function robotRows(): RobotRow[] {
       variants: latestRows.length,
       fcc_status,
       fcc_ids: m.fcc_ids,
-      fcc_grant_date: facts[0]?.grant_date ?? null,
+      fcc_grant_date: us.grant_date,
     };
   });
 }

@@ -2,22 +2,51 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { FccSearchItem } from "@/lib/data";
-import { COVERED_LIST_LABEL, fmtDate } from "@/lib/format";
-import { Badge } from "./Badge";
+import type { FccSearchItem, UsStatusKind } from "@/lib/data";
+import { fmtDate } from "@/lib/format";
+import { US_STATUS_SHORT, UsStatusBadge } from "./UsStatusBadge";
+
+type StatusFilter = UsStatusKind | "all";
+const STATUS_ORDER: UsStatusKind[] = ["before", "conditional", "after", "unknown"];
 
 export function FccSearch({ items }: { items: FccSearchItem[] }) {
   const [q, setQ] = useState("");
+  const [status, setStatus] = useState<StatusFilter>("all");
+
+  const counts = useMemo(() => {
+    const c: Record<UsStatusKind, number> = { before: 0, conditional: 0, after: 0, unknown: 0 };
+    for (const it of items) c[it.status]++;
+    return c;
+  }, [items]);
 
   const results = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return items;
-    return items.filter((it) =>
-      [it.fcc_id, it.grantee_code, it.model_name, it.manufacturer, it.description]
+    return items.filter((it) => {
+      if (status !== "all" && it.status !== status) return false;
+      if (!needle) return true;
+      return [it.fcc_id, it.grantee_code, it.model_name, it.manufacturer, it.description]
         .filter(Boolean)
-        .some((v) => (v as string).toLowerCase().includes(needle)),
+        .some((v) => (v as string).toLowerCase().includes(needle));
+    });
+  }, [items, q, status]);
+
+  const chip = (value: StatusFilter, label: string, count: number) => {
+    const on = status === value;
+    return (
+      <button
+        key={value}
+        type="button"
+        aria-pressed={on}
+        onClick={() => setStatus(value)}
+        className={`inline-flex h-10 items-center gap-1.5 rounded-full border px-3.5 text-[13px] font-medium ${
+          on ? "border-ink bg-ink text-bg" : "border-line bg-card text-ink-2 hover:bg-sunk"
+        }`}
+      >
+        {label}
+        <span className={`num text-[11px] ${on ? "text-bg/80" : "text-ink-3"}`}>{count}</span>
+      </button>
     );
-  }, [items, q]);
+  };
 
   return (
     <div>
@@ -33,14 +62,19 @@ export function FccSearch({ items }: { items: FccSearchItem[] }) {
         onChange={(e) => setQ(e.target.value)}
         className="h-12 w-full rounded-ctl border border-line bg-card px-4 text-[15px] text-ink shadow-card placeholder:text-ink-3"
       />
+      <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Covered List status">
+        {chip("all", "All", items.length)}
+        {STATUS_ORDER.map((k) => chip(k, US_STATUS_SHORT[k], counts[k]))}
+      </div>
       <p className="mt-2 font-mono text-[11px] text-ink-3" role="status">
         {results.length} of {items.length} FCC IDs
-        {q.trim() ? ` match “${q.trim()}”` : ""}
+        {status !== "all" ? ` · ${US_STATUS_SHORT[status]}` : ""}
+        {q.trim() ? ` · match “${q.trim()}”` : ""}
       </p>
 
       {results.length === 0 ? (
         <p className="mt-8 rounded-card border border-dashed border-line p-6 text-center text-sm text-ink-2">
-          No match. Try the grantee code (Unitree is 2A5PE) or part of the model name.
+          No match. Try the grantee code (Unitree is 2A5PE), part of the model name, or another status.
         </p>
       ) : (
         <ul className="card mt-4 divide-y divide-line-soft px-4">
@@ -60,16 +94,8 @@ export function FccSearch({ items }: { items: FccSearchItem[] }) {
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2 text-sm">
-                <span className="num text-[13px] text-ink-2">
-                  {it.grant_date ? fmtDate(it.grant_date) : "Date unknown"}
-                </span>
-                {it.after_covered_list === true ? (
-                  <Badge tone="amber">After Covered List ({COVERED_LIST_LABEL})</Badge>
-                ) : it.after_covered_list === false ? (
-                  <Badge tone="up">Before Covered List ({COVERED_LIST_LABEL})</Badge>
-                ) : (
-                  <Badge>Date unknown</Badge>
-                )}
+                <span className="num text-[13px] text-ink-2">{it.grant_date ? fmtDate(it.grant_date) : "Date unknown"}</span>
+                <UsStatusBadge kind={it.status} short />
               </div>
             </li>
           ))}

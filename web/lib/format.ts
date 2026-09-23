@@ -59,6 +59,26 @@ export function fmtMonth(iso: string): string {
 
 export const COVERED_LIST_LABEL = fmtDate(COVERED_LIST_DATE);
 
+/** FCC primary documents behind the US regulatory status block (context/fcc-api-notes.md). */
+export const FCC_DOCS = {
+  coveredListNotice: "https://docs.fcc.gov/public/attachments/DA-26-786A1.pdf", // DA 26-786, Jul 28 2026
+  factSheet: "https://docs.fcc.gov/public/attachments/DOC-423682A1.txt", // Jul 28 2026: previously authorized models may still be sold, imported, used
+  conditionalApprovals: "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf", // DA 26-996, Sep 18 2026, Appendix B lists every approval
+  search: "https://apps.fcc.gov/oetcf/eas/reports/GenericSearch.cfm",
+};
+
+/** FCC's own equipment-authorization record for an FCC ID (mirrors fccSourceUrl in the collector). */
+export function fccRecordUrl(fccId: string | null | undefined): string | null {
+  if (!fccId) return null;
+  const id = fccId.toUpperCase();
+  const [grantee, product] = id.includes("-") ? [id.slice(0, id.indexOf("-")), id.slice(id.indexOf("-") + 1)] : [id.slice(0, 5), id.slice(5)];
+  if (!grantee || !product) return null;
+  return `https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=${grantee}&product_code=${encodeURIComponent(product)}`;
+}
+
+/** The one-line rule every FCC surface repeats, worded once. */
+export const COVERED_LIST_RULE = `Since ${COVERED_LIST_LABEL} foreign-produced robots can no longer receive a new FCC authorization; devices authorized before that date can still be sold, imported, and used in the US.`;
+
 export const CATEGORY_LABEL: Record<Category, string> = {
   humanoid: "Humanoids",
   quadruped: "Quadrupeds",
