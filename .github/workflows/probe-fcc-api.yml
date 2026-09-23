@@ -1,0 +1,34 @@
+name: probe-fcc-api
+
+# Temporary: test the official OET Lab Services API (KDB 953436) from a US runner. Plain curl, no proxies.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Call getFCCIDList
+        run: |
+          UA="OhmlotBot/0.1 (+https://ohmlot.com; FCC equipment authorization lookup)"
+          mkdir -p out
+          call() { # name url [ua]
+            curl -sS -o "out/$1.body" -D "out/$1.headers" -w "%{http_code}" -m 60 -A "${3:-$UA}" -H "accept: application/json, text/html;q=0.5" "$2" > "out/$1.status" || echo "curl-error" > "out/$1.status"
+            echo "== $1 == HTTP $(cat out/$1.status) $(grep -i '^content-type' out/$1.headers | tr -d '\r')"
+            head -c 700 "out/$1.body"; echo; echo
+          }
+          call granteePrefix    "https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=2A5PE"
+          call fullId           "https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=2A5PE-YUSHU008"
+          call granteePrefixAlt "https://apps.fcc.gov/OETLabServices/getFCCIDList?fccid=2A5PE"
+          call granteeAgibot    "https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=2BTPT"
+          call noParam          "https://apps.fcc.gov/OETLabServices/getFCCIDList"
+          call curlUA           "https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=2A5PE" "curl/8.5.0"
+          call easHtml          "https://apps.fcc.gov/oetcf/eas/reports/GenericSearch.cfm"
+          call kdbAttachment    "https://apps.fcc.gov/kdb/GetAttachment.html?id=a2TAM%2Fce88o0NtvDeTzB%2Bg%3D%3D&desc=953436%20D01%20OET%20Laboratory%20Services%20API%20v04&tracking_number=50070"
+          echo "--- runner egress ---"; curl -s -m 10 https://ipinfo.io/json | head -c 200; echo
+      - uses: actions/upload-artifact@v4
+        with:
+          name: probe-fcc-api
+          path: out
+          retention-days: 3
