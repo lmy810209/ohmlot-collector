@@ -7,6 +7,11 @@ const REGISTRY = "data/fcc/grants.json";
 // Unofficial mirror of FCC EAS data. Cross-check new IDs on apps.fcc.gov before publishing.
 const granteeUrl = (code: string) => `https://fccid.io/${code}`;
 
+/**
+ * Manual-only collector (fcc.yml). Errors are returned for the console / Actions log and are NOT
+ * written to data/logs, which is reserved for the daily price run. When nothing could be parsed,
+ * nothing is written to data/ either, so a blocked run leaves no trace in the repo.
+ */
 export async function collectFcc(date: string) {
   const registry = await readJson<Record<string, FccGrant & { first_seen: string }>>(REGISTRY, {});
   const found: FccGrant[] = [];
@@ -23,11 +28,12 @@ export async function collectFcc(date: string) {
     await sleep(3000);
   }
 
+  if (found.length === 0) return { total: Object.keys(registry).length, added: [] as string[], errors, wrote: false };
+
   const { registry: next, added } = mergeGrants(registry, found, date);
   await writeJson(REGISTRY, next);
   await writeJson(`data/fcc/snapshots/${date}.json`, found);
   for (const id of added) await appendLog(`data/fcc/new-grants.log`, `${date} NEW ${id} ${next[id].grant_date ?? "?"}${next[id].after_covered_list ? " AFTER-COVERED-LIST" : ""}`);
-  for (const err of errors) await appendLog(`data/logs/${date}.log`, `[fcc] ${err}`);
   await upsert("fcc_grants", Object.values(next), "fcc_id");
-  return { total: Object.keys(next).length, added, errors };
+  return { total: Object.keys(next).length, added, errors, wrote: true };
 }

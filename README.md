@@ -13,9 +13,10 @@
 | `config/price-sources.json` | 가격 수집 대상 (Shopify `.js`/`.json` 상품 엔드포인트, 1X는 HTML 정규식) |
 | `config/fcc-grantees.json` | FCC grantee 코드 (Unitree = 2A5PE 등) |
 | `src/prices.ts` | 가격 수집 → `data/prices/YYYY-MM-DD.jsonl` |
-| `src/fcc.ts` | FCC 인증 수집 → `data/fcc/grants.json` (누적), 새 인증은 `data/fcc/new-grants.log` |
+| `src/fcc.ts` | FCC 인증 수집 → `data/fcc/grants.json` (누적), 새 인증은 `data/fcc/new-grants.log`. 아무것도 못 읽으면 파일을 쓰지 않음 |
 | `supabase/schema.sql` | Supabase 테이블 (models, price_snapshots, fcc_grants, latest_prices 뷰) |
-| `.github/workflows/daily.yml` | 매일 00:17 UTC(09:17 KST) 실행 후 `data/` 커밋 |
+| `.github/workflows/daily.yml` | 매일 00:17 UTC(09:17 KST) **가격만** 수집 후 `data/` 커밋 |
+| `.github/workflows/fcc.yml` | FCC 인증 수집. Actions에서 **수동 실행(Run workflow)** 전용 |
 
 ## 시작하기 (15분)
 
@@ -28,7 +29,9 @@
    ```bash
    npm install
    npm test
-   npm run collect      # data/prices, data/fcc 에 결과 생성. 실패는 data/logs 에 기록
+   npm run collect         # 가격 + FCC 모두 (로컬 확인용)
+   npm run collect:prices  # 매일 실행과 동일. 실패한 소스는 data/logs/<날짜>.log 에 기록
+   npm run collect:fcc     # 수동 실행과 동일. 못 읽으면 종료 코드 1, 파일은 쓰지 않음
    ```
 3. (선택) Supabase 연결
    - SQL Editor에서 `supabase/schema.sql` 실행
@@ -36,6 +39,7 @@
    - GitHub 저장소 Settings → Secrets → Actions 에 같은 두 값을 등록
    - Supabase 없이도 파일(`data/`)로만 동작합니다.
 4. GitHub → Actions → `daily-collect` → **Run workflow** 로 첫 실행. 이후 매일 자동.
+5. FCC는 필요할 때 Actions → `fcc-collect` → **Run workflow** 로 직접 실행합니다. 매일 실행에는 들어 있지 않습니다.
 
 ## 첫 실행 때 확인할 것
 
@@ -43,7 +47,7 @@
 - Shopify `.js` 주소가 `got HTML instead of JSON`으로 실패하면 스토어가 `.js`를 마케팅 사이트로 301시키는 경우입니다 (KEYi가 그랬음). 같은 handle의 `.json` 주소로 바꾸면 되고, 파서는 두 형식을 모두 처리합니다.
 - Shopify 스토어는 요청 지역에 따라 통화와 재고가 달라질 수 있습니다 (Pollen은 미국 밖에서 EUR 가격을 내려줌). 수집기는 `?country=US`로 미국 시장을 고정하므로 로컬에서 돌려도 GitHub 러너와 같은 USD 값이 나옵니다. 로컬과 러너 값이 다르면 이 부분을 먼저 의심하세요.
 - `HTTP 403 (cloudflare challenge)`는 봇 차단입니다. 재시도해도 소용없고 우회하지 않습니다. RobotShop은 모든 요청에 챌린지를 걸어 소스에서 뺐습니다.
-- FCC는 비공식 미러 `fccid.io`를 읽습니다. **2026-09-22 기준 자동 수집이 막혀 있습니다.** `fccid.io`·`fcc.report`는 Cloudflare 봇 챌린지(`HTTP 403 (cloudflare challenge)`), 공식 EAS(`apps.fcc.gov`)는 Akamai `Access Denied`를 돌려주며, 한국 가정용 IP와 GitHub Actions 미국 러너 양쪽에서 같았습니다. 봇 차단은 우회하지 않으므로 `data/logs`에 매일 `[fcc] ... 403`이 남고, 가격 수집과 `data/` 커밋은 그대로 진행됩니다. 접근 가능한 소스가 생기거나 페이지 구조가 달라 `0 grants parsed`가 나오면 `parseGranteePage`를 실제 HTML에 맞춰 조정하세요. 새 FCC ID는 공개 전에 FCC 공식 EAS(apps.fcc.gov)에서 교차 확인하세요.
+- FCC는 매일 실행에서 빠져 있고 `fcc-collect`로 수동 실행만 합니다. 비공식 미러 `fccid.io`를 읽는데, **2026-09-22 기준 자동 수집이 막혀 있습니다.** `fccid.io`·`fcc.report`는 Cloudflare 봇 챌린지(`HTTP 403 (cloudflare challenge)`), 공식 EAS(`apps.fcc.gov`)는 Akamai `Access Denied`를 돌려주며, 한국 가정용 IP와 GitHub Actions 미국 러너 양쪽에서 같았습니다. 봇 차단은 우회하지 않습니다. 실패한 수동 실행은 Actions 로그에만 빨간색으로 표시되고 `data/`에는 아무것도 남기지 않습니다 (`data/logs`는 가격 실패 전용). 접근 가능한 소스가 생기거나 페이지 구조가 달라 `0 grants parsed`가 나오면 `parseGranteePage`를 실제 HTML에 맞춰 조정하세요. 새 FCC ID는 공개 전에 FCC 공식 EAS(apps.fcc.gov)에서 교차 확인하세요.
 - `flags: ["placeholder_price"]`는 Unitree가 "문의" 상품에 넣는 $90,000/$100,000 임시 가격입니다. 시세 계산에서 빼세요.
 
 ## 지키는 규칙
