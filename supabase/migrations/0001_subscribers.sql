@@ -51,10 +51,15 @@ alter table public.signup_attempts enable row level security;
 revoke all on public.signup_attempts from anon, authenticated;
 -- Same treatment: nothing on the public API can read or write this table directly, only the function below.
 
+-- Every SECURITY DEFINER function below pins search_path explicitly (standard defense against a
+-- search_path-hijack attack on a definer function) — "extensions", not just "public", because this project
+-- installs pgcrypto into the extensions schema (Supabase's default), which is where gen_random_bytes()/
+-- digest() actually live; public alone can't see them.
+
 -- Cleans up old rows so this table doesn't grow forever; call this from a daily job (e.g. alongside the
 -- price collector) once that's wired up — not required for §B itself to work.
 create or replace function public.prune_signup_attempts() returns void
-language sql security definer set search_path = public as $$
+language sql security definer set search_path = public, extensions as $$
   delete from public.signup_attempts where attempted_at < now() - interval '1 day';
 $$;
 
@@ -63,7 +68,7 @@ $$;
 -- rejected attempt still leaves its signup_attempts row committed for the *next* call's count to see.
 create or replace function public.subscribe(p_email text, p_model_id text default null, p_source_page text default null)
 returns text
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare
   v_ip text;
   v_ip_hash text;
@@ -113,7 +118,7 @@ grant execute on function public.subscribe(text, text, text) to anon, authentica
 -- /unsubscribe page uses this to show "you're unsubscribed" vs "that link has already been used". Never
 -- returns row data, so it can't be used to read the list either.
 create or replace function public.unsubscribe(p_token text) returns boolean
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare
   v_deleted int;
 begin
