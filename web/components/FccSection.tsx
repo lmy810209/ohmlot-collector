@@ -1,13 +1,15 @@
 import Link from "next/link";
 import type { ConditionalApproval } from "@/lib/data";
-import { COVERED_LIST_LABEL, COVERED_LIST_RULE, fmtDate } from "@/lib/format";
+import { COVERED_LIST_LABEL, COVERED_LIST_RULE } from "@/lib/format";
 
+// task-fcc-3.md §0: the underlying parser has not been proven to split every notice entry correctly
+// (see context/fcc-api-notes.md §8), so this must not claim the list below is exhaustive. No "only" / "all".
 function approvalsSentence(approvals: ConditionalApproval[], catalogSize: number): string {
   if (approvals.length === 0) {
-    return "No Department of War Conditional Approval for a robotic device has been published yet, so no foreign-produced model can receive a new FCC authorization right now.";
+    return "We have not yet confirmed a Department of War Conditional Approval for any robotic device in the FCC's public notices.";
   }
-  const list = approvals.map((a) => `${a.company ?? a.entry} (${a.effective_from ? fmtDate(a.effective_from) : "date unknown"})`).join("; ");
-  return `So far the only Conditional Approvals for robotic devices are ${list}. None of the ${catalogSize} personal robots this site tracks are on that list.`;
+  const companies = [...new Set(approvals.map((a) => a.company ?? a.entry))];
+  return `Robotic-device manufacturers found in FCC Conditional Approval notices: ${companies.join(", ")}. None of these match the ${catalogSize} robots this site tracks.`;
 }
 
 /** Guide §4.5: an explanation card plus three figures, split the way the US status block classifies robots. */

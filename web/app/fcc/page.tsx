@@ -23,8 +23,8 @@ export default function FccPage() {
       </p>
       <p className="mt-2 max-w-2xl text-[13px] text-ink-3">
         {approvals.length === 0
-          ? "No Conditional Approval for a robotic device has been published yet."
-          : `Conditional Approvals granted so far: ${approvals.map((a) => a.company ?? a.entry).join(", ")}. None of the robots below are on that list.`}{" "}
+          ? "No Conditional Approval for a robotic device has been confirmed yet."
+          : `Robotic-device manufacturers found in FCC Conditional Approval notices: ${[...new Set(approvals.map((a) => a.company ?? a.entry))].join(", ")}. None of these match the robots below.`}{" "}
         <a href={FCC_DOCS.conditionalApprovals} target="_blank" rel="noopener noreferrer" className="underline decoration-line underline-offset-2 hover:decoration-ink">
           FCC Conditional Approvals
         </a>
