@@ -1,4 +1,5 @@
 // Pure parsers — no network. Tested in test/parse.test.ts.
+import { createHash } from "node:crypto";
 
 export const COVERED_LIST_DATE = "2026-07-28"; // FCC DA 26-786: new grants for foreign-produced robots barred from this date
 
@@ -22,6 +23,22 @@ export interface PriceSource {
    * (confirmed against the source's own description text — see context/observability.md and
    * context/task-events.md §4). Drives purchase_mode; never guessed from prose at parse time. */
   contact_sales_variants?: string[];
+}
+
+/** Stable fingerprint of the parts of a source's config that affect what a row's fields *mean* — the
+ * endpoint, which product is picked out of it, and business-rule overrides. Not price/stock values
+ * themselves. context/task-events-2.md §1: stored on every row so a future day can tell "the data changed"
+ * apart from "we changed how/what we read" — a diff is only a real-world event when this hash matches on
+ * both sides. Deliberately excludes `seller`/`default_model`/`variant_map` (labels, not observation method). */
+export function configHash(source: PriceSource): string {
+  const material = {
+    type: source.type,
+    url: source.url,
+    product_handle: source.product_handle ?? null,
+    contact_sales_variants: source.contact_sales_variants ?? null,
+    patterns: source.patterns ?? null,
+  };
+  return createHash("sha256").update(JSON.stringify(material)).digest("hex").slice(0, 12);
 }
 
 /** context/task-events.md §4. Never a bare bool — the reason has to travel with the value. */
@@ -56,6 +73,10 @@ export interface PriceRow {
   market: "US" | "unknown";
   url: string;
   flags: string[];
+  /** context/task-events-2.md §1 — fingerprint of the source config that produced this row (see configHash).
+   * Rows from before this field existed (2026-09-24 and earlier) simply don't have it; events.ts treats an
+   * absent hash on either side as "can't tell", not as "changed" or "unchanged". */
+  config_hash: string;
 }
 
 interface ShopifyVariant {
@@ -136,6 +157,7 @@ export function parseShopifyProduct(json: unknown, source: PriceSource, date: st
   // Derived from the matched product's own handle (not string-munged from source.url) so the collection
   // endpoint (KEYi) — which has no per-handle path of its own — still points at the real product page.
   const cleanUrl = `${new URL(source.url).origin}/products/${p.handle}`;
+  const hash = configHash(source);
   return p.variants.map((v, i) => {
     const price = toCents(v.price) / 100;
     const compareAtRaw = v.compare_at_price;
@@ -167,6 +189,7 @@ export function parseShopifyProduct(json: unknown, source: PriceSource, date: st
       market: "US",
       url: cleanUrl,
       flags,
+      config_hash: hash,
     };
   });
 }
@@ -189,6 +212,7 @@ export function withUsMarket(url: string): string {
 export function parseRegexHtml(html: string, source: PriceSource, date: string, observedAt: string): PriceRow[] {
   const rows: PriceRow[] = [];
   const text = stripTags(html); // price and label are often in sibling tags: <span>$20,000</span><span>Ownership</span>
+  const hash = configHash(source);
   for (const pat of source.patterns ?? []) {
     const m = text.match(new RegExp(pat.regex, "i"));
     if (!m) continue;
@@ -212,6 +236,7 @@ export function parseRegexHtml(html: string, source: PriceSource, date: string, 
       market: "US",
       url: source.url,
       flags: [],
+      config_hash: hash,
     });
   }
   return rows;

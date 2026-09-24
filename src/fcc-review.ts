@@ -14,9 +14,9 @@ for (const n of store.notices) {
   console.log(`  ${n.da} (${n.released}) — ${n.status}${n.records ? `, ${n.records} rows` : ""}${n.error ? ` — ${n.error}` : ""}`);
 }
 
-console.log(`\n${store.approvals.length} robotic-device Conditional Approval record(s):\n`);
+console.log(`\n${store.approvals.length} Conditional Approval record(s) across all three Appendix B columns:\n`);
 for (const a of store.approvals) {
-  console.log(`— ${a.entry}`);
+  console.log(`— [${a.fcc_column}] ${a.entry}`);
   console.log(`  company:   ${a.company ?? "(not split)"}`);
   console.log(`  models:    ${a.models ?? "(not split)"}`);
   console.log(`  effective: ${a.effective_from ?? "?"}${a.effective_to ? ` – ${a.effective_to}` : " – (open-ended)"}`);

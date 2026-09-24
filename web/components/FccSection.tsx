@@ -4,9 +4,12 @@ import { COVERED_LIST_LABEL, COVERED_LIST_RULE } from "@/lib/format";
 
 // task-fcc-3.md §0: the underlying parser has not been proven to split every notice entry correctly
 // (see context/fcc-api-notes.md §8), so this must not claim the list below is exhaustive. No "only" / "all".
-function approvalsSentence(approvals: ConditionalApproval[], catalogSize: number): string {
+// task-fcc-4.md §4: once all three Appendix B columns are read, the empty-result sentence can say we checked
+// the whole appendix (UAS, Routers, and Robotic Devices) — but still only that our own catalog isn't on it,
+// never a count of FCC's total approvals (§1 warns against exactly that).
+function approvalsSentence(approvals: ConditionalApproval[], catalogSize: number, asOf: string | null): string {
   if (approvals.length === 0) {
-    return "We have not yet confirmed a Department of War Conditional Approval for any robotic device in the FCC's public notices.";
+    return `We checked all three columns of the FCC's Conditional Approvals notices (Appendix B: UAS, Routers, and Robotic Devices) — none of the ${catalogSize} robots this site tracks has a manufacturer match${asOf ? `, as of ${asOf}` : ""}.`;
   }
   const companies = [...new Set(approvals.map((a) => a.company ?? a.entry))];
   return `Robotic-device manufacturers found in FCC Conditional Approval notices: ${companies.join(", ")}. None of these match the ${catalogSize} robots this site tracks.`;
@@ -20,6 +23,7 @@ export function FccSection({
   unknown,
   approvals,
   catalogSize,
+  asOf,
 }: {
   before: number;
   conditional: number;
@@ -27,6 +31,7 @@ export function FccSection({
   unknown: number;
   approvals: ConditionalApproval[];
   catalogSize: number;
+  asOf: string | null;
 }) {
   const figures = [
     { value: before, label: `granted before ${COVERED_LIST_LABEL}` },
@@ -45,7 +50,7 @@ export function FccSection({
           {unknown} {unknown === 1 ? "robot has" : "robots have"} no FCC record or grant date on file. Status is checked against FCC public notices and
           equipment authorization records.
         </p>
-        <p className="mt-2 text-[13px] text-ink-3">{approvalsSentence(approvals, catalogSize)}</p>
+        <p className="mt-2 text-[13px] text-ink-3">{approvalsSentence(approvals, catalogSize, asOf)}</p>
         <Link href="/fcc" className="mt-4 inline-flex h-10 items-center rounded-ctl border border-line bg-card px-4 text-sm font-medium hover:bg-sunk">
           Search FCC IDs
         </Link>

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { extractLeadTime, normalizeDate, parseRegexHtml, parseShopifyProduct, withUsMarket, type PriceSource } from "../src/lib/parse.ts";
-import { extractRoboticApprovals } from "../src/lib/pdf.ts";
+import { extractApprovals, findColumnBounds, type Item } from "../src/lib/pdf.ts";
 
 // Node's Buffer is a Uint8Array subclass, but pdfjs checks the exact constructor, so re-wrap it.
 const fixture = async (name: string) => new Uint8Array(await readFile(new URL(`./fixtures/${name}`, import.meta.url)));
@@ -274,51 +274,123 @@ test("shopify: lead_time_text/days flow from description into every variant row"
   assert.equal(rows[0].market, "US");
 });
 
-// ---------- FCC Conditional Approvals: the real bug from task-fcc-3.md ----------
+// ---------- FCC Conditional Approvals: the real bug from task-fcc-3.md, extended to all 3 columns (task-fcc-4.md) ----------
 // The old docs.fcc.gov .txt-based parser merged adjacent table cells (e.g. Askey's own second entry bled
 // into Ascento's, and a phantom "Verizon" record was invented from text that was really part of Arcadyan's
 // product list — see context/fcc-api-notes.md §8-9). These tests run against the *real* notice PDFs, read via
 // src/lib/pdf.ts's column-coordinate extraction, and assert the exact, complete, correctly-split text — not
-// just "it didn't crash".
+// just "it didn't crash". task-fcc-4.md §1 extended this from reading only Robotic Devices to all three
+// columns (UAS, Routers, Robotic Devices), each tagged with `fcc_column`; §3 added per-page column-boundary
+// re-detection, exercised for real by DA-26-996's Appendix B, which spans 4 pages and only prints the column
+// header row on the first of them.
+
+const robotic = <T extends { fcc_column: string }>(approvals: T[]) => approvals.filter((a) => a.fcc_column === "robotic_devices");
 
 test("DA-26-957.pdf: Appendix B has one robotic entry, Husqvarna, complete and unmerged", async () => {
-  const { status, approvals } = await extractRoboticApprovals(await fixture("DA-26-957A1.pdf"));
-  assert.equal(status, "ok");
+  const { columns, approvals } = await extractApprovals(await fixture("DA-26-957A1.pdf"));
+  assert.equal(columns.robotic_devices, "ok");
   assert.deepEqual(
-    approvals.map((a) => [a.entry, a.company, a.models, a.effective_from, a.effective_to]),
+    robotic(approvals).map((a) => [a.entry, a.company, a.models, a.effective_from, a.effective_to]),
     [["Husqvarna AB 305v IQ, 310v IQ, 420v IQ, and 440v IQ robotic platforms", "Husqvarna AB", "305v IQ, 310v IQ, 420v IQ, and 440v IQ", "2026-09-09", null]],
   );
 });
 
+test("DA-26-957.pdf: the UAS and Routers columns are also read and tagged, not just Robotic Devices", async () => {
+  const { columns, approvals } = await extractApprovals(await fixture("DA-26-957A1.pdf"));
+  assert.equal(columns.uas, "ok");
+  assert.equal(columns.routers, "ok");
+  const uas = approvals.filter((a) => a.fcc_column === "uas");
+  const routers = approvals.filter((a) => a.fcc_column === "routers");
+  assert.ok(uas.some((a) => a.entry.includes("SiFly Aviation") && a.entry.includes("Q12 Uncrewed Aircraft System")), "SiFly Aviation's UAS entry should be read whole");
+  assert.ok(routers.some((a) => a.company === "Netgear, Inc." && a.entry.includes("Nighthawk") && a.entry.includes("cable modems")), "Netgear's long, multi-line Routers entry should be read whole, not truncated at the first line");
+  // Never let a UAS/Routers entry's own text (or vice versa) show up misfiled under Robotic Devices.
+  for (const a of robotic(approvals)) assert.doesNotMatch(a.entry, /SiFly|Netgear/);
+});
+
 test("DA-26-996.pdf: two robotic entries, Husqvarna and ANSCER, each complete and not bleeding into the other", async () => {
-  const { status, approvals } = await extractRoboticApprovals(await fixture("DA-26-996A1.pdf"));
-  assert.equal(status, "ok");
+  const { columns, approvals } = await extractApprovals(await fixture("DA-26-996A1.pdf"));
+  assert.equal(columns.robotic_devices, "ok");
   assert.deepEqual(
-    approvals.map((a) => [a.company, a.models, a.effective_from]),
+    robotic(approvals).map((a) => [a.company, a.models, a.effective_from]),
     [
       ["Husqvarna AB", "305v IQ, 310v IQ, 420v IQ, and 440v IQ", "2026-09-09"],
       ["ANSCER Robotics", "AR250, AR650, and AR1250", "2026-09-18"],
     ],
   );
   // The specific corruption task-fcc-3.md §1 found: Askey/Ascento and Verizon/Air VEV text must never appear
-  // anywhere in what we extract, because we only read the Robotic Devices column in the first place.
-  for (const a of approvals) {
+  // in the Robotic Devices column.
+  for (const a of robotic(approvals)) {
     assert.doesNotMatch(a.entry, /Askey|Ascento|Verizon|Arcadyan|Air VEV/);
   }
 });
 
-test("DA-26-786.pdf: has an Appendix B, but it's a National Security Determination, not the approvals table → no_appendix", async () => {
-  const r = await extractRoboticApprovals(await fixture("DA-26-786A1.pdf"));
-  assert.equal(r.status, "no_appendix");
+test("DA-26-996.pdf: Ascento (UAS, page 9) and Askey (Routers, page 8) stay isolated from each other across a 4-page Appendix B with no repeated header row (task-fcc-4.md §3)", async () => {
+  const { columns, approvals, pageNotes } = await extractApprovals(await fixture("DA-26-996A1.pdf"));
+  assert.equal(columns.uas, "ok");
+  assert.equal(columns.routers, "ok");
+  const uas = approvals.filter((a) => a.fcc_column === "uas");
+  const routers = approvals.filter((a) => a.fcc_column === "routers");
+  const ascento = uas.find((a) => a.entry.includes("Ascento"));
+  const askey = routers.find((a) => a.entry.includes("Askey"));
+  assert.ok(ascento, "Ascento, Inc.'s UAS entry should be found");
+  assert.ok(askey, "Askey Computer's Routers entry should be found");
+  assert.doesNotMatch(ascento!.entry, /Askey/, "Ascento's UAS entry must not carry Askey's Routers text");
+  assert.doesNotMatch(askey!.entry, /Ascento/, "Askey's Routers entry must not carry Ascento's UAS text");
+  // The header row only prints on the Appendix's first page (verified directly against this fixture); every
+  // later page must be logged as inheriting boundaries, never silently guessed or silently dropped.
+  assert.ok(pageNotes.some((n) => /no column header found.*inherited/.test(n)), "later pages without a header row should be logged as inheriting boundaries");
+});
+
+test("DA-26-786.pdf: has an Appendix B, but it's a National Security Determination, not the approvals table → no_appendix for all three columns", async () => {
+  const r = await extractApprovals(await fixture("DA-26-786A1.pdf"));
+  assert.deepEqual(r.columns, { uas: "no_appendix", routers: "no_appendix", robotic_devices: "no_appendix" });
   assert.equal(r.approvals.length, 0);
 });
 
-test("DA-26-789.pdf: no Appendix B at all → no_appendix, nothing invented", async () => {
-  const r = await extractRoboticApprovals(await fixture("DA-26-789A1.pdf"));
-  assert.equal(r.status, "no_appendix");
+test("DA-26-789.pdf: no Appendix B at all → no_appendix for all three columns, nothing invented", async () => {
+  const r = await extractApprovals(await fixture("DA-26-789A1.pdf"));
+  assert.deepEqual(r.columns, { uas: "no_appendix", routers: "no_appendix", robotic_devices: "no_appendix" });
   assert.equal(r.approvals.length, 0);
 });
 
 test("not a PDF → throws rather than silently returning nothing", async () => {
-  await assert.rejects(() => extractRoboticApprovals(new TextEncoder().encode("not a pdf")));
+  await assert.rejects(() => extractApprovals(new TextEncoder().encode("not a pdf")));
+});
+
+// findColumnBounds is the pure per-page boundary-detection step task-fcc-4.md §3 re-runs on every page —
+// tested directly against hand-built header items so the "missing column" and "missing date sub-header"
+// cases don't require a crafted PDF fixture.
+test("findColumnBounds: all three columns found, ordered left to right, entry/date ranges bounded by neighboring columns", () => {
+  const items: Item[] = [
+    { page: 1, x: 33, y: 641, text: "UAS Conditional" },
+    { page: 1, x: 140, y: 617, text: "Approval" },
+    { page: 1, x: 240, y: 641, text: "Routers" },
+    { page: 1, x: 330, y: 618, text: "Approval" },
+    { page: 1, x: 410, y: 641, text: "Robotic Devices" },
+    { page: 1, x: 520, y: 618, text: "Approval" },
+  ];
+  const bounds = findColumnBounds(items);
+  assert.ok(bounds.uas && bounds.routers && bounds.robotic_devices);
+  assert.equal(bounds.uas!.dateHi, bounds.routers!.entryX0, "uas's date column ends exactly where routers's entry column begins — the same midpoint");
+  assert.equal(bounds.uas!.entryX0, -Infinity, "the first column has no left neighbor to take a midpoint against");
+  assert.equal(bounds.robotic_devices!.dateHi, Infinity, "the last column's date range is unbounded on the right");
+});
+
+test("findColumnBounds: a column missing its entry header (or its paired date header) is simply absent, not a crash", () => {
+  const noRouters = findColumnBounds([
+    { page: 1, x: 33, y: 641, text: "UAS Conditional" },
+    { page: 1, x: 140, y: 617, text: "Approval" },
+    { page: 1, x: 410, y: 641, text: "Robotic Devices" },
+    { page: 1, x: 520, y: 618, text: "Approval" },
+  ]);
+  assert.ok(noRouters.uas && noRouters.robotic_devices);
+  assert.equal(noRouters.routers, undefined);
+
+  const noDateForRobotic = findColumnBounds([
+    { page: 1, x: 33, y: 641, text: "UAS Conditional" },
+    { page: 1, x: 140, y: 617, text: "Approval" },
+    { page: 1, x: 410, y: 641, text: "Robotic Devices" }, // header present, but no companion "Approval" to its right
+  ]);
+  assert.ok(noDateForRobotic.uas);
+  assert.equal(noDateForRobotic.robotic_devices, undefined, "an entry header with no date header found is not usable");
 });

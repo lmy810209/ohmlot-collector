@@ -2,7 +2,7 @@ import { AlertSignup } from "@/components/AlertSignup";
 import { FccSection } from "@/components/FccSection";
 import { RobotExplorer } from "@/components/RobotExplorer";
 import { Delta } from "@/components/Delta";
-import { robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
+import { getApprovalStore, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
 import { fmtDate, fmtDay } from "@/lib/format";
 
 export default function Home() {
@@ -15,6 +15,7 @@ export default function Home() {
   const fccAfter = rows.filter((r) => r.fcc_status === "after").length;
   const fccUnknown = rows.filter((r) => r.fcc_status === "unknown").length;
   const approvals = roboticApprovals();
+  const approvalsAsOf = getApprovalStore()?.updated || null;
   const changes = run.changes.slice(0, 3);
 
   const aside = (
@@ -124,7 +125,7 @@ export default function Home() {
 
       {/* 5. FCC */}
       <div className="mt-14 sm:mt-20">
-        <FccSection before={fccBefore} conditional={fccConditional} after={fccAfter} unknown={fccUnknown} approvals={approvals} catalogSize={rows.length} />
+        <FccSection before={fccBefore} conditional={fccConditional} after={fccAfter} unknown={fccUnknown} approvals={approvals} catalogSize={rows.length} asOf={approvalsAsOf} />
       </div>
 
       {/* 6. Alerts */}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { FccSearch } from "@/components/FccSearch";
-import { fccSearchItems, roboticApprovals } from "@/lib/data";
+import { fccSearchItems, getApprovalStore, roboticApprovals } from "@/lib/data";
 import { COVERED_LIST_RULE, FCC_DOCS } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 export default function FccPage() {
   const items = fccSearchItems();
   const approvals = roboticApprovals();
+  const approvalsAsOf = getApprovalStore()?.updated || null;
   return (
     <div className="py-10 sm:py-14">
       <div className="micro mb-2">FCC</div>
@@ -23,7 +24,7 @@ export default function FccPage() {
       </p>
       <p className="mt-2 max-w-2xl text-[13px] text-ink-3">
         {approvals.length === 0
-          ? "No Conditional Approval for a robotic device has been confirmed yet."
+          ? `We checked all three Appendix B columns (UAS, Routers, and Robotic Devices) — no Conditional Approval for a robotic device has been confirmed yet${approvalsAsOf ? `, as of ${approvalsAsOf}` : ""}.`
           : `Robotic-device manufacturers found in FCC Conditional Approval notices: ${[...new Set(approvals.map((a) => a.company ?? a.entry))].join(", ")}. None of these match the robots below.`}{" "}
         <a href={FCC_DOCS.conditionalApprovals} target="_blank" rel="noopener noreferrer" className="underline decoration-line underline-offset-2 hover:decoration-ink">
           FCC Conditional Approvals

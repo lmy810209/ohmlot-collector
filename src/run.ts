@@ -11,17 +11,20 @@ if (which === "all" || which === "prices") {
   const r = await collectPrices(date);
   console.log(`[prices] ${r.count} rows, ${r.errors.length} errors, ${r.events.length} events`);
   r.errors.forEach((e) => console.warn("  ", e));
-  r.events.forEach((e) => console.log(`   EVENT ${e.type} ${e.model_id}/${e.seller}/${e.variant}: ${JSON.stringify(e.from)} -> ${JSON.stringify(e.to)}`));
+  r.events.forEach((e) => console.log(`   EVENT ${e.type}${e.observation_change ? " [observation]" : ""} ${e.model_id}/${e.seller}/${e.variant}: ${JSON.stringify(e.from)} -> ${JSON.stringify(e.to)}${e.reason ? ` (${e.reason})` : ""}`));
   // Fail only if every price source failed, so partial outages still get archived.
   if (r.count === 0) failed = true;
 }
 if (which === "all" || which === "fcc") {
   const r = await collectFcc(date);
+  // task-fcc-4.md §1-2: r.approvals now spans all three Appendix B columns (uas/routers/robotic_devices).
+  const byColumn = { uas: 0, routers: 0, robotic_devices: 0 };
+  for (const a of r.approvals) byColumn[a.fcc_column]++;
   console.log(
-    `[fcc] ${r.notices.length} notices, ${r.approvals.length} robotic-device Conditional Approvals on file${r.wrote ? "" : " — nothing readable, nothing written"}`,
+    `[fcc] ${r.notices.length} notices, ${r.approvals.length} Conditional Approvals on file (uas ${byColumn.uas}, routers ${byColumn.routers}, robotic_devices ${byColumn.robotic_devices})${r.wrote ? "" : " — nothing readable, nothing written"}`,
   );
   r.notices.forEach((n) => console.log(`   ${n.da} ${n.status}${n.records ? ` (${n.records} rows)` : ""}${n.error ? ` ${n.error}` : ""}`));
-  r.approvals.forEach((a) => console.log(`   ROBOT ${a.entry} — from ${a.effective_from ?? "?"} (${a.source_da}${a.also_in.length ? `, also ${a.also_in.join(", ")}` : ""})${a.matched_manufacturer ? ` — matches ${a.matched_manufacturer}` : ""}`));
+  r.approvals.forEach((a) => console.log(`   [${a.fcc_column}] ${a.entry} — from ${a.effective_from ?? "?"} (${a.source_da}${a.also_in.length ? `, also ${a.also_in.join(", ")}` : ""})${a.matched_manufacturer ? ` — matches ${a.matched_manufacturer}` : ""}`));
   r.errors.forEach((e) => console.warn("  ", e));
   // task-fcc-3.md §4: a consistency-check warning means a record looked like a parsing artifact and was
   // dropped rather than published (see suspiciousReasons in src/fcc.ts). That must not pass silently — a

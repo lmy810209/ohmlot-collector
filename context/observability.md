@@ -29,7 +29,7 @@ KEYi는 `.js`가 마케팅 페이지로 301 리다이렉트돼(이전 세션에�
 | 6 | pollen-official / reachy-mini-lite | **있음** | 없음 | **있음** — 동일 문구 확인 | 없음 | 있음(variant 1개) | **있음** — `2026-04-20T12:34:54+02:00` | **있음** — 5번과 동일 |
 | 7 | petoi-official / bittle-x | **있음** — variant별 `available`(예: alloy 조립형은 `false`) | 없음 | 없음 — description에 리드타임 문구 없음 | **필드는 있으나 현재 미적용** — `compare_at_price`가 숫자로 존재하지만 6개 variant 전부 `price`와 동일(할인 없음 상태) | **있음** — variant 6개(조립/사전조립 × lite/alloy 서보) | **있음** — `2023-06-05T00:11:30-07:00` | 없음 — 직접 호출로 확인 |
 | 8 | petoi-official / nybble-q | **있음** | 없음 | 없음 | 필드는 있으나 현재 미적용(동일 패턴) | **있음** — variant 3개 | **있음** — `2025-11-26T21:32:08-08:00` | 없음 — bittle과 동일 스토어 |
-| 9 | keyi-official / petbot (Loona) | **없음** — `/products/petbot.json`엔 `available` 필드 자체가 없음(위 "정정" 참고) | 없음 | 없음 — `body_html` 295자, 리드타임 언급 없음 | **있음, 현재 적용 중** — 15개 variant 전부 `compare_at_price` > `price` (예: Premium $499 vs $529, 약 6% 할인) | **있음** — variant 15개, 가장 풍부 | **있음** — `2026-01-21T00:01:02-05:00` | 없음 — `?country=` 무영향(직접 호출로 확인) |
+| 9 | keyi-official / petbot (Loona) | **없음** — `/products/petbot.json`엔 `available` 필드 자체가 없음(위 "정정" 참고) | 없음 | 없음 — `body_html` 295자, 리드타임 언급 없음 | **부분 적용 — 15개 중 14개** `compare_at_price` > `price` (예: Premium $499 vs $529, 약 6% 할인). Space Edition만 $699=$699로 할인 없음 — 아래 "정정 2" 참고 | **있음** — variant 15개, 가장 풍부 | **있음** — `2026-01-21T00:01:02-05:00` | 없음 — `?country=` 무영향(직접 호출로 확인) |
 | 10 | deeprobotics-us / lite-3 | **있음** — variant별 `available`(6개 전부 현재 `true`) | 없음 | 없음 — description은 있으나 리드타임 문구 없음. 단, Venture/Pro/LiDAR 상위 구성은 "please contact our sales team... for detailed configurations and available discounts"라고 명시(가격은 나와 있지만 실제 판매조건은 문의 필요) | 없음 — `compare_at_price` `null` | **있음** — variant 6개(Basic/Basic AI/Venture/Pro/LiDAR/Controller) | **있음** — `2025-08-28T05:09:18-07:00` | 없음 — 직접 호출로 확인 |
 | 11 | 1x-official / order (1X NEO) | 없음 — "품절"/"입고" 같은 재고 문구 없음(애초에 사전예약형 상품) | 없음 | **부분 있음** — 페이지 고정 문구 "US Deliveries start 2026"와 FAQ "US deliveries begin in 2026 starting with Early Access customers…". 연 단위일 뿐 주 단위 리드타임은 아님 | 없음 — 할인/정가 병기 문구 없음 | 없음 — 정규식으로 고정 2개 항목(Ownership $20,000, Subscription $499/mo)만 뽑는 구조라 페이지 자체의 옵션 구조를 추적하지 않음 | 없음 — 일반 HTML 주문 페이지라 게시일 메타데이터 없음 | **조사 안 됨** — 쿼리 파라미터로 리전을 바꾸는 방법을 못 찾았고, IP 기반 분기 여부는 VPN 없이 확인 불가. "없음"이라 단정하지 않음 |
 
@@ -45,8 +45,9 @@ KEYi(Loona)와 1X(NEO)는 안 된다 — KEYi는 다른 엔드포인트로 바�
 시도(장바구니 진입 등)는 하지 않았다(§3).
 
 **재고·리드타임이 안 되는 소스의 대안 신호**:
-- **KEYi**: `compare_at_price`가 지금 15개 variant 전부에서 실제로 할인 중(정가보다 낮은 판매가). 이 값과
-  variant별 `updated_at` 타임스탬프는 매일 안 남기면 복원 불가능하다.
+- **KEYi**: `compare_at_price`가 지금 15개 variant 중 14개에서 실제로 할인 중(정가보다 낮은 판매가) —
+  Space Edition 1개는 할인 없음(아래 "정정 2" 참고). 이 값과 variant별 `updated_at` 타임스탬프는 매일 안
+  남기면 복원 불가능하다.
 - **1X**: "US Deliveries start 2026"라는 고정 문구 자체가 비복원 데이터다 — 이 문구가 언제 구체적인
   날짜나 "배송 중" 같은 표현으로 바뀌는지는 그 순간의 원본을 갖고 있어야만 알 수 있다(0번에서 이미
   원본 HTML을 매일 archiving 시작함).
@@ -59,3 +60,43 @@ KEYi(Loona)와 1X(NEO)는 안 된다 — KEYi는 다른 엔드포인트로 바�
 맞다(1X는 variant 개념이 없어 예외). `parseShopifyProduct`(src/lib/parse.ts)는 지금 `price`, `available`,
 `variant`(title)만 읽고 `compare_at_price`와 `options`는 버린다. 이번 조사에서는 수집기를 고치지 않았다
 (§3 지시대로 조사만).
+
+## 정정 2: "15개 variant 전부 할인" 은 틀렸다 — Space Edition은 할인 없음 (task-events-2.md §2)
+
+위 표의 "15개 variant 전부 `compare_at_price` > `price`"는 예시로 든 Premium 하나($499 vs $529)를
+근거로 15개 전부에 일반화한 것이었다. `data/prices/raw/2026-09-24/keyi-official__petbot.json`의
+실제 15개 variant를 전부 열어 대조한 결과:
+
+- **Space Edition**: `price: "699.00"`, `compare_at_price: "699.00"` — 같은 값, 할인 아님.
+- 나머지 14개는 표대로 `compare_at_price` > `price` 확인됨.
+- **15개 variant의 `updated_at`이 전부 동일한 시각(`2026-09-23T22:26:15-04:00`)** — 한 번의 일괄
+  갱신이었다. Space Edition만 그 이후에 별도로 할인이 종료됐다면 `updated_at`이 달라야 하는데 그렇지
+  않다. 즉 이 조사 당시(2026-09-24)에도 Space Edition은 이미 할인 상태가 아니었다.
+
+**판정: (b) — 조사 문서가 틀렸다.** (a)(그 사이 할인이 실제로 끝났다)가 아니다. 하나의 사건도 없었고,
+"예시 하나를 보고 전체를 단정"한 조사 기록의 오류였다. `events.jsonl`에 `discount_ended`를 손으로 넣지
+않았다 — 자동 생성 규칙 밖에서 만든 이벤트는 만들지 않는다는 원칙(task-events.md §5) 그대로다.
+
+**원칙: 예시 하나로 전체를 단정하지 않는다.** "variant N개 중 M개가 X" 같은 전수 주장은 표본이 아니라
+실제로 N개를 다 열어본 결과여야 한다. 이 조사에서 "예: Premium $499 vs $529"라고 예시를 든 것 자체는
+근거 제시로 적절했지만, 그 예시가 "전부"의 증명이 되지는 않는다 — 앞으로 전수 주장에는 반례 확인을
+포함한다(가능하면 코드로 — 이 경우 `data/prices/2026-09-24.jsonl`을 스크립트로 집계하면 됐다).
+
+## 2026-09-24 최초 관측 시점의 상태 (task-events-2.md §3 — 사건이 아니라 상태)
+
+`config/price-sources.json`의 KEYi 엔드포인트 교체가 오늘(2026-09-24) 처음 적용된 시점에 관측된
+Loona 15개 구성의 실제 재고 상태. 이 전환 자체가 `events.jsonl`에는 전부 `observation_started`
+(관측 개시, 세상의 변화 아님)로 기록되어 있으므로, "그날의 진짜 상태"는 사건 로그가 아니라 여기
+문서에 남긴다:
+
+`data/prices/2026-09-24.jsonl`을 직접 집계한 값이다(지시문 원문의 "9개 품절"은 실제로는 **8개**다 —
+집계 없이 쓴 숫자로 보인다. 이 문서에서도 같은 실수를 반복하지 않으려 재집계했다):
+
+- **품절 8개, 재고 있음 7개** (15개 중).
+- 품절 8개: Loona Limited Edition: Sky, Loona Xmas Reindeer, Loona Scholar, Loona Summer Vibe,
+  Loona Aviator Supreme, Loona Football Fanatic Blue, Loona Football Fanatic Red, Loona Go.
+  이름으로 보면 전부 시즌/테마 한정 구성으로 보이지만, Shopify 응답 자체에 "한정판" 여부를 나타내는
+  필드는 없다 — "전부 한정판이다"는 이름에서 추정한 것이지 데이터로 확인된 사실은 아니다.
+- 재고 있음 7개: Space Edition, Premium, Basketball Set, Snowy Whimsy, Duo Delight, Buzzer Beater,
+  Football Hat Trick.
+- 할인: 15개 중 14개(Space Edition 제외) — 위 "정정 2" 참고.

@@ -73,7 +73,10 @@ export interface PriceRow {
    the same JSON read as plain data (no shared TS module between the collector and the site). */
 export interface ConditionalApproval {
   id: string;
-  equipment_type: "robotic_device";
+  /** Which of Appendix B's three columns FCC itself printed this entry under (task-fcc-4.md §1) — a fact
+   * about the filing, not a judgment about the device: FCC placement doesn't reliably track device type
+   * (Ascento, Inc.'s Ascento Guard is a ground robot, filed under "uas"). */
+  fcc_column: "uas" | "routers" | "robotic_devices";
   entry: string;
   company: string | null;
   models: string | null;
@@ -151,10 +154,11 @@ export function getApprovalStore(): ApprovalStore | null {
 }
 
 /** Robotic-device Conditional Approvals read from FCC public notices — the only Conditional Approvals data
- * this site stores comes from this file, never from press coverage (context/task-fcc-2.md §3). Every stored
- * record already is a robotic device (src/lib/pdf.ts only reads that one column of Appendix B). */
+ * this site stores comes from this file, never from press coverage (context/task-fcc-2.md §3). The store also
+ * holds the UAS and Routers columns (task-fcc-4.md §1-2, for the cross-check in conditionalApprovalCheck
+ * below); this accessor is specifically the Robotic Devices column, for display as robotic-device entries. */
 export function roboticApprovals(): ConditionalApproval[] {
-  return load().approvals?.approvals ?? [];
+  return (load().approvals?.approvals ?? []).filter((a) => a.fcc_column === "robotic_devices");
 }
 
 export type ConditionalApprovalCheck =
@@ -167,6 +171,12 @@ export type ConditionalApprovalCheck =
  * and this manufacturer isn't on the list" (it has run, and found no match) — conflating them was the whole
  * complaint. Matches by manufacturer name against the same substring rule src/fcc.ts uses when it stamps
  * matched_manufacturer, so a model matches here exactly when its own manufacturer produced that stamp.
+ *
+ * Deliberately checks `store.approvals` unfiltered — all three Appendix B columns, not just
+ * fcc_column === "robotic_devices" (task-fcc-4.md §1-2). FCC's own column placement doesn't reliably track
+ * device type, so a manufacturer match under UAS or Routers is still real evidence of a Conditional Approval
+ * on file for them; restricting this check to the Robotic Devices column would miss exactly the case this
+ * task exists to catch.
  */
 export function conditionalApprovalCheck(model: Model): ConditionalApprovalCheck {
   const store = getApprovalStore();
@@ -331,7 +341,7 @@ export function modelUsStatus(model: Model): UsStatus {
       return { ...base, conditional_approval: true, conditional_approval_note: `DoW Conditional Approval since ${check.approval.effective_from ?? "an unspecified date"} (FCC ${check.approval.source_da}), as of ${check.asOf}.` };
     }
     if (check.state === "not_on_list") {
-      return { ...base, conditional_approval: false, conditional_approval_note: `Not on the FCC's Robotic Devices Conditional Approvals list as of ${check.asOf}.` };
+      return { ...base, conditional_approval: false, conditional_approval_note: `Not on the FCC's Conditional Approvals list (checked all three Appendix B columns — UAS, Routers, and Robotic Devices) as of ${check.asOf}.` };
     }
   }
   return base;

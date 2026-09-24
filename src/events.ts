@@ -5,6 +5,14 @@
 // (seller, variant) row at a time. Nothing is inferred beyond what the two rows themselves say — a field
 // missing on one side (true for every 9/22 and 9/23 row, which predate this schema) simply can't produce an
 // event that depends on it, rather than being treated as a value of null/false/0.
+//
+// context/task-events-2.md §1: a value differing between two snapshots is only a real-world event when both
+// snapshots observed it *the same way*. Two things can make that false without the world changing at all:
+//   - the field didn't exist in the prior snapshot yet (a schema addition — "unknown" wasn't a real state)
+//   - the source config (endpoint, which product/variant is read, business-rule overrides) changed between
+//     the two runs (config_hash differs) — a value can shift just because we started reading it differently
+// Either case is classified "observation_started" instead of the field's normal event type, and every event
+// (both kinds) carries observation_change + reason so the distinction survives into storage, not just logs.
 import type { PriceRow } from "./lib/parse.ts";
 
 export type EventType =
@@ -15,7 +23,8 @@ export type EventType =
   | "variant_added"
   | "variant_removed"
   | "lead_time_changed"
-  | "product_unpublished";
+  | "product_unpublished"
+  | "observation_started";
 
 export interface CollectorEvent {
   date: string;
@@ -26,19 +35,41 @@ export interface CollectorEvent {
   from: unknown;
   to: unknown;
   source_url: string;
+  /** true when this row is not evidence anything changed in the world — only that we started observing it,
+   * or observed it differently (new field, new endpoint, new business rule). Never dropped, just flagged: a
+   * consumer (the site's timeline) can filter these out by default without losing when-we-started-watching. */
+  observation_change: boolean;
+  /** Human-readable cause when observation_change is true; null otherwise. */
+  reason: string | null;
 }
 
 const rowKey = (r: Pick<PriceRow, "seller" | "variant">) => `${r.seller}\u0000${r.variant}`;
 const productKey = (r: Pick<PriceRow, "seller" | "url">) => `${r.seller}\u0000${r.url}`;
 
-/** availability_status is new (today onward); a pre-existing row only has the old `available` bool. Derive
- * the same status from whichever the row actually has, so availability_changed can compare across the
- * schema boundary — task-events.md §5 explicitly expects this event to work from 9/22. */
+/** availability_status is new (2026-09-24 onward); a pre-existing row only has the old `available` bool.
+ * Derive the same status from whichever the row actually has, so availability_changed can compare across
+ * the schema boundary — task-events.md §5 explicitly expects this event to work from 9/22. */
 function statusOf(r: Partial<Pick<PriceRow, "availability_status" | "available">>): string {
   if (r.availability_status) return r.availability_status;
   if (r.available === true) return "in_stock";
   if (r.available === false) return "out_of_stock";
   return "unknown";
+}
+
+/** Whether a value-diff between two rows is real-world evidence or an artifact of how/what we observed.
+ * `fieldIsNew` is true when the specific field being compared didn't exist on `prev` at all (a schema
+ * addition — task-events-2.md's "previously unknown" case, e.g. availability_status on 9/23 rows). Beyond
+ * that, config_hash only counts as "changed" when BOTH sides have it — a hash that's simply absent on the
+ * older side (true for every row before today) can't be compared, so it's never treated as a change on its
+ * own; that would falsely flag every field on every source the first day config_hash exists. */
+function classify(prev: PriceRow, curr: PriceRow, fieldIsNew: boolean): { observation_change: boolean; reason: string | null } {
+  if (fieldIsNew) {
+    return { observation_change: true, reason: "field did not exist in the prior snapshot — first observation under this schema, not a change in the world" };
+  }
+  if (prev.config_hash !== undefined && curr.config_hash !== undefined && prev.config_hash !== curr.config_hash) {
+    return { observation_change: true, reason: `collector config changed for this source (config_hash ${prev.config_hash} -> ${curr.config_hash})` };
+  }
+  return { observation_change: false, reason: null };
 }
 
 /**
@@ -60,37 +91,64 @@ export function generateEvents(prev: PriceRow[], curr: PriceRow[], date: string,
     if (!p) continue; // first time this exact (seller, variant) has been seen — not a "change"
 
     if (p.price_usd !== c.price_usd) {
-      events.push({ date, type: "price_changed", model_id: c.model_id, seller: c.seller, variant: c.variant, from: p.price_usd, to: c.price_usd, source_url: c.url });
+      // price_usd has existed, unchanged, since before this schema — never "new" — only config_hash can
+      // make a price diff an observation artifact (e.g. the endpoint itself changed, as KEYi's did).
+      const { observation_change, reason } = classify(p, c, false);
+      events.push({
+        date,
+        type: observation_change ? "observation_started" : "price_changed",
+        model_id: c.model_id, seller: c.seller, variant: c.variant, from: p.price_usd, to: c.price_usd, source_url: c.url,
+        observation_change, reason,
+      });
     }
 
     const pStatus = statusOf(p);
     const cStatus = statusOf(c);
     if (pStatus !== cStatus) {
-      events.push({ date, type: "availability_changed", model_id: c.model_id, seller: c.seller, variant: c.variant, from: pStatus, to: cStatus, source_url: c.url });
-    }
-
-    // on_sale only exists from today onward; both sides must have it for a discount transition to mean anything.
-    if (p.on_sale !== undefined && c.on_sale !== undefined && p.on_sale !== c.on_sale) {
+      const fieldIsNew = (p as Partial<PriceRow>).availability_status === undefined;
+      const { observation_change, reason } = classify(p, c, fieldIsNew);
       events.push({
         date,
-        type: c.on_sale ? "discount_started" : "discount_ended",
+        type: observation_change ? "observation_started" : "availability_changed",
+        model_id: c.model_id, seller: c.seller, variant: c.variant, from: pStatus, to: cStatus, source_url: c.url,
+        observation_change, reason,
+      });
+    }
+
+    // on_sale only exists from 2026-09-24 onward; both sides must have it for a discount transition to mean
+    // anything (this already excludes every schema-boundary comparison, so fieldIsNew is always false here —
+    // only a config_hash change, e.g. a future endpoint switch, could still make one of these an artifact).
+    if (p.on_sale !== undefined && c.on_sale !== undefined && p.on_sale !== c.on_sale) {
+      const { observation_change, reason } = classify(p, c, false);
+      events.push({
+        date,
+        type: observation_change ? "observation_started" : c.on_sale ? "discount_started" : "discount_ended",
         model_id: c.model_id,
         seller: c.seller,
         variant: c.variant,
         from: p.compare_at_price_usd ?? null,
         to: c.on_sale ? c.compare_at_price_usd : null,
         source_url: c.url,
+        observation_change, reason,
       });
     }
 
     if (p.lead_time_text !== undefined && c.lead_time_text !== undefined && p.lead_time_text !== c.lead_time_text) {
-      events.push({ date, type: "lead_time_changed", model_id: c.model_id, seller: c.seller, variant: c.variant, from: p.lead_time_text, to: c.lead_time_text, source_url: c.url });
+      const { observation_change, reason } = classify(p, c, false);
+      events.push({
+        date,
+        type: observation_change ? "observation_started" : "lead_time_changed",
+        model_id: c.model_id, seller: c.seller, variant: c.variant, from: p.lead_time_text, to: c.lead_time_text, source_url: c.url,
+        observation_change, reason,
+      });
     }
   }
 
   // variant_added / variant_removed — set-compare variant_id per product (seller+url), only once every row
   // on BOTH sides of that product carries a real id (the schema-boundary guard: 9/22–9/24 rows are all
-  // variant_id: null, so this naturally produces nothing until two consecutive new-shaped days exist).
+  // variant_id: null, so this naturally produces nothing until two consecutive new-shaped days exist — the
+  // same "field didn't exist yet" case as availability_status, just gated by completeness instead of a
+  // per-row undefined check, so it needs no separate observation_started reclassification).
   const idsByProduct = (rows: PriceRow[]) => {
     const m = new Map<string, { ids: Map<string | number, PriceRow>; complete: boolean }>();
     for (const r of rows) {
@@ -108,24 +166,25 @@ export function generateEvents(prev: PriceRow[], curr: PriceRow[], date: string,
     const pEntry = prevProducts.get(pk);
     if (!pEntry || !pEntry.complete || !cEntry.complete) continue;
     for (const [id, r] of cEntry.ids) {
-      if (!pEntry.ids.has(id)) events.push({ date, type: "variant_added", model_id: r.model_id, seller: r.seller, variant: r.variant, from: null, to: id, source_url: r.url });
+      if (!pEntry.ids.has(id)) events.push({ date, type: "variant_added", model_id: r.model_id, seller: r.seller, variant: r.variant, from: null, to: id, source_url: r.url, observation_change: false, reason: null });
     }
     for (const [id, r] of pEntry.ids) {
-      if (!cEntry.ids.has(id)) events.push({ date, type: "variant_removed", model_id: r.model_id, seller: r.seller, variant: r.variant, from: id, to: null, source_url: r.url });
+      if (!cEntry.ids.has(id)) events.push({ date, type: "variant_removed", model_id: r.model_id, seller: r.seller, variant: r.variant, from: id, to: null, source_url: r.url, observation_change: false, reason: null });
     }
   }
 
   // product_unpublished — a whole product page (not just one variant) present yesterday and now confirmed
   // gone, specifically via HTTP 404 in today's error log. A timeout/403/Cloudflare block is a fetch problem,
   // not evidence the product was unpublished, so those never produce this event (task-events.md §5 names 404
-  // specifically for exactly this reason).
+  // specifically for exactly this reason). A 404 is unambiguous regardless of config — never an observation
+  // artifact.
   const prevProductRows = new Map<string, PriceRow>();
   for (const r of prev) if (!prevProductRows.has(productKey(r))) prevProductRows.set(productKey(r), r);
   const currProductUrls = new Set(curr.map((r) => r.url));
   for (const [pk, r] of prevProductRows) {
     if (currProductUrls.has(r.url)) continue;
     const has404 = currErrors.some((e) => e.includes(r.url) && /HTTP 404/.test(e));
-    if (has404) events.push({ date, type: "product_unpublished", model_id: r.model_id, seller: r.seller, variant: "(entire product)", from: r.url, to: null, source_url: r.url });
+    if (has404) events.push({ date, type: "product_unpublished", model_id: r.model_id, seller: r.seller, variant: "(entire product)", from: r.url, to: null, source_url: r.url, observation_change: false, reason: null });
     void pk;
   }
 

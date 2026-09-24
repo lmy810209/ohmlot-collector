@@ -7,6 +7,11 @@
       "url": "https://docs.fcc.gov/public/attachments/DA-26-786A1.pdf",
       "fetched": "2026-09-24",
       "status": "no_appendix",
+      "columns": {
+        "uas": "no_appendix",
+        "routers": "no_appendix",
+        "robotic_devices": "no_appendix"
+      },
       "records": 0,
       "error": null
     },
@@ -16,6 +21,11 @@
       "url": "https://docs.fcc.gov/public/attachments/DA-26-789A1.pdf",
       "fetched": "2026-09-24",
       "status": "no_appendix",
+      "columns": {
+        "uas": "no_appendix",
+        "routers": "no_appendix",
+        "robotic_devices": "no_appendix"
+      },
       "records": 0,
       "error": null
     },
@@ -25,7 +35,12 @@
       "url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
       "fetched": "2026-09-24",
       "status": "ok",
-      "records": 1,
+      "columns": {
+        "uas": "ok",
+        "routers": "ok",
+        "robotic_devices": "ok"
+      },
+      "records": 45,
       "error": null
     },
     {
@@ -34,20 +49,25 @@
       "url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
       "fetched": "2026-09-24",
       "status": "ok",
-      "records": 2,
+      "columns": {
+        "uas": "ok",
+        "routers": "ok",
+        "robotic_devices": "ok"
+      },
+      "records": 46,
       "error": null
     }
   ],
   "approvals": [
     {
-      "equipment_type": "robotic_device",
-      "entry": "Husqvarna AB 305v IQ, 310v IQ, 420v IQ, and 440v IQ robotic platforms",
-      "company": "Husqvarna AB",
-      "models": "305v IQ, 310v IQ, 420v IQ, and 440v IQ",
-      "effective_from": "2026-09-09",
+      "fcc_column": "uas",
+      "entry": "Mobilicom SkyHopper Series / M Band / Tactical Data Link, Various Controllers, and ICE, OS3 Security Software",
+      "company": "Mobilicom SkyHopper Series / M Band / Tactical Data Link, Various Controllers, and ICE,",
+      "models": "OS3 Security Software",
+      "effective_from": "2026-03-17",
       "effective_to": null,
       "extra_dates": [],
-      "id": "robotic_device|husqvarna ab 305v iq 310v iq 420v iq and 440v iq robotic platforms|2026-09-09",
+      "id": "uas|mobilicom skyhopper series m band tactical data link various controllers and ice os3 security software|2026-03-17",
       "source_da": "DA-26-957",
       "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
       "also_in": [
@@ -57,14 +77,816 @@
       "matched_manufacturer": null
     },
     {
-      "equipment_type": "robotic_device",
+      "fcc_column": "uas",
+      "entry": "ScoutDI Scout 137 Uncrewed Aircraft System",
+      "company": "ScoutDI Scout",
+      "models": "137 Uncrewed Aircraft System",
+      "effective_from": "2026-03-17",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|scoutdi scout 137 uncrewed aircraft system|2026-03-17",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "SiFly Aviation, Inc. Q12 Uncrewed Aircraft System",
+      "company": "SiFly Aviation, Inc.",
+      "models": "Q12 Uncrewed Aircraft System",
+      "effective_from": "2026-03-17",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|sifly aviation inc q12 uncrewed aircraft system|2026-03-17",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Verge, Inc. X1 Uncrewed Aircraft System",
+      "company": "Verge, Inc.",
+      "models": "X1 Uncrewed Aircraft System",
+      "effective_from": "2026-03-17",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|verge inc x1 uncrewed aircraft system|2026-03-17",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Adtran Inc.’s Service Delivery Gateway (SDG) class routers",
+      "company": "Adtran Inc.",
+      "models": "Service Delivery Gateway (SDG) class routers",
+      "effective_from": "2026-04-14",
+      "effective_to": "2027-10-01",
+      "extra_dates": [],
+      "id": "routers|adtran inc s service delivery gateway sdg class routers|2026-04-14",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Netgear, Inc.’s Nighthawk consumer mesh, mobile and standalone routers (R, RAX, RAXE, RS, MK, MR, M and MH series), Orbi consumer mesh, mobile and standalone routers (RBK, RBE, RBR, RBRE, LBR, LBK and CBK series), cable gateways (CAX series) and cable modems (CM series)",
+      "company": "Netgear, Inc.",
+      "models": "Nighthawk consumer mesh, mobile and standalone routers (R, RAX, RAXE, RS, MK, MR, M and MH series), Orbi consumer mesh, mobile and standalone routers (RBK, RBE, RBR, RBRE, LBR, LBK and CBK series), cable gateways (CAX series) and cable modems (CM series)",
+      "effective_from": "2026-04-14",
+      "effective_to": "2027-10-01",
+      "extra_dates": [],
+      "id": "routers|netgear inc s nighthawk consumer mesh mobile and standalone routers r rax raxe rs mk mr m and mh series orbi consumer mesh mobile and standalone routers rbk rbe rbr rbre lbr lbk and cbk series cable gateways cax series and cable modems cm series|2026-04-14",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Sees.ai v.USA. 1.0 Uncrewed Aircraft System",
+      "company": "Sees.ai v.USA.",
+      "models": "1.0 Uncrewed Aircraft System",
+      "effective_from": "2026-04-14",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|sees ai v usa 1 0 uncrewed aircraft system|2026-04-14",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "eero LLC’s eero, eero Pro, eero Max, eero PoE, eero Outdoor, eero Signal, and Amazon Leo routers",
+      "company": "eero LLC",
+      "models": "eero, eero Pro, eero Max, eero PoE, eero Outdoor, eero Signal, and Amazon Leo routers",
+      "effective_from": "2026-04-22",
+      "effective_to": "2027-10-31",
+      "extra_dates": [],
+      "id": "routers|eero llc s eero eero pro eero max eero poe eero outdoor eero signal and amazon leo routers|2026-04-22",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Air6 System GmbH’s AIR8 Medium Lifter, AIR8 Compact, AIR4 Rugged, AIR4 Light, AIR4 Micro, AIR4 Nano E, and AIR4 Nano Unmanned Aerial Systems",
+      "company": "Air6 System GmbH",
+      "models": "AIR8 Medium Lifter, AIR8 Compact, AIR4 Rugged, AIR4 Light, AIR4 Micro, AIR4 Nano E, and AIR4 Nano Unmanned Aerial Systems",
+      "effective_from": "2026-05-06",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|air6 system gmbh s air8 medium lifter air8 compact air4 rugged air4 light air4 micro air4 nano e and air4 nano unmanned aerial systems|2026-05-06",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Calix, Inc.’s 7u6.2 router, part number (100-06200)",
+      "company": "Calix, Inc.",
+      "models": "7u6.2 router, part number (100-06200)",
+      "effective_from": "2026-05-06",
+      "effective_to": "2027-10-31",
+      "extra_dates": [],
+      "id": "routers|calix inc s 7u6 2 router part number 100 06200|2026-05-06",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Elevon Aerial, LLC, doing business as Elevon Aerial AG, Z30, Z50, and Z80 Uncrewed Aircraft Systems",
+      "company": "Elevon Aerial, LLC, doing business as Elevon Aerial AG,",
+      "models": "Z30, Z50, and Z80 Uncrewed Aircraft Systems",
+      "effective_from": "2026-05-15",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|elevon aerial llc doing business as elevon aerial ag z30 z50 and z80 uncrewed aircraft systems|2026-05-15",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Nokia Corporation’s wireless-fidelity 8 router",
+      "company": "Nokia Corporation",
+      "models": "wireless-fidelity 8 router",
+      "effective_from": "2026-05-15",
+      "effective_to": "2027-10-31",
+      "extra_dates": [],
+      "id": "routers|nokia corporation s wireless fidelity 8 router|2026-05-15",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Beacons, Open Network Terminal (ONT) Based Beacons, and Fastmile Gateway routers",
+      "company": "Beacons, Open Network Terminal (ONT) Based Beacons, and Fastmile Gateway routers",
+      "models": null,
+      "effective_from": "2026-05-18",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "routers|beacons open network terminal ont based beacons and fastmile gateway routers|2026-05-18",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Nokia Corporation’s Beacons, Open Network Terminal (ONT) Based Beacons, and Fastmile Gateway routers",
+      "company": "Nokia Corporation",
+      "models": "Beacons, Open Network Terminal (ONT) Based Beacons, and Fastmile Gateway routers",
+      "effective_from": "2026-05-18",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "routers|nokia corporation s beacons open network terminal ont based beacons and fastmile gateway routers|2026-05-18",
+      "source_da": "DA-26-996",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
+      "also_in": [],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Air VEV, Inc.’s 120C and 060C Unmanned Aerial Systems",
+      "company": "Air VEV, Inc.",
+      "models": "120C and 060C Unmanned Aerial Systems",
+      "effective_from": "2026-05-26",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|air vev inc s 120c and 060c unmanned aerial systems|2026-05-26",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Blueflite, Inc.’s Cobalt 461 Uncrewed Aircraft System (UAS) and related UAS critical components including data transmission devices, communications systems, and flight controllers",
+      "company": "Blueflite, Inc.",
+      "models": "Cobalt 461 Uncrewed Aircraft System (UAS) and related UAS critical components including data transmission devices, communications systems, and flight controllers",
+      "effective_from": "2026-05-26",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|blueflite inc s cobalt 461 uncrewed aircraft system uas and related uas critical components including data transmission devices communications systems and flight controllers|2026-05-26",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Verity AG’s Series 4 Indoor Autonomous Inventory System Uncrewed Aircraft System",
+      "company": "Verity AG",
+      "models": "Series 4 Indoor Autonomous Inventory System Uncrewed Aircraft System",
+      "effective_from": "2026-05-26",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|verity ag s series 4 indoor autonomous inventory system uncrewed aircraft system|2026-05-26",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Alpha Networks Inc. USA’s 1700 and 2700 series of routers",
+      "company": "Alpha Networks Inc. USA",
+      "models": "1700 and 2700 series of routers",
+      "effective_from": "2026-06-01",
+      "effective_to": "2027-11-22",
+      "extra_dates": [],
+      "id": "routers|alpha networks inc usa s 1700 and 2700 series of routers|2026-06-01",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Calix, Inc.’s 7p6, 7u6m.2, 7u4txg, and 7u4 broadband routers",
+      "company": "Calix, Inc.",
+      "models": "7p6, 7u6m.2, 7u4txg, and 7u4 broadband routers",
+      "effective_from": "2026-06-01",
+      "effective_to": "2027-11-22",
+      "extra_dates": [],
+      "id": "routers|calix inc s 7p6 7u6m 2 7u4txg and 7u4 broadband routers|2026-06-01",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Innovation First International, Inc.’s VEX AIR Uncrewed Aircraft System",
+      "company": "Innovation First International, Inc.",
+      "models": "VEX AIR Uncrewed Aircraft System",
+      "effective_from": "2026-06-04",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|innovation first international inc s vex air uncrewed aircraft system|2026-06-04",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Sagemcom USA, LLC’s FAST3994, FAST3897, FAST5698,",
+      "company": "Sagemcom USA, LLC",
+      "models": "FAST3994, FAST3897, FAST5698,",
+      "effective_from": "2026-06-04",
+      "effective_to": "2027-12-05",
+      "extra_dates": [],
+      "id": "routers|sagemcom usa llc s fast3994 fast3897 fast5698|2026-06-04",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "ABZ Innovation Kft.’s L50 Uncrewed Aircraft System",
+      "company": "ABZ Innovation Kft.",
+      "models": "L50 Uncrewed Aircraft System",
+      "effective_from": "2026-06-12",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|abz innovation kft s l50 uncrewed aircraft system|2026-06-12",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Arcadyan Technology Corporation’s routers for T-Mobile 5G FWA broadband devices, which includes the G5AR, G5MAR, GxMAR, GxMAR-ODU, GxAR Series (5G FWA); AT&T BGW 720; and (XC Series), CR100B (WG Series), CE1000A, and E3200 (WE Series)",
+      "company": "Arcadyan Technology Corporation",
+      "models": "routers for T-Mobile 5G FWA broadband devices, which includes the G5AR, G5MAR, GxMAR, GxMAR-ODU, GxAR Series (5G FWA); AT&T BGW 720; and (XC Series), CR100B (WG Series), CE1000A, and E3200 (WE Series)",
+      "effective_from": "2026-06-12",
+      "effective_to": "2027-12-12",
+      "extra_dates": [],
+      "id": "routers|arcadyan technology corporation s routers for t mobile 5g fwa broadband devices which includes the g5ar g5mar gxmar gxmar odu gxar series 5g fwa at t bgw 720 and xc series cr100b wg series ce1000a and e3200 we series|2026-06-12",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Arcadyan Technology Corporation’s routers for T-Mobile 5G FWA broadband devices, which includes the G5AR, G5MAR, GxMAR, GxMAR-ODU, GxAR Series (5G FWA); AT&T Verizon C46BE (XC Series), CR100B (WG Series), CE1000A, and E3200 (WE Series)",
+      "company": "Arcadyan Technology Corporation",
+      "models": "routers for T-Mobile 5G FWA broadband devices, which includes the G5AR, G5MAR, GxMAR, GxMAR-ODU, GxAR Series (5G FWA); AT&T Verizon C46BE (XC Series), CR100B (WG Series), CE1000A, and E3200 (WE Series)",
+      "effective_from": "2026-06-12",
+      "effective_to": "2027-12-12",
+      "extra_dates": [],
+      "id": "routers|arcadyan technology corporation s routers for t mobile 5g fwa broadband devices which includes the g5ar g5mar gxmar gxmar odu gxar series 5g fwa at t verizon c46be xc series cr100b wg series ce1000a and e3200 we series|2026-06-12",
+      "source_da": "DA-26-996",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
+      "also_in": [],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Flock Group, Inc. (doing business as Flock Safety) Flock Alpha Uncrewed Aircraft System",
+      "company": "Flock Group, Inc. (doing business as Flock Safety) Flock Alpha Uncrewed Aircraft System",
+      "models": null,
+      "effective_from": "2026-06-12",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|flock group inc doing business as flock safety flock alpha uncrewed aircraft system|2026-06-12",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Miri Technologies, Inc.’s Miri X10 Travel router",
+      "company": "Miri Technologies, Inc.",
+      "models": "Miri X10 Travel router",
+      "effective_from": "2026-06-12",
+      "effective_to": "2027-12-12",
+      "extra_dates": [],
+      "id": "routers|miri technologies inc s miri x10 travel router|2026-06-12",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Ceres Air LLC’s Uncrewed Aircraft Systems: C40, C31, C26, C20, and C6",
+      "company": "Ceres Air LLC",
+      "models": "Uncrewed Aircraft Systems: C40, C31, C26, C20, and C6",
+      "effective_from": "2026-06-22",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|ceres air llc s uncrewed aircraft systems c40 c31 c26 c20 and c6|2026-06-22",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Hitron Technologies Americas, Inc.’s DOCSIS 4.0 Wi-Fi Gateway, DOCSIS 3.1 Wi-Fi Gateway, XGSPON Wi-Fi Gateway, Standalone Wi-Fi routers, 5G FWA Wi-Fi Gateway, and 5G FWA Wi-Fi Hotspot",
+      "company": "Hitron Technologies Americas, Inc.",
+      "models": "DOCSIS 4.0 Wi-Fi Gateway, DOCSIS 3.1 Wi-Fi Gateway, XGSPON Wi-Fi Gateway, Standalone Wi-Fi routers, 5G FWA Wi-Fi Gateway, and 5G FWA Wi-Fi Hotspot",
+      "effective_from": "2026-06-22",
+      "effective_to": "2027-12-18",
+      "extra_dates": [],
+      "id": "routers|hitron technologies americas inc s docsis 4 0 wi fi gateway docsis 3 1 wi fi gateway xgspon wi fi gateway standalone wi fi routers 5g fwa wi fi gateway and 5g fwa wi fi hotspot|2026-06-22",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Real-Time Robotics, Inc.’s HERA Tactical Uncrewed Aircraft Systems Platform (both standard and VEGA)",
+      "company": "Real-Time Robotics, Inc.",
+      "models": "HERA Tactical Uncrewed Aircraft Systems Platform (both standard and VEGA)",
+      "effective_from": "2026-06-22",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|real time robotics inc s hera tactical uncrewed aircraft systems platform both standard and vega|2026-06-22",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Vantiva USA, LLC’s CWA438TX router",
+      "company": "Vantiva USA, LLC",
+      "models": "CWA438TX router",
+      "effective_from": "2026-07-08",
+      "effective_to": "2028-01-03",
+      "extra_dates": [],
+      "id": "routers|vantiva usa llc s cwa438tx router|2026-07-08",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Gemtek Technology Co., Ltd.’s WRTQ- 411BE and WNRFQQ-113BE routers",
+      "company": "Gemtek Technology Co., Ltd.",
+      "models": "WRTQ- 411BE and WNRFQQ-113BE routers",
+      "effective_from": "2026-07-10",
+      "effective_to": "2028-01-03",
+      "extra_dates": [],
+      "id": "routers|gemtek technology co ltd s wrtq 411be and wnrfqq 113be routers|2026-07-10",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Gryphon Safety Online, Inc.’s Parental Control WiFi Router",
+      "company": "Gryphon Safety Online, Inc.",
+      "models": "Parental Control WiFi Router",
+      "effective_from": "2026-07-20",
+      "effective_to": "2028-01-10",
+      "extra_dates": [],
+      "id": "routers|gryphon safety online inc s parental control wifi router|2026-07-20",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Sercomm Corporation’s Air4992 Wi-Fi 7 Router",
+      "company": "Sercomm Corporation",
+      "models": "Air4992 Wi-Fi 7 Router",
+      "effective_from": "2026-07-20",
+      "effective_to": "2028-01-10",
+      "extra_dates": [],
+      "id": "routers|sercomm corporation s air4992 wi fi 7 router|2026-07-20",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Askey Computer Corp.’s ASK- NCM3000 and",
+      "company": "Askey Computer Corp.",
+      "models": "ASK- NCM3000 and",
+      "effective_from": "2026-07-24",
+      "effective_to": "2028-01-17",
+      "extra_dates": [],
+      "id": "routers|askey computer corp s ask ncm3000 and|2026-07-24",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Calix, Inc.’s GigaSpire and Giga Pro class routers",
+      "company": "Calix, Inc.",
+      "models": "GigaSpire and Giga Pro class routers",
+      "effective_from": "2026-07-24",
+      "effective_to": "2027-11-22",
+      "extra_dates": [],
+      "id": "routers|calix inc s gigaspire and giga pro class routers|2026-07-24",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Exedy Globalparts Corporation’s Ayre CX Uncrewed Aircraft System",
+      "company": "Exedy Globalparts Corporation",
+      "models": "Ayre CX Uncrewed Aircraft System",
+      "effective_from": "2026-07-24",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|exedy globalparts corporation s ayre cx uncrewed aircraft system|2026-07-24",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "FAST5699, and FAST5999 routers Sagemcom USA, LLC’s “FAST” Broadband Class of Gateways and Routers (including FAST3994, FAST3897, FAST5698, FAST5699, FAST5999)",
+      "company": "FAST5699, and FAST5999 routers Sagemcom USA, LLC",
+      "models": "“FAST” Broadband Class of Gateways and Routers (including FAST3994, FAST3897, FAST5698, FAST5699, FAST5999)",
+      "effective_from": "2026-07-24",
+      "effective_to": "2027-12-05",
+      "extra_dates": [],
+      "id": "routers|fast5699 and fast5999 routers sagemcom usa llc s fast broadband class of gateways and routers including fast3994 fast3897 fast5698 fast5699 fast5999|2026-07-24",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Humax Networks USA, Inc.’s HNR2306 and HNRM30 routers",
+      "company": "Humax Networks USA, Inc.",
+      "models": "HNR2306 and HNRM30 routers",
+      "effective_from": "2026-07-24",
+      "effective_to": "2028-01-17",
+      "extra_dates": [],
+      "id": "routers|humax networks usa inc s hnr2306 and hnrm30 routers|2026-07-24",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Parallel Flight Technologies, Inc.’s Firefly Uncrewed Aircraft System",
+      "company": "Parallel Flight Technologies, Inc.",
+      "models": "Firefly Uncrewed Aircraft System",
+      "effective_from": "2026-07-24",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|parallel flight technologies inc s firefly uncrewed aircraft system|2026-07-24",
+      "source_da": "DA-26-996",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
+      "also_in": [
+        "DA-26-957"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "SpaceX Services, Inc.’s Starlink routers",
+      "company": "SpaceX Services, Inc.",
+      "models": "Starlink routers",
+      "effective_from": "2026-07-27",
+      "effective_to": "2028-01-17",
+      "extra_dates": [],
+      "id": "routers|spacex services inc s starlink routers|2026-07-27",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "ASK-NCQ8000 (Wi-Fi 8 Gateways) Askey Computer, Corp.’s ASK- NCM1100, ASK-",
+      "company": "ASK-NCQ8000 (Wi-Fi 8 Gateways) Askey Computer, Corp.",
+      "models": "ASK- NCM1100, ASK-",
+      "effective_from": "2026-08-14",
+      "effective_to": "2028-02-03",
+      "extra_dates": [],
+      "id": "routers|ask ncq8000 wi fi 8 gateways askey computer corp s ask ncm1100 ask|2026-08-14",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "ASK-NCQ8000 (Wi-Fi 8 Gateways) Askey Computer, Corp.’s ASK- NCM1100, ASK- NCM1100E, ASK- NCM3000, and ASK-NCQ8000 routers",
+      "company": "ASK-NCQ8000 (Wi-Fi 8 Gateways) Askey Computer, Corp.",
+      "models": "ASK- NCM1100, ASK- NCM1100E, ASK- NCM3000, and ASK-NCQ8000 routers",
+      "effective_from": "2026-08-14",
+      "effective_to": "2028-02-03",
+      "extra_dates": [],
+      "id": "routers|ask ncq8000 wi fi 8 gateways askey computer corp s ask ncm1100 ask ncm1100e ask ncm3000 and ask ncq8000 routers|2026-08-14",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "ASK-NCQ8000 (Wi-Fi 8 Gateways) Askey Computer, NCM1100, ASK- NCM1100E, ASK- NCM3000, and ASK-NCQ8000 routers",
+      "company": "ASK-NCQ8000 (Wi-Fi 8 Gateways) Askey Computer, NCM1100, ASK- NCM1100E, ASK- NCM3000, and ASK-NCQ8000 routers",
+      "models": null,
+      "effective_from": "2026-08-14",
+      "effective_to": "2028-02-03",
+      "extra_dates": [],
+      "id": "routers|ask ncq8000 wi fi 8 gateways askey computer ncm1100 ask ncm1100e ask ncm3000 and ask ncq8000 routers|2026-08-14",
+      "source_da": "DA-26-996",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
+      "also_in": [],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Zyxel Communications, Inc.’s EE4210-00, EE6610-00, and 5GNR (NR5331) routers",
+      "company": "Zyxel Communications, Inc.",
+      "models": "EE4210-00, EE6610-00, and 5GNR (NR5331) routers",
+      "effective_from": "2026-08-14",
+      "effective_to": "2028-02-03",
+      "extra_dates": [],
+      "id": "routers|zyxel communications inc s ee4210 00 ee6610 00 and 5gnr nr5331 routers|2026-08-14",
+      "source_da": "DA-26-996",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
+      "also_in": [
+        "DA-26-957"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "uas",
+      "entry": "Ascento, Inc.’s Ascento Guard Dori USA v1 Uncrewed Aircraft System",
+      "company": "Ascento, Inc.",
+      "models": "Ascento Guard Dori USA v1 Uncrewed Aircraft System",
+      "effective_from": "2026-08-21",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "uas|ascento inc s ascento guard dori usa v1 uncrewed aircraft system|2026-08-21",
+      "source_da": "DA-26-996",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
+      "also_in": [
+        "DA-26-957"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "WNC Corporation's LVR5A, LVM9, and LV85C Wi-Fi",
+      "company": "WNC Corporation",
+      "models": "LVR5A, LVM9, and LV85C Wi-Fi",
+      "effective_from": "2026-08-21",
+      "effective_to": "2028-02-03",
+      "extra_dates": [],
+      "id": "routers|wnc corporation s lvr5a lvm9 and lv85c wi fi|2026-08-21",
+      "source_da": "DA-26-996",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
+      "also_in": [
+        "DA-26-957"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "ASUS Computer International’s RT Router Series, ROG GT Series, ROG Strix GS Series, TUF Gaming Series, ExpertWiFi Series, ZenWiFi Mesh Series, 5G MiFi Series, repeaters, and wireless access points",
+      "company": "ASUS Computer International",
+      "models": "RT Router Series, ROG GT Series, ROG Strix GS Series, TUF Gaming Series, ExpertWiFi Series, ZenWiFi Mesh Series, 5G MiFi Series, repeaters, and wireless access points",
+      "effective_from": "2026-09-09",
+      "effective_to": "2028-03-06",
+      "extra_dates": [],
+      "id": "routers|asus computer international s rt router series rog gt series rog strix gs series tuf gaming series expertwifi series zenwifi mesh series 5g mifi series repeaters and wireless access points|2026-09-09",
+      "source_da": "DA-26-996",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
+      "also_in": [
+        "DA-26-957"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "routers",
+      "entry": "Comtrend Corporation’s GRG- 4366u, VG-8043u, PBL-6201, and NL- 3131 wireless routers",
+      "company": "Comtrend Corporation",
+      "models": "GRG- 4366u, VG-8043u, PBL-6201, and NL- 3131 wireless routers",
+      "effective_from": "2026-09-09",
+      "effective_to": "2028-03-06",
+      "extra_dates": [],
+      "id": "routers|comtrend corporation s grg 4366u vg 8043u pbl 6201 and nl 3131 wireless routers|2026-09-09",
+      "source_da": "DA-26-996",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
+      "also_in": [
+        "DA-26-957"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "robotic_devices",
+      "entry": "Husqvarna AB 305v IQ, 310v IQ, 420v IQ, and 440v IQ robotic platforms",
+      "company": "Husqvarna AB",
+      "models": "305v IQ, 310v IQ, 420v IQ, and 440v IQ",
+      "effective_from": "2026-09-09",
+      "effective_to": null,
+      "extra_dates": [],
+      "id": "robotic_devices|husqvarna ab 305v iq 310v iq 420v iq and 440v iq robotic platforms|2026-09-09",
+      "source_da": "DA-26-957",
+      "source_url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
+      "also_in": [
+        "DA-26-996"
+      ],
+      "first_seen": "2026-09-24",
+      "matched_manufacturer": null
+    },
+    {
+      "fcc_column": "robotic_devices",
       "entry": "ANSCER Robotics AR250, AR650, and AR1250 robotic platforms",
       "company": "ANSCER Robotics",
       "models": "AR250, AR650, and AR1250",
       "effective_from": "2026-09-18",
       "effective_to": null,
       "extra_dates": [],
-      "id": "robotic_device|anscer robotics ar250 ar650 and ar1250 robotic platforms|2026-09-18",
+      "id": "robotic_devices|anscer robotics ar250 ar650 and ar1250 robotic platforms|2026-09-18",
       "source_da": "DA-26-996",
       "source_url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
       "also_in": [],
