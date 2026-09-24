@@ -1,14 +1,10 @@
 name: fcc-collect
 
-# Manual only, for now. Reads the official FCC OET Laboratory Services API (KDB 953436, getFCCIDList); see
-# context/fcc-api-notes.md. The API is behind an Akamai edge rule that answers 403 to GitHub's US runners as
-# well as to non-US home IPs (last checked 2026-09-24, run 35890991314: all 8 grantee codes → HTTP 403), so the
-# weekly Monday schedule stays off until a run from Actions → fcc-collect → Run workflow succeeds. Then add:
-#   schedule:
-#     - cron: "0 1 * * 1"
-# A blocked run is logged and skipped — nothing is bypassed, and when no grantee code answers nothing is
-# written to data/ (exit 1).
+# Weekly + manual. Reads PSHSB public notices from docs.fcc.gov (the only FCC host reachable from
+# runners) and extracts Conditional Approvals; see context/fcc-api-notes.md for why EAS is not used.
 on:
+  schedule:
+    - cron: "0 1 * * 1"   # Mondays 01:00 UTC
   workflow_dispatch: {}
 
 permissions:
@@ -26,17 +22,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - name: Collect FCC grants (official API)
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Collect FCC notices
         run: npm run collect:fcc
-      - name: Commit FCC snapshot
+      - name: Commit FCC data
         if: always()
         run: |
           git config user.name "collector-bot"
           git config user.email "collector-bot@users.noreply.github.com"
-          git add data/fcc data/models.json
-          git diff --cached --quiet || git commit -m "fcc snapshot $(date -u +%F)"
+          git add data/fcc
+          git diff --cached --quiet || git commit -m "fcc notices $(date -u +%F)"
           git pull --rebase -q
           git push

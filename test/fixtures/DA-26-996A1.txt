@@ -1,0 +1,344 @@
+﻿DA 26-996
+Released:  September 18, 2026
+
+FCC’S PUBLIC SAFETY AND HOMELAND SECURITY BUREAU ANNOUNCES CONDITIONAL APPROVAL AND EXEMPTION OF CERTAIN ADVANCED ROBOTIC DEVICES FROM FCC COVERED LIST
+
+WC Docket No. 18-89, ET Docket No. 21-232, EA Docket No. 21-233
+
+The Federal Communications Commission’s (FCC or Commission) Public Safety and Homeland Security Bureau (PSHSB or Bureau) maintains a list of equipment and services (Covered List) that have been determined to “pose an unacceptable risk to the national security of the United States or the security and safety of United States persons.”1  Pursuant to section 2 of the Secure and Trusted Communications Networks Act of 2019 (Secure Networks Act)2 and sections 1.50002(a) and 1.50003 of the Commission’s rules,3 PSHSB announces that the Department of War (DoW) has granted Conditional Approval for certain advanced robotic devices.  Therefore, such devices are exempt from the Covered List.
+1. Secure and Trusted Communications Networks Act of 2019, Pub. L. No. 116-124, 133 Stat. 158 (2020) (codified as amended at 47 U.S.C. §§ 1601-1609) (Secure Networks Act); 47 CFR §§ 1.50002, 1.50003.  For the current version of the Covered List, see Federal Communications Commission, List of Equipment and Services Covered By Section 2 of The Secure Networks Act, https://www.fcc.gov/supplychain/coveredlist (last updated Sept. 18, 2026).
+2. 47 U.S.C. § 1601.
+3. 47 CFR §§ 1.50002(a), 1.50003; see also Protecting Against National Security Threats to the Communications Supply Chain Through FCC Programs, WC Docket No. 18-89, Second Report and Order, 35 FCC Rcd 14284 (2020) (Supply Chain Second Report and Order).
+
+Addition of Advanced Robotic Devices to the Covered List
+
+On July 28, 2026, the Commission added to the Covered List “foreign-produced advanced robotic devices, except advanced robotic devices which have been granted a Conditional Approval by DoW.”This addition was based on a National Security Determination from an Executive Branch interagency body, including several appropriate national security agencies, determining (among other things) that advanced robotic devices produced in a foreign country pose an unacceptable risk to the national security of the United States and to the safety and security of U.S. persons.4  5
+4. FCC’s Public Safety and Homeland Security Bureau Announces Addition of Foreign-Produced Power Inverters and Advanced Robotic Devices to FCC Covered List, WC Docket No. 18-89, Public Notice, DA 26-786 (July 28, 2026) (Robotics Public Notice).
+5. Robotics Public Notice at 2.
+
+Conditional Approvals
+
+The Executive Branch interagency body established a process by which entities producing certain covered equipment in foreign countries can request DoW to evaluate whether such devices do not pose unacceptable risks to national security and receive Conditional Approvals that would exempt such devices from the Covered List.  The Commission has previously updated the Covered List to reflect the Conditional Approvals that we have received from DoW exempting certain Uncrewed Aircraft Systems (UAS) and UAS critical components and routers from the Covered List.Conditional Approvals that we have received from DoW exempting certain Uncrewed Aircraft Systems (UAS) and UAS critical components and routers from the Covered List.Conditional Approvals that we have received from DoW exempting certain Uncrewed Aircraft Systems (UAS) and UAS critical components and routers from the Covered List.
+6. See, e.g., FCC’s Public Safety and Homeland Security Bureau Announces Conditional Approval of Certain Routers and Uncrewed Aircraft Systems (UAS) and Exemption from FCC Covered List, WC Docket No. 18-89, Public Notice, DA-26-351 (April 14, 2026).  The list of devices that have received Conditional Approvals can be found on the Bureau’s website at https://www.fcc.gov/supplychain/coveredlist.
+
+DoW has reviewed submissions and granted Conditional Approvals for the following devices:
+• ANSCER Robotics’ AR250, AR650, and AR1250 robotic platforms
+
+
+
+Consistent with the National Security Determination, this exemption from the FCC’s Covered List is “subject to ANSCER’s continuous compliance with the onshoring plan outlined in its conditional approval application and pursuant to updated vetting of its products.”7
+7 Additionally, failure to comply with the onshoring plan or the discovery of a false statement or misrepresentation in ANSCER’s conditional approval application could result in termination of the conditional approval and return to the FCC’s Covered List. Consistent with the National Security Determinations, for the Robotic Devices Conditional Approvals that do not reflect termination dates, such Conditional Approvals will remain effective indefinitely, so long as the entity that received Conditional Approval abides by the onshoring plan outlined in its Conditional Approval application and pursuant to updated vetting of the products.
+
+The Covered List
+
+We find that each of the Conditional Approvals constitutes “a specific determination” by DoW that such devices do not pose risks to U.S. national security.8  Therefore, we conclude that PSHSB is required to update the Covered List to exclude the equipment identified in these Conditional Approvals.
+8 See Routers Public Notice, Appx. C; Second UAS Public Notice, Appx. B.
+
+PSHSB takes this action under its authority and obligation to publish and maintain the Covered List.  Sections 1.50002(a) and 1.50003 of the Commission’s rules require PSHSB to publish the Covered List on the Commission’s website, to maintain and update the Covered List, and to monitor the status of determinations.9
+9 47 CFR §§ 1.50002(a), 1.50003.  See Supply Chain Second Report and Order, 35 FCC Rcd at 14319, 14325, paras. 72, 77, 92.
+
+The Covered List and the list of devices that have received Conditional Approvals are attached as Appendices A and B to this Public Notice and can also be found on the Bureau’s website at https://www.fcc.gov/supplychain/coveredlist.10
+10 The FCC website also contains a list of certain affiliates and subsidiaries of entities identified on the Covered List.  The list of affiliates and subsidiaries does not constitute a comprehensive list of all entities that the Commission may find, upon further examination, to qualify as relevant subsidiaries or affiliates of entities on the Covered List.  Those entities, whether or not they currently provide covered communications equipment or services, are subject to the Commission’s prohibitions, such as the prohibition against obtaining authorizations for covered equipment.  See Reminder: Communications Equipment And Services On The Covered List Pose An Unacceptable Risk To National Security, National Security Advisory No. 2025-01, DA 25-927, n.3 (PSHSB Oct. 14, 2025).
+
+
+We note the continued availability of FCC staff guidance pursuant to sections 0.191 and 0.31(i) of the Commission’s rules.  Commission staff will provide guidance to TCBs, test labs, and equipment authorization applicants on the impact of these updates.
+
+For further information, please contact Chris Smeenk, Attorney Advisor, Operations and Emergency Management Division, Public Safety and Homeland Security Bureau at 202-418-1630 or Chris.Smeenk@fcc.gov.
+APPENDIX A
+COVERED LIST (September 18, 2026)*†±
+
+Covered Equipment or Services*
+Date of Inclusion on Covered List
+
+Telecommunications equipment produced or provided by Huawei Technologies Company, including telecommunications or video surveillance services produced or provided by such entity or using such equipment.
+
+March 12, 2021
+
+Telecommunications equipment produced or provided by ZTE Corporation, including telecommunications or video surveillance services provided or provided by such entity or using such equipment.
+
+March 12, 2021
+
+Video surveillance and telecommunications equipment produced or provided by Hytera Communications Corporation, to the extent it is used for the purpose of public safety, security of government facilities, physical security surveillance of critical infrastructure, and other national security purposes, including telecommunications or video surveillance services produced or provided by such entity or using such equipment.
+
+
+March 12, 2021
+
+Video surveillance and telecommunications equipment produced or provided by Hangzhou Hikvision Digital Technology Company, to the extent it is used for the purpose of public safety, security of government facilities, physical security surveillance of critical infrastructure, and other national security purposes, including telecommunications or video surveillance services produced or provided by such entity or using such equipment.
+
+
+March 12, 2021
+
+Video surveillance and telecommunications equipment produced or provided by Dahua Technology Company, to the extent it is used for the purpose of public safety, security of government facilities, physical security surveillance of critical infrastructure, and other national security purposes, including telecommunications or video surveillance services produced or provided by such entity or using such equipment.
+
+
+March 12, 2021
+
+Information security products, solutions, and services supplied, directly or indirectly, by AO Kaspersky Lab or any of its predecessors, successors, parents, subsidiaries, or affiliates.
+March 25, 2022
+
+International telecommunications services provided by China Mobile International USA Inc. subject to section 214 of the Communications Act of 1934.
+March 25, 2022
+
+Telecommunications services provided by China Telecom (Americas) Corp. subject to section 214 of the Communications Act of 1934.
+March 25, 2022
+
+International telecommunications services provided by Pacific Networks Corp. and its wholly-owned subsidiary ComNet (USA) LLC subject to section 214 of the Communications Act of 1934.
+September 20, 2022
+
+International telecommunications services provided by China Unicom (Americas) Operations Limited subject to section 214 of the Communications Act of 1934.
+September 20, 2022
+
+Cybersecurity and anti-virus software produced or provided by Kaspersky Lab, Inc. or any of its successors and assignees.
+July 23, 2024
+
+Uncrewed aircraft systems (UAS) and UAS critical components produced in a foreign country††—except:
+(a) UAS and UAS critical components included on the Defense Contract Management Agency’s (DCMA’s) Blue UAS Cleared List, until January 1, 2028,#
+(b) UAS and UAS critical components that qualify as “domestic end products” under the Buy American Standard, 48 CFR 25.101(a), until January 1, 2028;
+(c) devices which have been granted a Conditional Approval by DoW or DHS; and  (d) foreign-produced “Toy Drones,” as defined in the
+
+All communications and video surveillance equipment and services listed in Section 1709(a)(1) of the FY25 National Defense Authorization Act (Pub. L. 118-159).
+
+December 22, 2025
+
+Updated: January 7, 2026
+
+Updated: March 18, 2026
+Updated: June 15, 2026
+Updated:  July 21, 2026
+
+Routers^ produced in a foreign country, except routers which have been granted a Conditional Approval by DoW or DHS.
+March 23, 2026
+
+
+International telecommunications services provided by Digitalsystem Technology Inc., subject to section 214 of the Communications Act of 1934.
+July 7, 2026
+
+Foreign-produced power inverters,£ except power inverters which have been granted a Conditional Approval by DoW or DHS.
+
+July 28, 2026
+
+Updated:  August 20, 2026
+
+Foreign-produced advanced robotic devices,except advanced robotic devices which have been granted a Conditional Approval by DoW. ³
+July 28, 2026
+
+
+
+
+* The inclusion of producers or providers of equipment or services named on this list should be read to include the subsidiaries and affiliates of such entities.
+
+†Where equipment or services on the list are identified by category, such category should be construed to include only equipment or services capable of the functions outlined in sections 2(b)(2)(A), (B), or (C) of the Secure and Trusted Communications Networks Act of 2019, 47 U.S.C. § 1601(b)(2)(A)-(C).
+
+±The scope of the Covered List is affected by the Conditional Approvals that we have received.
+
+††For purposes of inclusion of UAS and UAS critical components, we incorporate the definitions included in the associated National Security Determination.
+
+#The “Blue UAS list” referred to in the National Security Determination is the combination of the “Blue UAS Cleared List” at https://bluelist.appsplatformportals.us/Cleared-List/ and the list of compliant UAS components and software at https://bluelist.appsplatformportals.us/Framework/. We use the term “Blue UAS Cleared List” to refer to both lists.
+
+^For purposes of inclusion of routers, we incorporate the definitions included in the associated National Security Determination.
+
+³For purposes of inclusion of advanced robotic devices, we incorporate the definitions included in the associated National Security Determination.
+
+National Security Determination.   £For purposes of inclusion of power inverters, we incorporate the definitions included in the associated
+
+APPENDIX B
+Conditional Approvals
+Updated September 18, 2026
+
+UAS Conditional Approvals
+
+Dates of Conditional Approval*
+
+Routers Conditional Approvals
+Dates of Conditional Approval
+
+Robotic Devices Conditional Approvals
+Dates of
+Conditional Approval#
+
+
+SiFly Aviation, Inc. Q12 Uncrewed Aircraft System
+
+March 17, 2026
+Netgear, Inc.’s Nighthawk consumer mesh, mobile and standalone routers (R, RAX, RAXE, RS, MK, MR, M and MH series), Orbi consumer mesh, mobile and standalone routers (RBK, RBE, RBR, RBRE, LBR, LBK and CBK series), cable gateways (CAX series) and cable modems (CM series)
+April 14, 2026 –
+October 1, 2027
+Husqvarna AB 305v IQ, 310v IQ, 420v IQ, and 440v IQ robotic platforms
+September 9, 2026
+
+Mobilicom SkyHopper Series / M Band / Tactical Data Link, Various Controllers, and ICE, OS3 Security Software
+
+March 17, 2026
+Adtran Inc.’s Service Delivery Gateway (SDG) class routers
+April 14, 2026 –
+October 1, 2027
+ANSCER Robotics AR250, AR650, and AR1250 robotic platforms
+September 18, 2026
+
+ScoutDI Scout 137 Uncrewed Aircraft System
+
+March 17, 2026
+eero LLC’s eero, eero Pro, eero Max, eero PoE, eero Outdoor, eero Signal, and Amazon Leo routers
+April 22, 2026 –
+October 31, 2027
+
+Verge, Inc. X1 Uncrewed Aircraft System
+
+March 17, 2026
+Calix, Inc.’s 7u6.2 router, part number (100-06200)
+
+Calix, Inc.’s 7p6, 7u6m.2, 7u4txg, and 7u4 broadband routers
+Calix, Inc.’s GigaSpire and Giga Pro class routers
+May 6, 2026 –
+October 31, 2027
+
+June 1, 2026 –
+November 22, 2027
+
+
+July 24, 2026 – November 22, 2027
+
+Sees.ai v.USA. 1.0 Uncrewed Aircraft System
+
+April 14, 2026
+Nokia Corporation’s wireless-fidelity 8 router
+
+May 15, 2026 –
+October 31, 2027
+
+May 18, 2026 –
+October 31, 2027
+
+Nokia Corporation’s Beacons, Open Network Terminal (ONT) Based Beacons, and Fastmile Gateway routers
+
+Air6 System GmbH’s AIR8 Medium Lifter, AIR8 Compact, AIR4 Rugged, AIR4 Light, AIR4 Micro, AIR4 Nano E, and AIR4 Nano Unmanned Aerial Systems
+May 6, 2026
+Alpha Networks Inc. USA’s 1700 and 2700 series of routers
+
+June 1, 2026 –
+November 22, 2027
+
+
+Elevon Aerial, LLC, doing business as Elevon Aerial AG, Z30, Z50, and Z80 Uncrewed Aircraft Systems
+May 15, 2026
+Sagemcom USA, LLC’s FAST3994, FAST3897, FAST5698, FAST5699, and FAST5999 routers
+
+Sagemcom USA, LLC’s  “FAST” Broadband Class of Gateways and Routers (including FAST3994, FAST3897, FAST5698, FAST5699, FAST5999)
+June 4, 2026 –
+December 5, 2027
+
+
+July 24, 2026 – December 5, 2027
+
+Blueflite, Inc.’s Cobalt 461 Uncrewed Aircraft System (UAS) and related UAS critical components including data transmission devices, communications systems, and flight controllers
+May 26, 2026
+Miri Technologies, Inc.’s Miri X10 Travel router
+June 12, 2026 – December 12, 2027
+
+Verity AG’s Series 4 Indoor Autonomous Inventory System Uncrewed Aircraft System
+May 26, 2026
+Arcadyan Technology Corporation’s routers for T-Mobile 5G FWA broadband devices, which includes the G5AR, G5MAR, GxMAR, GxMAR-ODU, GxAR Series (5G FWA); AT&T BGW 720; and
+June 12, 2026 – December 12, 2027
+
+Verizon C46BE (XC Series), CR100B (WG Series), CE1000A, and E3200 (WE Series)
+
+Air VEV, Inc.’s 120C and 060C Unmanned Aerial Systems
+May 26, 2026
+Hitron Technologies Americas, Inc.’s DOCSIS 4.0 Wi-Fi Gateway, DOCSIS 3.1 Wi-Fi Gateway, XGSPON Wi-Fi Gateway, Standalone Wi-Fi routers, 5G FWA Wi-Fi Gateway, and 5G FWA Wi-Fi Hotspot
+June 22, 2026 – December 18, 2027
+
+Innovation First International, Inc.’s VEX AIR Uncrewed Aircraft System
+June 4, 2026
+Vantiva USA, LLC’s CWA438TX router
+July 8, 2026 –
+January 3, 2028
+
+Flock Group, Inc. (doing business as Flock Safety) Flock Alpha Uncrewed Aircraft System
+June 12, 2026
+Gemtek Technology Co., Ltd.’s WRTQ-411BE and WNRFQQ-113BE routers
+July 10, 2026 –
+January 3, 2028
+
+ABZ Innovation Kft.’s L50 Uncrewed Aircraft System
+June 12, 2026
+Gryphon Safety Online, Inc.’s Parental Control WiFi Router
+
+July 20, 2026 –
+January 10, 2028
+
+Real-Time Robotics, Inc.’s HERA Tactical Uncrewed Aircraft Systems Platform (both standard and VEGA)
+June 22, 2026
+Sercomm Corporation’s Air4992 Wi-Fi 7 Router
+
+July 20, 2026 –
+January 10, 2028
+
+Ceres Air LLC’s Uncrewed Aircraft Systems: C40, C31, C26, C20, and C6
+June 22, 2026
+Humax Networks USA, Inc.’s HNR2306 and HNRM30 routers
+July 24, 2026 – January 17, 2028
+
+Exedy Globalparts Corporation’s Ayre CX Uncrewed Aircraft System
+July 24, 2026
+SpaceX Services, Inc.’s Starlink routers
+
+July 27, 2026 – January 17, 2028
+
+Parallel Flight Technologies, Inc.’s Firefly Uncrewed Aircraft System
+
+July 24, 2026
+Askey Computer Corp.’s ASK-NCM3000 and ASK-NCQ8000 (Wi-Fi 8 Gateways)
+
+Askey Computer, Corp.’s ASK-
+July 24, 2026 – January 17, 2028
+
+August 14, 2026 – February 3, 2028
+
+
+NCM1100, ASK-NCM1100E, ASK-NCM3000, and ASK-NCQ8000 routers
+
+Ascento, Inc.’s Ascento Guard Dori USA v1 Uncrewed Aircraft System
+August 21, 2026
+Zyxel Communications, Inc.’s EE4210-00, EE6610-00, and 5GNR (NR5331) routers
+August 14, 2026 – February 3, 2028
+
+
+
+WNC Corporation's LVR5A, LVM9, and LV85C Wi-Fi Routers
+August 21, 2026 – February 3, 2028
+
+
+
+ASUS Computer International’s RT Router Series, ROG GT Series, ROG Strix GS Series, TUF Gaming Series, ExpertWiFi Series, ZenWiFi Mesh Series, 5G MiFi Series, repeaters, and wireless access points
+September 9, 2026 – March 6, 2028
+
+
+
+Comtrend Corporation’s GRG-4366u, VG-8043u, PBL-6201, and NL-3131 wireless routers
+September 9, 2026 – March 6, 2028
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

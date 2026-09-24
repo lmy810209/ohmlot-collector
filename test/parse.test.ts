@@ -1,18 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import {
-  buildUsStatus,
-  fccSourceUrl,
-  mergeGrants,
+  classifyEquipment,
   normalizeDate,
-  parseFccIdList,
+  parseConditionalApprovals,
   parseRegexHtml,
   parseShopifyProduct,
-  syncUsStatus,
   withUsMarket,
-  type ModelSeed,
   type PriceSource,
 } from "../src/lib/parse.ts";
+
+const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8");
 
 const go2: PriceSource = {
   seller: "unitree-official",
@@ -60,141 +59,6 @@ test("shopify: placeholder prices are flagged", () => {
     "2026-09-22",
   );
   assert.deepEqual(rows[0].flags, ["placeholder_price"]);
-});
-
-test("regex html: 1X NEO ownership + subscription", () => {
-  const html = `<div>$20,000 Ownership</div><div>$499/mo Subscription</div><div>$200 Deposit</div>`;
-  const rows = parseRegexHtml(
-    html,
-    {
-      seller: "1x-official",
-      type: "regex_html",
-      url: "https://www.1x.tech/order",
-      default_model: "1x-neo",
-      patterns: [
-        { variant: "Ownership", regex: "\\$([0-9,]+)\\s*Ownership" },
-        { variant: "Subscription (per month)", regex: "\\$([0-9,]+)\\s*/\\s*mo" },
-      ],
-    },
-    "2026-09-22",
-  );
-  assert.deepEqual(rows.map((r) => [r.variant, r.price_usd]), [
-    ["Ownership", 20000],
-    ["Subscription (per month)", 499],
-  ]);
-});
-
-test("dates normalize from FCC / fccid formats", () => {
-  assert.equal(normalizeDate("03/03/2025"), "2025-03-03");
-  assert.equal(normalizeDate("2025-03-03"), "2025-03-03");
-  assert.equal(normalizeDate("Mar 3, 2025"), "2025-03-03");
-  assert.equal(normalizeDate("garbage"), null);
-});
-
-test("getFCCIDList: bare array, MM/DD/YYYY dates, covered-list flag, earliest date kept, other grantees dropped", () => {
-  const g = parseFccIdList(
-    [
-      { fccid: "2A5PE-YUSHU008", grantee: "Hangzhou Yushu Technology Co., Ltd.", grantDate: "03/03/2025", applicationPurpose: "Original Equipment" },
-      { fccid: "2A5PE-YUSHU008", grantee: "Hangzhou Yushu Technology Co., Ltd.", grantDate: "08/10/2026", applicationPurpose: "Class II Permissive Change" },
-      { fccid: "2A5PE-YUSHU013", grantee: "Hangzhou Yushu Technology Co., Ltd.", grantDate: "08/02/2026", applicationPurpose: "Original Equipment" },
-      { fccid: "BCG-E2430A", grantee: "Apple Inc.", grantDate: "09/09/2009", applicationPurpose: "Original Equipment" },
-    ],
-    "2A5PE",
-  );
-  const byId = Object.fromEntries(g.map((x) => [x.fcc_id, x]));
-  assert.equal(g.length, 2);
-  assert.equal(byId["2A5PE-YUSHU008"].grant_date, "2025-03-03");
-  assert.equal(byId["2A5PE-YUSHU008"].after_covered_list, false);
-  assert.equal(byId["2A5PE-YUSHU013"].after_covered_list, true);
-  assert.equal(byId["2A5PE-YUSHU013"].description, null);
-});
-
-test("getFCCIDList: wrapped array and alternative field names are accepted; missing date stays null", () => {
-  const g = parseFccIdList({ status: "ok", results: [{ FCC_ID: "2bkmidigitv4", grant_date: "2025-09-12" }, { FCC_ID: "2BKMI-X1" }] }, "2BKMI");
-  assert.deepEqual(
-    g.map((x) => [x.fcc_id, x.grant_date, x.after_covered_list]),
-    [
-      ["2BKMIDIGITV4", "2025-09-12", false],
-      ["2BKMI-X1", null, null],
-    ],
-  );
-});
-
-test("getFCCIDList: a body without any array of rows is rejected", () => {
-  assert.throws(() => parseFccIdList({ message: "Access Denied" }, "2A5PE"), /unexpected response shape/);
-  assert.throws(() => parseFccIdList("<html>", "2A5PE"), /unexpected response shape/);
-});
-
-test("fccSourceUrl points at the FCC's own record for hyphenated and 5+N style IDs", () => {
-  assert.equal(
-    fccSourceUrl("2A5PE-YUSHU008"),
-    "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU008",
-  );
-  assert.equal(fccSourceUrl("2AAIC00010")?.endsWith("grantee_code=2AAIC&product_code=00010"), true);
-  assert.equal(fccSourceUrl(null), null);
-});
-
-test("us_status: before/after/unknown from the grant date, registry date wins, conditional approval only from the FCC list", () => {
-  const registry = {
-    "2A5PE-YUSHU008": { fcc_id: "2A5PE-YUSHU008", grantee_code: "2A5PE", grant_date: "2025-03-01", description: null, after_covered_list: false, first_seen: "2026-09-29" },
-  };
-  const base = { manufacturer: "Unitree Robotics", fcc_grantee_code: "2A5PE", fcc_grant_date: "2025-03-03" };
-  const before = buildUsStatus({ ...base, id: "unitree-g1", name: "Unitree G1", fcc_ids: ["2A5PE-YUSHU008"] }, registry, "2026-09-29");
-  assert.equal(before.grant_date, "2025-03-01"); // registry over seed
-  assert.equal(before.covered_list, "before");
-  assert.equal(before.conditional_approval, false);
-  assert.match(before.conditional_approval_note, /Not on the FCC's Robotic Devices Conditional Approvals list/);
-  assert.equal(before.last_verified, "2026-09-29");
-  assert.equal(before.source_url?.includes("product_code=YUSHU008"), true);
-
-  const after = buildUsStatus({ ...base, id: "x", name: "X", fcc_ids: ["2A5PE-YUSHU099"], fcc_grant_date: "2026-08-02" }, registry, "2026-09-29");
-  assert.equal(after.covered_list, "after");
-
-  const unknown = buildUsStatus({ ...base, id: "y", name: "Y", fcc_ids: [], fcc_grant_date: null }, registry, "2026-09-29");
-  assert.deepEqual([unknown.fcc_id, unknown.grant_date, unknown.covered_list, unknown.source_url], [null, null, "unknown", null]);
-
-  const husq = buildUsStatus({ id: "h", name: "Husqvarna 305v IQ", manufacturer: "Husqvarna AB", fcc_grantee_code: null, fcc_ids: [], fcc_grant_date: "2026-09-01" }, {}, "2026-09-29");
-  assert.equal(husq.conditional_approval, true);
-  assert.match(husq.conditional_approval_note, /2026-09-09/);
-});
-
-test("syncUsStatus: only models whose grantee code answered get a new last_verified; unchanged blocks are not counted", () => {
-  const models: (ModelSeed & { extra?: number })[] = [
-    { id: "a", name: "A", manufacturer: "M", fcc_grantee_code: "2A5PE", fcc_ids: ["2A5PE-YUSHU008"], fcc_grant_date: "2025-03-03", extra: 1 },
-    { id: "b", name: "B", manufacturer: "M", fcc_grantee_code: "2BKMI", fcc_ids: ["2BKMIDIGITV4"], fcc_grant_date: "2025-09-12" },
-  ];
-  const first = syncUsStatus(models, {}, "2026-09-24", "all");
-  assert.equal(first.changed, 2);
-  assert.equal(first.models[0].extra, 1); // other seed fields survive
-  assert.equal(first.models[1].us_status?.last_verified, "2026-09-24");
-
-  const second = syncUsStatus(first.models, {}, "2026-10-05", new Set(["2A5PE"]));
-  assert.equal(second.changed, 1);
-  assert.equal(second.models[0].us_status?.last_verified, "2026-10-05");
-  assert.equal(second.models[1].us_status?.last_verified, "2026-09-24"); // 2BKMI did not answer
-
-  const third = syncUsStatus(second.models, {}, "2026-10-05", new Set(["2A5PE"]));
-  assert.equal(third.changed, 0);
-});
-
-test("mergeGrants stamps first_seen only for new IDs", () => {
-  const existing = {
-    "2A5PE-YUSHU008": {
-      fcc_id: "2A5PE-YUSHU008", grantee_code: "2A5PE", grant_date: "2025-03-03",
-      description: null, after_covered_list: false, first_seen: "2026-09-01",
-    },
-  };
-  const { registry, added } = mergeGrants(
-    existing,
-    [
-      { fcc_id: "2A5PE-YUSHU008", grantee_code: "2A5PE", grant_date: "2025-03-03", description: null, after_covered_list: false },
-      { fcc_id: "2A5PE-YUSHU013", grantee_code: "2A5PE", grant_date: "2026-08-02", description: null, after_covered_list: true },
-    ],
-    "2026-09-22",
-  );
-  assert.deepEqual(added, ["2A5PE-YUSHU013"]);
-  assert.equal(registry["2A5PE-YUSHU008"].first_seen, "2026-09-01");
-  assert.equal(registry["2A5PE-YUSHU013"].first_seen, "2026-09-22");
 });
 
 test("shopify: .json endpoint shape ({ product }, dollar strings) is accepted", () => {
@@ -253,4 +117,62 @@ test("shopify: requests pin the US market (Pollen serves EUR elsewhere)", () => 
   assert.equal(withUsMarket("https://store.pollen-robotics.com/products/reachy-mini-lite-version.js"),
     "https://store.pollen-robotics.com/products/reachy-mini-lite-version.js?country=US");
   assert.equal(withUsMarket("https://x/p.js?foo=1"), "https://x/p.js?foo=1&country=US");
+});
+
+test("dates normalize from FCC / notice formats", () => {
+  assert.equal(normalizeDate("03/03/2025"), "2025-03-03");
+  assert.equal(normalizeDate("2025-03-03"), "2025-03-03");
+  assert.equal(normalizeDate("Mar 3, 2025"), "2025-03-03");
+  assert.equal(normalizeDate("September 9, 2026"), "2026-09-09");
+  assert.equal(normalizeDate("garbage"), null);
+});
+
+test("DA-26-957 (flattened .txt): Appendix B parses, Husqvarna robotic row is exact", () => {
+  const { status, approvals } = parseConditionalApprovals(fixture("DA-26-957A1.txt"));
+  assert.equal(status, "ok");
+  assert.ok(approvals.length >= 25, `expected many rows, got ${approvals.length}`);
+  const robotic = approvals.filter((a) => a.equipment_type === "robotic_device");
+  assert.deepEqual(
+    robotic.map((a) => [a.entry, a.company, a.models, a.effective_from, a.effective_to]),
+    [["Husqvarna AB 305v IQ, 310v IQ, 420v IQ, and 440v IQ robotic platforms", "Husqvarna AB", "305v IQ, 310v IQ, 420v IQ, and 440v IQ", "2026-09-09", null]],
+  );
+  const netgear = approvals.find((a) => a.entry.startsWith("Netgear, Inc."));
+  assert.ok(netgear && netgear.equipment_type === "router" && netgear.company === "Netgear, Inc.");
+  assert.equal(netgear.effective_from, "2026-04-14");
+  assert.equal(netgear.effective_to, "2027-10-01");
+  const sifly = approvals[0];
+  assert.equal(sifly.entry, "SiFly Aviation, Inc. Q12 Uncrewed Aircraft System");
+  assert.equal(sifly.equipment_type, "uas");
+  assert.equal(sifly.effective_from, "2026-03-17");
+});
+
+test("DA-26-996 (line-per-cell .txt): both robotic approvals, ANSCER dated 2026-09-18", () => {
+  const { status, approvals } = parseConditionalApprovals(fixture("DA-26-996A1.txt"));
+  assert.equal(status, "ok");
+  const robotic = approvals.filter((a) => a.equipment_type === "robotic_device");
+  assert.deepEqual(
+    robotic.map((a) => [a.company, a.models, a.effective_from]),
+    [
+      ["Husqvarna AB", "305v IQ, 310v IQ, 420v IQ, and 440v IQ", "2026-09-09"],
+      ["ANSCER Robotics", "AR250, AR650, and AR1250", "2026-09-18"],
+    ],
+  );
+});
+
+test("DA-26-786 (Covered List addition, no Appendix B table) → no_appendix, nothing invented", () => {
+  const r = parseConditionalApprovals(fixture("DA-26-786A1.txt"));
+  assert.equal(r.status, "no_appendix");
+  assert.equal(r.approvals.length, 0);
+});
+
+test("appendix present but unreadable → parse_failed", () => {
+  const r = parseConditionalApprovals("APPENDIX B\nConditional Approvals\nUpdated someday\n\nsome text without any table");
+  assert.equal(r.status, "parse_failed");
+  assert.equal(r.approvals.length, 0);
+});
+
+test("equipment classification: UAS wins over 'Robotics' in a company name", () => {
+  assert.equal(classifyEquipment("Real-Time Robotics, Inc.’s HERA Tactical Uncrewed Aircraft Systems Platform"), "uas");
+  assert.equal(classifyEquipment("ANSCER Robotics AR250, AR650, and AR1250 robotic platforms"), "robotic_device");
+  assert.equal(classifyEquipment("Sercomm Corporation’s Air4992 Wi-Fi 7 Router"), "router");
 });

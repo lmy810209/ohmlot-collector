@@ -1,8 +1,31 @@
 import Link from "next/link";
-import { COVERED_LIST_LABEL, COVERED_LIST_RULE } from "@/lib/format";
+import type { ConditionalApproval } from "@/lib/data";
+import { COVERED_LIST_LABEL, COVERED_LIST_RULE, fmtDate } from "@/lib/format";
+
+function approvalsSentence(approvals: ConditionalApproval[], catalogSize: number): string {
+  if (approvals.length === 0) {
+    return "No Department of War Conditional Approval for a robotic device has been published yet, so no foreign-produced model can receive a new FCC authorization right now.";
+  }
+  const list = approvals.map((a) => `${a.company ?? a.entry} (${a.effective_from ? fmtDate(a.effective_from) : "date unknown"})`).join("; ");
+  return `So far the only Conditional Approvals for robotic devices are ${list}. None of the ${catalogSize} personal robots this site tracks are on that list.`;
+}
 
 /** Guide §4.5: an explanation card plus three figures, split the way the US status block classifies robots. */
-export function FccSection({ before, conditional, after, unknown }: { before: number; conditional: number; after: number; unknown: number }) {
+export function FccSection({
+  before,
+  conditional,
+  after,
+  unknown,
+  approvals,
+  catalogSize,
+}: {
+  before: number;
+  conditional: number;
+  after: number;
+  unknown: number;
+  approvals: ConditionalApproval[];
+  catalogSize: number;
+}) {
   const figures = [
     { value: before, label: `granted before ${COVERED_LIST_LABEL}` },
     { value: conditional, label: "conditionally approved by DoW after that date" },
@@ -20,6 +43,7 @@ export function FccSection({ before, conditional, after, unknown }: { before: nu
           {unknown} {unknown === 1 ? "robot has" : "robots have"} no FCC record or grant date on file. Status is checked against FCC public notices and
           equipment authorization records.
         </p>
+        <p className="mt-2 text-[13px] text-ink-3">{approvalsSentence(approvals, catalogSize)}</p>
         <Link href="/fcc" className="mt-4 inline-flex h-10 items-center rounded-ctl border border-line bg-card px-4 text-sm font-medium hover:bg-sunk">
           Search FCC IDs
         </Link>

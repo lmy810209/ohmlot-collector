@@ -46,7 +46,7 @@
 - 본문·제목: **Schibsted Grotesk** (400/500/600/800)
 - 숫자·라벨·코드: **IBM Plex Mono** (400/500/600)
 - **Inter, Geist, Space Grotesk, Poppins 금지.** 2026년 기준 "AI가 만든 사이트" 신호로 읽힌다.
-- `body { font-variant-numeric: tabular-nums }` 필수. 가격이 세로로 정렬돼야 한다.
+- `font-variant-numeric: tabular-nums`는 **숫자 요소에만** 적용한다(`.num`, 모노 클래스, `.tnum`). body 전체에 걸면 Schibsted Grotesk의 `tnum`이 마침표·쉼표까지 숫자 폭으로 늘려 제목에 "robots ." 같은 공백이 생긴다. 가격 세로 정렬은 숫자 요소만으로 충분하다.
 - 제목 `letter-spacing: -.035em`, `text-wrap: balance`. 본문 `text-wrap: pretty`.
 - 크기: h1 `clamp(36px,5.4vw,58px)/800`, h2 20~24px/700, 본문 15px, 표 안 14px, 마이크로 라벨 10.5px 대문자 `letter-spacing:.1em`.
 

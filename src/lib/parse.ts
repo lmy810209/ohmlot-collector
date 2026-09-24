@@ -109,14 +109,6 @@ export function parseRegexHtml(html: string, source: PriceSource, date: string):
   return rows;
 }
 
-export interface FccGrant {
-  fcc_id: string;
-  grantee_code: string;
-  grant_date: string | null; // YYYY-MM-DD
-  description: string | null;
-  after_covered_list: boolean | null;
-}
-
 const MONTHS: Record<string, string> = {
   jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
   jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
@@ -126,183 +118,115 @@ export function normalizeDate(s: string): string | null {
   s = s.trim();
   let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (m) return `${m[1]}-${m[2]}-${m[3]}`;
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); // MM/DD/YYYY (FCC EAS)
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); // MM/DD/YYYY
   if (m) return `${m[3]}-${m[1].padStart(2, "0")}-${m[2].padStart(2, "0")}`;
-  m = s.match(/^([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})$/); // "Mar 3, 2025"
+  m = s.match(/^([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})$/); // "Mar 3, 2025" / "September 9, 2026"
   if (m && MONTHS[m[1].toLowerCase()]) return `${m[3]}-${MONTHS[m[1].toLowerCase()]}-${m[2].padStart(2, "0")}`;
   return null;
 }
 
-/** The array of grant rows inside a getFCCIDList response: either the body itself or the first array-valued property. */
-function findRows(raw: unknown): unknown[] | null {
-  if (Array.isArray(raw)) return raw;
-  if (raw && typeof raw === "object") {
-    for (const v of Object.values(raw as Record<string, unknown>)) if (Array.isArray(v)) return v;
-  }
-  return null;
+/* ---------- FCC Covered List: Conditional Approvals from PSHSB public notices ----------
+   Source: docs.fcc.gov/public/attachments/<DA>A1.txt (the .txt rendering of the public notice). Appendix B is a
+   three-column table (UAS | Routers | Robotic Devices, each with its own "Dates of Conditional Approval"
+   sub-column) that the .txt flattens to running text in row-major or column-major order depending on the
+   notice. We don't rely on column position: every "Month D, YYYY [– Month D, YYYY]" range in the appendix is
+   found in order, and the text between one range and the next is treated as the cell that owns the *next*
+   range (an empty gap means the previous cell prints a second range for a second product). Nothing beyond
+   that is inferred — company/model splitting is a best-effort heuristic and the verbatim cell is always kept
+   in `entry`, so a display can always fall back to it. */
+
+export type EquipmentType = "robotic_device" | "router" | "uas" | "unknown";
+export type NoticeParseStatus = "ok" | "no_appendix" | "parse_failed";
+
+export interface ConditionalApproval {
+  equipment_type: EquipmentType;
+  /** The table cell, verbatim (whitespace collapsed). Authoritative — always shown alongside any derived field. */
+  entry: string;
+  /** Heuristic split of `entry`; null when the split is not obvious. */
+  company: string | null;
+  models: string | null;
+  effective_from: string | null; // YYYY-MM-DD
+  effective_to: string | null; // null = no termination date printed (approval is open-ended)
+  /** Extra "Start – End" ranges printed under the same cell (multi-product / multi-period cells). */
+  extra_dates: { from: string | null; to: string | null }[];
 }
 
-/** Case- and separator-insensitive field lookup: "grantDate", "grant_date" and "GRANTDATE" all match "grantdate". */
-function field(row: Record<string, unknown>, ...names: string[]): unknown {
-  const wanted = new Set(names.map((n) => n.toLowerCase().replace(/_/g, "")));
-  for (const [k, v] of Object.entries(row)) if (wanted.has(k.toLowerCase().replace(/_/g, ""))) return v;
-  return undefined;
+/** Slice the Conditional Approvals appendix out of a notice's .txt; null when the notice has none. */
+export function extractConditionalApprovalsAppendix(text: string): string | null {
+  const m = text.match(/APPENDIX\s+B\s*\r?\n\s*Conditional Approvals/i);
+  if (!m || m.index == null) return null;
+  const rest = text.slice(m.index);
+  const end = rest.search(/\n\s*\*\s*Consistent with|\n\s*APPENDIX\s+C\b/i);
+  return end > 0 ? rest.slice(0, end) : rest;
 }
 
-/**
- * Parser for the FCC OET Laboratory Services API, getFCCIDList (KDB 953436).
- * The official schema PDF could not be fetched (context/fcc-api-notes.md §1), so this accepts the shapes
- * seen in the wild — a bare JSON array of rows, or an object wrapping that array — and matches field
- * names loosely. Rows are filtered to the grantee code; the earliest grant date per FCC ID is kept
- * (the original grant — later rows are Class II changes and the like). The untouched body is archived
- * by the collector so rows can be re-parsed once the schema is confirmed.
- */
-export function parseFccIdList(raw: unknown, granteeCode: string): FccGrant[] {
-  const code = granteeCode.toUpperCase();
-  const rows = findRows(raw);
-  if (!rows) throw new Error("unexpected response shape (no array of grant rows)");
-  const out = new Map<string, FccGrant>();
-  for (const r of rows) {
-    if (!r || typeof r !== "object") continue;
-    const row = r as Record<string, unknown>;
-    const fcc_id = String(field(row, "fccid", "fcc_id") ?? "").trim().toUpperCase();
-    if (!fcc_id || !fcc_id.startsWith(code)) continue;
-    const rawDate = field(row, "grantdate", "grant_date", "date");
-    const grant_date = rawDate == null ? null : normalizeDate(String(rawDate));
-    const prev = out.get(fcc_id);
-    if (!prev || (grant_date && (!prev.grant_date || grant_date < prev.grant_date))) {
-      out.set(fcc_id, {
-        fcc_id,
-        grantee_code: code,
-        grant_date,
-        description: null, // the API's applicationPurpose ("Original Equipment", …) is not a device description
-        after_covered_list: grant_date ? grant_date >= COVERED_LIST_DATE : null,
-      });
+const MONTH = "(?:January|February|March|April|May|June|July|August|September|October|November|December)";
+const DATE = `${MONTH}\\s+\\d{1,2},\\s+\\d{4}`;
+// The end date (and its leading dash) is fully optional: some notices print a bare start date with no
+// dash at all for an open-ended approval (DA-26-996), others print "Month D, YYYY –" with the dash but no
+// end date (DA-26-957). Making the whole "dash + end date" group optional, rather than just the end date,
+// handles both without merging the next cell's text into this one.
+const RANGE = new RegExp(`(${DATE})(?:\\s*[–—-]\\s*(${DATE}))?`, "g");
+const HEADER = "Dates of Conditional Approval";
+
+export function classifyEquipment(entry: string): EquipmentType {
+  if (/uncrewed|unmanned|aircraft|aerial|\bUAS\b/i.test(entry)) return "uas";
+  if (/robot/i.test(entry)) return "robotic_device";
+  if (/router|gateway|modem|mesh|wi-?fi|access point|repeater|mifi/i.test(entry)) return "router";
+  return "unknown";
+}
+
+function splitEntry(entry: string): { company: string | null; models: string | null } {
+  const poss = entry.match(/^(.+?)[’']s\s+(.+)$/);
+  let company: string | null = null;
+  let models: string | null = null;
+  if (poss) {
+    company = poss[1].trim();
+    models = poss[2].trim();
+  } else {
+    const tokens = entry.split(" ");
+    const i = tokens.findIndex((t) => /\d/.test(t));
+    if (i > 0) {
+      company = tokens.slice(0, i).join(" ");
+      models = tokens.slice(i).join(" ");
+    } else {
+      company = entry;
     }
   }
-  return [...out.values()];
-}
-
-/** Merge newly seen grants into the persistent registry, stamping first_seen. */
-export function mergeGrants(
-  registry: Record<string, FccGrant & { first_seen: string }>,
-  found: FccGrant[],
-  today: string,
-): { registry: Record<string, FccGrant & { first_seen: string }>; added: string[] } {
-  const added: string[] = [];
-  const next = { ...registry };
-  for (const g of found) {
-    if (!next[g.fcc_id]) {
-      next[g.fcc_id] = { ...g, first_seen: today };
-      added.push(g.fcc_id);
-    } else if (!next[g.fcc_id].grant_date && g.grant_date) {
-      next[g.fcc_id] = { ...next[g.fcc_id], grant_date: g.grant_date, after_covered_list: g.after_covered_list };
-    }
+  if (models) {
+    models = models.replace(/\s*(robotic platforms?|robotic devices?|routers?|Uncrewed Aircraft Systems?( \(UAS\))?|Unmanned Aerial Systems?)\s*$/i, "").trim() || null;
   }
-  return { registry: next, added };
+  return { company, models };
 }
 
-/* ---------- US regulatory status per model (data/models.json → us_status) ---------- */
-
-export interface UsStatus {
-  fcc_id: string | null;
-  grant_date: string | null; // YYYY-MM-DD
-  covered_list: "before" | "after" | "unknown";
-  conditional_approval: boolean | null;
-  conditional_approval_note: string;
-  last_verified: string; // YYYY-MM-DD, the day this block was last checked against FCC records
-  source_url: string | null; // FCC's own record for the FCC ID
-}
-
-/** The fields of a data/models.json row that us_status is derived from. */
-export interface ModelSeed {
-  id: string;
-  name: string;
-  manufacturer: string;
-  fcc_grantee_code: string | null;
-  fcc_ids: string[];
-  fcc_grant_date: string | null;
-  us_status?: UsStatus | null;
-}
-
-/**
- * DoW Conditional Approvals for advanced robotic devices, as published by the FCC (verbatim from the
- * public notices; see context/fcc-api-notes.md §3). Only these devices are exempt from the Covered List.
- */
-export const CONDITIONAL_APPROVALS = {
-  verified: "2026-09-18",
-  notice_url: "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
-  devices: [
-    { producer: "Husqvarna", models: ["305v IQ", "310v IQ", "420v IQ", "440v IQ"], since: "2026-09-09", notice_id: "DA 26-957", notice: "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf" },
-    { producer: "ANSCER", models: ["AR250", "AR650", "AR1250"], since: "2026-09-18", notice_id: "DA 26-996", notice: "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf" },
-  ],
-} as const;
-
-/** FCC's own equipment-authorization record for an FCC ID (grantee code + product code). */
-export function fccSourceUrl(fccId: string | null): string | null {
-  if (!fccId) return null;
-  const id = fccId.toUpperCase();
-  const [grantee, product] = id.includes("-") ? [id.slice(0, id.indexOf("-")), id.slice(id.indexOf("-") + 1)] : [id.slice(0, 5), id.slice(5)];
-  if (!grantee || !product) return null;
-  return `https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=${grantee}&product_code=${encodeURIComponent(product)}`;
-}
-
-function conditionalApprovalFor(model: Pick<ModelSeed, "name" | "manufacturer">) {
-  const maker = model.manufacturer.toLowerCase();
-  const name = model.name.toLowerCase();
-  return CONDITIONAL_APPROVALS.devices.find(
-    (d) => maker.includes(d.producer.toLowerCase()) && d.models.some((m) => name.includes(m.toLowerCase())),
-  );
-}
-
-/**
- * us_status for one model. The grant date comes from the collector's registry when it has the ID,
- * else from the seed row. covered_list is decided against COVERED_LIST_DATE; conditional_approval is
- * true only for devices on the FCC's published list (and false otherwise — the list was checked, not guessed).
- */
-export function buildUsStatus(model: ModelSeed, registry: Record<string, FccGrant>, verifiedOn: string): UsStatus {
-  const fcc_id = model.fcc_ids[0] ?? null;
-  const fromRegistry = model.fcc_ids.map((id) => registry[id]?.grant_date).find(Boolean) ?? null;
-  const grant_date = fromRegistry ?? model.fcc_grant_date ?? null;
-  const ca = conditionalApprovalFor(model);
-  return {
-    fcc_id,
-    grant_date,
-    covered_list: grant_date ? (grant_date < COVERED_LIST_DATE ? "before" : "after") : "unknown",
-    conditional_approval: ca ? true : false,
-    conditional_approval_note: ca
-      ? `DoW Conditional Approval since ${ca.since} (FCC ${ca.notice_id}).`
-      : `Not on the FCC's Robotic Devices Conditional Approvals list as of ${CONDITIONAL_APPROVALS.verified} (DA 26-996, Appendix B).`,
-    last_verified: verifiedOn,
-    source_url: fccSourceUrl(fcc_id),
-  };
-}
-
-/**
- * Recomputes us_status on every seed model. last_verified moves to `today` only for models whose grantee
- * code was actually fetched this run (`verifiedCodes`), or for all models when seeding by hand ("all").
- * Models that were not verified keep their previous block untouched so the date never lies.
- */
-export function syncUsStatus<M extends ModelSeed>(
-  models: M[],
-  registry: Record<string, FccGrant>,
-  today: string,
-  verifiedCodes: Set<string> | "all",
-): { models: M[]; changed: number } {
-  let changed = 0;
-  const out = models.map((m) => {
-    const verified = verifiedCodes === "all" || (m.fcc_grantee_code != null && verifiedCodes.has(m.fcc_grantee_code));
-    if (!verified && m.us_status) return m;
-    const next = buildUsStatus(m, registry, verified ? today : m.us_status?.last_verified ?? today);
-    const prev = m.us_status;
-    const same =
-      prev &&
-      prev.fcc_id === next.fcc_id && prev.grant_date === next.grant_date && prev.covered_list === next.covered_list &&
-      prev.conditional_approval === next.conditional_approval && prev.conditional_approval_note === next.conditional_approval_note &&
-      prev.last_verified === next.last_verified && prev.source_url === next.source_url;
-    if (same) return m;
-    changed++;
-    return { ...m, us_status: next };
-  });
-  return { models: out, changed };
+/** Parses one notice's Appendix B into Conditional Approval rows. Never guesses: unreadable → parse_failed. */
+export function parseConditionalApprovals(text: string): { status: NoticeParseStatus; approvals: ConditionalApproval[] } {
+  const appendix = extractConditionalApprovalsAppendix(text);
+  if (!appendix) return { status: "no_appendix", approvals: [] };
+  let t = appendix
+    .split(/\r?\n/)
+    .filter((l) => !/^\s*\d{1,3}\s*$/.test(l) && !/^\s*Federal Communications Commission/i.test(l) && !/^\s*DA \d\d-\d+\s*$/.test(l))
+    .join(" ")
+    .replace(/\s+/g, " ");
+  const hdr = t.lastIndexOf(HEADER);
+  if (hdr < 0) return { status: "parse_failed", approvals: [] };
+  t = t.slice(hdr + HEADER.length).replace(/^[#*]?\s*/, "");
+  const out: ConditionalApproval[] = [];
+  let last = 0;
+  let prev: ConditionalApproval | null = null;
+  for (const m of t.matchAll(RANGE)) {
+    const cell = t.slice(last, m.index).replace(/^[\s–—-]+/, "").trim(); // a stray leading dash from a skipped open-ended date
+    last = (m.index ?? 0) + m[0].length;
+    const from = normalizeDate(m[1]);
+    const to = m[2] ? normalizeDate(m[2]) : null;
+    if (!cell) {
+      if (prev) prev.extra_dates.push({ from, to });
+      continue;
+    }
+    const entry = cell.replace(/\s+/g, " ").trim();
+    const rec: ConditionalApproval = { equipment_type: classifyEquipment(entry), entry, ...splitEntry(entry), effective_from: from, effective_to: to, extra_dates: [] };
+    out.push(rec);
+    prev = rec;
+  }
+  return out.length ? { status: "ok", approvals: out } : { status: "parse_failed", approvals: [] };
 }

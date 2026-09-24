@@ -42,7 +42,7 @@ export interface UsStatus {
   grant_date: string | null; // YYYY-MM-DD
   covered_list: "before" | "after" | "unknown";
   conditional_approval: boolean | null;
-  conditional_approval_note: string;
+  conditional_approval_note: string | null;
   last_verified: string | null; // YYYY-MM-DD
   source_url: string | null;
 }
@@ -67,19 +67,44 @@ export interface PriceRow {
   flags: string[];
 }
 
-export interface FccGrant {
-  fcc_id: string;
-  grantee_code: string;
-  grant_date: string | null;
-  description: string | null;
-  after_covered_list: boolean | null;
-  first_seen?: string;
+/* ---------- FCC Covered List: Conditional Approvals (from data/fcc/conditional-approvals.json) ----------
+   Written weekly by src/fcc.ts, which parses PSHSB public notices from docs.fcc.gov — see
+   context/fcc-api-notes.md. Shape mirrors ApprovalRecord/ApprovalStore in src/fcc.ts exactly, since this is
+   the same JSON read as plain data (no shared TS module between the collector and the site). */
+export type EquipmentType = "robotic_device" | "router" | "uas" | "unknown";
+export interface ConditionalApproval {
+  id: string;
+  equipment_type: EquipmentType;
+  entry: string;
+  company: string | null;
+  models: string | null;
+  effective_from: string | null;
+  effective_to: string | null;
+  extra_dates: { from: string | null; to: string | null }[];
+  source_da: string;
+  source_url: string;
+  also_in: string[];
+  first_seen: string;
+}
+export interface NoticeStatus {
+  da: string;
+  released: string;
+  url: string;
+  fetched: string | null;
+  status: string;
+  records: number;
+  error: string | null;
+}
+export interface ApprovalStore {
+  updated: string;
+  notices: NoticeStatus[];
+  approvals: ConditionalApproval[];
 }
 
 interface Store {
   models: Model[];
   prices: PriceRow[];
-  grants: Record<string, FccGrant>;
+  approvals: ApprovalStore | null;
 }
 
 let store: Store | null = null;
@@ -105,12 +130,10 @@ function load(): Store {
         .filter((r) => !r.flags?.includes("placeholder_price"))
     : [];
 
-  const grantsPath = path.join(DATA_DIR, "fcc", "grants.json");
-  const grants = existsSync(grantsPath)
-    ? (JSON.parse(readFileSync(grantsPath, "utf8")) as Record<string, FccGrant>)
-    : {};
+  const approvalsPath = path.join(DATA_DIR, "fcc", "conditional-approvals.json");
+  const approvals = existsSync(approvalsPath) ? (JSON.parse(readFileSync(approvalsPath, "utf8")) as ApprovalStore) : null;
 
-  store = { models, prices, grants };
+  store = { models, prices, approvals };
   return store;
 }
 
@@ -122,8 +145,14 @@ export function getModel(id: string): Model | undefined {
   return load().models.find((m) => m.id === id);
 }
 
-export function getGrants(): Record<string, FccGrant> {
-  return load().grants;
+export function getApprovalStore(): ApprovalStore | null {
+  return load().approvals;
+}
+
+/** Robotic-device Conditional Approvals read from FCC public notices — the only Conditional Approvals data
+ * this site stores comes from this file, never from press coverage (context/task-fcc-2.md §3). */
+export function roboticApprovals(): ConditionalApproval[] {
+  return (load().approvals?.approvals ?? []).filter((a) => a.equipment_type === "robotic_device");
 }
 
 export function getPriceRows(modelId?: string): PriceRow[] {
@@ -233,8 +262,8 @@ export interface FccFact {
   grant_date: string | null;
   after_covered_list: boolean | null;
   description: string | null;
-  /** "registry" when the weekly FCC collector has seen the ID; "model" when only the seed data has it. */
-  source: "registry" | "model";
+  /** Always "model": FCC IDs are hand-verified seed data now, not collected automatically (context/task-fcc-2.md). */
+  source: "model";
   /** This ID's own position, with the model's conditional-approval flag applied. */
   status: UsStatusKind;
 }
@@ -243,19 +272,17 @@ function coveredList(date: string | null): UsStatus["covered_list"] {
   return date ? (date < COVERED_LIST_DATE ? "before" : "after") : "unknown";
 }
 
-/** FCC facts for a model: the collector's registry wins, the seed grant date is the fallback. */
+/** FCC facts for a model, from the hand-verified seed (`fcc_ids` + `us_status`). Never inferred or scraped. */
 export function fccFacts(model: Model): FccFact[] {
-  const grants = getGrants();
   const conditional = model.us_status?.conditional_approval ?? null;
   return model.fcc_ids.map((id) => {
-    const g = grants[id];
-    const date = g?.grant_date ?? model.fcc_grant_date ?? null;
+    const date = (id === model.us_status?.fcc_id ? model.us_status.grant_date : null) ?? model.fcc_grant_date ?? null;
     return {
       fcc_id: id,
       grant_date: date,
       after_covered_list: date ? date >= COVERED_LIST_DATE : null,
-      description: g?.description ?? null,
-      source: g ? "registry" : "model",
+      description: null,
+      source: "model",
       status: usStatusKind({ covered_list: coveredList(date), conditional_approval: conditional }),
     };
   });
@@ -292,13 +319,11 @@ export interface FccSearchItem {
   status: UsStatusKind;
 }
 
-/** Everything the /fcc search can match: every model FCC ID plus registry grants not tied to a model. */
+/** Everything the /fcc search can match: every FCC ID on file for a catalog model. */
 export function fccSearchItems(): FccSearchItem[] {
   const items: FccSearchItem[] = [];
-  const seen = new Set<string>();
   for (const m of getModels()) {
     for (const f of fccFacts(m)) {
-      seen.add(f.fcc_id);
       items.push({
         fcc_id: f.fcc_id,
         grantee_code: m.fcc_grantee_code,
@@ -311,21 +336,6 @@ export function fccSearchItems(): FccSearchItem[] {
         status: f.status,
       });
     }
-  }
-  for (const g of Object.values(getGrants())) {
-    if (seen.has(g.fcc_id)) continue;
-    items.push({
-      fcc_id: g.fcc_id,
-      grantee_code: g.grantee_code,
-      model_id: null,
-      model_name: null,
-      manufacturer: null,
-      grant_date: g.grant_date,
-      after_covered_list: g.after_covered_list,
-      description: g.description,
-      // Not one of our models, so no conditional-approval check: after-date grants stay "after".
-      status: usStatusKind({ covered_list: coveredList(g.grant_date), conditional_approval: null }),
-    });
   }
   return items.sort((a, b) => (b.grant_date ?? "").localeCompare(a.grant_date ?? "") || a.fcc_id.localeCompare(b.fcc_id));
 }

@@ -229,3 +229,29 @@ https://errors.edgesuite.net/18.e5263e17.1790178919.b3c60547
 - Husqvarna 첫 승인 보도: https://www.prnewswire.com/news-releases/husqvarna-group-first-to-receive-fcc-conditional-approval-for-foreign-manufactured-advanced-robotic-lawn-mowers-in-the-us-302876464.html
 - ANSCER 승인 보도: https://www.robotics247.com/article/anscer-robotics-secures-fcc-conditional-approval-for-three-amrs
 - 프로브 워크플로 실행: https://github.com/lmy810209/ohmlot-collector/actions/runs/35885072929 (아티팩트 `probe-fcc-api`, 3일 보관)
+
+## 7. (2단계 §4) Covered List 로봇 항목 — DA-26-786 / DA-26-789 원문 기준
+
+웹페이지(fcc.gov/supplychain/coveredlist)는 우리 환경에서 403이고 아카이브본만 읽히므로, 아래는 docs.fcc.gov의
+`DA-26-786A1.txt`·`DA-26-789A1.txt` 원문에서 그대로 옮긴 것이다.
+
+- **항목 문구** (DA-26-786 본문 및 부록 A, 2026-07-28 추가):
+  > “Foreign-produced advanced robotic devices, except advanced robotic devices which have been granted a Conditional
+  > Approval by DoW.”
+  같은 공지에 인버터 항목: “Foreign-produced power inverters, except power inverters which have been granted a
+  Conditional Approval by DoW or DHS”.
+- **정의의 소재**: 공지는 “We accept the National Security Determinations’ definitions of ‘foreign-produced,’ ‘power
+  inverters,’ and ‘advanced robotic devices,’ as provided in the Appendices below.” 라고만 하고, 정의 자체는 **부록 C
+  (Advanced Robotic Devices National Security Determination)**에 있다. 부록 C는 `.txt`판에 본문 텍스트가 없고(PDF도
+  스캔 이미지로 보임) 그래서 4.4 lb 기준 등 정의 원문은 확보하지 못했다. 정의 요약은 2차 출처(Morgan Lewis)뿐이므로
+  사이트에는 정의 세부를 쓰지 않는다.
+- **효과** (DA-26-786 “Equipment Authorization Impacts”): §2.903(a)에 따라 Covered List 등재 장비는 equipment
+  authorization을 받을 수 없고, §2.911에 따라 모든 신청은 “covered equipment”가 아님을 인증해야 한다. 공지는 기존
+  승인 모델의 판매·사용을 금지하지 않는다(팩트시트 동일).
+- **조건부 승인 반영 방식** (DA-26-786): “If we receive a further specific determination from DoW or DHS … we will
+  further update the Covered List.” → 이후 DA-26-957(9/9), DA-26-996(9/18)이 부록 B에 로봇 승인을 추가.
+- **DA-26-789 (OET)**: 2026-07-28 이전에 승인된 “Covered Advanced Robotic Devices”에 대해 §§2.932(b)/2.1043(b)의
+  Class I·II permissive change 금지를 소프트웨어·펌웨어 업데이트에 한해 최소 2029-01-01까지 유예. 즉 기존 승인 로봇은
+  보안 패치·호환성 업데이트를 계속 받을 수 있다.
+- **추가 공지 번호** (docs.fcc.gov 순차 확인, 2026-09-24): DA-26-983·984(9/15, 조건부 승인 관련, 로봇 없음),
+  **DA-26-996(9/18, ANSCER Robotics AR250/AR650/AR1250 추가)**. `config/fcc-notices.json`에 996을 추가했다.

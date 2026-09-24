@@ -34,10 +34,10 @@
       "fcc_id": "2A5PE-YUSHU008",
       "grant_date": "2025-03-03",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU008"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2A5PE&product_code=YUSHU008"
     }
   },
   {
@@ -74,10 +74,10 @@
       "fcc_id": "2A5PE-YUSHU010",
       "grant_date": "2026-06-22",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU010"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2A5PE&product_code=YUSHU010"
     }
   },
   {
@@ -112,9 +112,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -152,10 +152,10 @@
       "fcc_id": "2A5PE-YUSHU012",
       "grant_date": "2026-06-30",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU012"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2A5PE&product_code=YUSHU012"
     }
   },
   {
@@ -193,10 +193,10 @@
       "fcc_id": "2A5PE-YUSHU004",
       "grant_date": "2024-05-27",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU004"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2A5PE&product_code=YUSHU004"
     }
   },
   {
@@ -234,10 +234,10 @@
       "fcc_id": "2A5PE-YUSHU004",
       "grant_date": "2024-05-27",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU004"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2A5PE&product_code=YUSHU004"
     }
   },
   {
@@ -275,10 +275,10 @@
       "fcc_id": "2A5PE-YUSHU004",
       "grant_date": "2024-05-27",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU004"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2A5PE&product_code=YUSHU004"
     }
   },
   {
@@ -312,9 +312,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -355,10 +355,10 @@
       "fcc_id": "2A5PE-YUSHU001",
       "grant_date": "2022-05-05",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2A5PE&product_code=YUSHU001"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2A5PE&product_code=YUSHU001"
     }
   },
   {
@@ -392,9 +392,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -430,9 +430,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -466,9 +466,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -503,9 +503,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -539,9 +539,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -574,9 +574,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -613,10 +613,10 @@
       "fcc_id": "2BTPT-LX2501",
       "grant_date": "2026-04-17",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2BTPT&product_code=LX2501"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2BTPT&product_code=LX2501"
     }
   },
   {
@@ -652,9 +652,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -688,9 +688,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -724,9 +724,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -760,9 +760,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -796,9 +796,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -833,9 +833,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -870,9 +870,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -905,9 +905,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -939,9 +939,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -976,10 +976,10 @@
       "fcc_id": "2AWR5-KY004LN01",
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2AWR5&product_code=KY004LN01"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2AWR5&product_code=KY004LN01"
     }
   },
   {
@@ -1016,10 +1016,10 @@
       "fcc_id": "2AAIC00010",
       "grant_date": "2018-11-15",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2AAIC&product_code=00010"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2AAIC&product_code=00010"
     }
   },
   {
@@ -1052,9 +1052,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   },
@@ -1092,10 +1092,10 @@
       "fcc_id": "2BKMIDIGITV4",
       "grant_date": "2025-09-12",
       "covered_list": "before",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
-      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&grantee_code=2BKMI&product_code=DIGITV4"
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": "2026-09-23",
+      "source_url": "https://apps.fcc.gov/oetcf/eas/reports/GenericSearchResult.cfm?RequestTimeout=500&calledFromFrame=N&grantee_code=2BKMI&product_code=DIGITV4"
     }
   },
   {
@@ -1128,9 +1128,9 @@
       "fcc_id": null,
       "grant_date": null,
       "covered_list": "unknown",
-      "conditional_approval": false,
-      "conditional_approval_note": "Not on the FCC's Robotic Devices Conditional Approvals list as of 2026-09-18 (DA 26-996, Appendix B).",
-      "last_verified": "2026-09-24",
+      "conditional_approval": null,
+      "conditional_approval_note": null,
+      "last_verified": null,
       "source_url": null
     }
   }

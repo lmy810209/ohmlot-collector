@@ -2,7 +2,7 @@ import { collectPrices } from "./prices.ts";
 import { collectFcc } from "./fcc.ts";
 import { todayUTC } from "./lib/io.ts";
 
-// `prices` runs daily (daily.yml). `fcc` runs on demand (fcc.yml; weekly once the API answers from a runner). `all` is for local runs.
+// `prices` runs daily (daily.yml). `fcc` runs weekly + manually (fcc.yml). `all` is for local runs.
 const which = process.argv[2] ?? "all";
 const date = process.env.COLLECT_DATE ?? todayUTC();
 
@@ -16,10 +16,14 @@ if (which === "all" || which === "prices") {
 }
 if (which === "all" || which === "fcc") {
   const r = await collectFcc(date);
-  console.log(`[fcc] ${r.total} grants in registry, ${r.added.length} new, ${r.errors.length} errors${r.wrote ? `, ${r.modelsUpdated} models re-verified` : " — nothing written"}`);
-  r.added.forEach((id) => console.log("   NEW", id));
+  const robotic = r.approvals.filter((a) => a.equipment_type === "robotic_device");
+  console.log(
+    `[fcc] ${r.notices.length} notices, ${r.approvals.length} conditional approvals on file (${robotic.length} robotic)${r.wrote ? "" : " — nothing readable, nothing written"}`,
+  );
+  r.notices.forEach((n) => console.log(`   ${n.da} ${n.status}${n.records ? ` (${n.records} rows)` : ""}${n.error ? ` ${n.error}` : ""}`));
+  robotic.forEach((a) => console.log(`   ROBOT ${a.entry} — from ${a.effective_from ?? "?"} (${a.source_da})`));
   r.errors.forEach((e) => console.warn("  ", e));
-  // A manual FCC run should show red when no source could be read; `all` (local) stays green for prices.
+  // A manual/weekly FCC run should show red when no notice could be read; `all` (local) stays green for prices.
   if (which === "fcc" && !r.wrote) failed = true;
 }
 process.exit(failed ? 1 : 0);
