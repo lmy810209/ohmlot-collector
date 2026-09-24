@@ -255,3 +255,46 @@ https://errors.edgesuite.net/18.e5263e17.1790178919.b3c60547
   보안 패치·호환성 업데이트를 계속 받을 수 있다.
 - **추가 공지 번호** (docs.fcc.gov 순차 확인, 2026-09-24): DA-26-983·984(9/15, 조건부 승인 관련, 로봇 없음),
   **DA-26-996(9/18, ANSCER Robotics AR250/AR650/AR1250 추가)**. `config/fcc-notices.json`에 996을 추가했다.
+
+## 8. task-fcc-3.md 대응: docs.fcc.gov `.txt`를 버리고 PDF 좌표 기반 파서로 교체 (2026-09-24)
+
+§1(2단계, 커밋 8612fd3)에서 만든 `.txt` 기반 파서는 실사용 데이터로 검증하니 항목 경계가 깨져 있었다
+(task-fcc-3.md가 정확히 지적: Askey/Ascento, Verizon/Air VEV 경계 침범, "47건"은 신뢰 불가).
+원인은 docs.fcc.gov의 `.txt`가 3열(UAS/Router/Robotic) 표를 컬럼 구분 없이 한 줄 흐름으로 압축하면서,
+회사명이 "'s"로 끝나지 않는 셀·같은 회사가 두 번 나오는 셀 경계를 정규식으로는 복원할 수 없게 만든다는 것.
+
+**교체한 방식**: 같은 PDF를 `pdfjs-dist`(Mozilla PDF.js, 순수 JS, 시스템 바이너리 불필요)로 직접 열어
+각 텍스트 조각의 실제 좌표(x, y)를 읽는다. 부록 B 헤더 행에서 "Robotic Devices" 열의 x 시작점과
+그 옆 "Dates of … Approval" 열의 x 시작점을 매번 헤더 텍스트에서 찾아내므로(하드코딩된 픽셀 값 없음),
+**Robotic Devices 열에 속한 텍스트만** 좌표로 골라내고 UAS·Router 열은 애초에 읽지 않는다. 이것으로
+task §3의 "분류는 섹션 제목에서, 항목 문자열에서 추측하면 안 된다"가 구조적으로 보장된다 — 애초에
+Robotic Devices 열 밖의 텍스트는 로봇 레코드가 될 기회조차 없다.
+
+같은 열 안에서 항목 경계는 "날짜가 그 항목의 **첫 줄**과 같은 행(y좌표)에 인쇄된다"는 실제 표 레이아웃을
+이용해 해결했다(Husqvarna AB 305v / September 9, 2026 이 같은 y, ANSCER Robotics / September 18, 2026 도
+같은 y — pdfplumber로 원본 PDF 좌표를 직접 찍어 확인). 즉 항목 i의 전체 텍스트는 "그 항목 날짜의 y부터
+다음 항목 날짜의 y 직전까지, Robotic 열에 있는 모든 줄"이다. 파이썬 pdfplumber로 먼저 이 모델을 검증한
+뒤 (Python 의존성 없이) `pdfjs-dist`로 동일 로직을 `src/lib/pdf.ts`에 구현했다.
+
+**검증 결과** (실제 DA-26-957/DA-26-996 PDF, `npm test`):
+- DA-26-957: Husqvarna 1건, 완전한 텍스트("Husqvarna AB 305v IQ, 310v IQ, 420v IQ, and 440v IQ robotic
+  platforms"), Askey/Verizon 등 다른 열 텍스트 전혀 섞이지 않음.
+- DA-26-996: Husqvarna + ANSCER 2건, 마찬가지로 완전하고 깨끗함. `also_in`으로 두 공지의 Husqvarna가
+  1건으로 정확히 합쳐짐.
+- DA-26-786(로봇 표 없이 다른 내용의 Appendix B)과 DA-26-789(Appendix B 자체 없음)는 정확히
+  `no_appendix`로 구분됨 — "APPENDIX B" 뒤에 "Conditional Approvals" 부제가 오는지까지 확인해서 판정.
+
+**§4 정합성 검사**: `suspiciousReasons()`(src/fcc.ts)가 회사명이 숫자/쉼표로 시작하거나 "routers"/
+"Series"/"Gateway" 같은 제품 단어를 포함하거나, 항목에 "'s"가 두 번 나오는 등 병합 흔적을 검사한다.
+하나라도 걸리면 그 레코드는 저장하지 않고 경고로 남기며, `src/run.ts`가 경고 발생 시 `fcc-collect`를
+실패시킨다(가격 수집은 영향 없음). `npm run fcc:review`로 저장된 레코드 전체를 사람이 읽는 형식으로
+출력해 확인할 수 있다.
+
+**§5 모델 대조**: `src/fcc.ts`가 매 실행마다 각 조건부 승인 레코드의 회사명을 `data/models.json`의
+`manufacturer`와 대조해 `matched_manufacturer`를 채운다. 웹은 `web/lib/data.ts`의
+`conditionalApprovalCheck(model)`로 "공지를 읽어서 확인했고 목록에 없음"(state: `not_on_list`, 날짜 포함)과
+"아직 한 번도 확인 안 됨"(state: `not_checked`)을 구분해 상세 페이지의 "Conditional approval" 행에
+그대로 반영한다.
+
+원문 PDF는 이제 `.txt` 대신 그대로 `data/fcc/raw/<DA>A1.pdf`에 저장한다(재검증용). `test/fixtures/`의
+`.txt` 픽스처는 PDF 픽스처로 교체했다.

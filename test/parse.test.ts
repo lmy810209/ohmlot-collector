@@ -1,17 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import {
-  classifyEquipment,
-  normalizeDate,
-  parseConditionalApprovals,
-  parseRegexHtml,
-  parseShopifyProduct,
-  withUsMarket,
-  type PriceSource,
-} from "../src/lib/parse.ts";
+import { readFile } from "node:fs/promises";
+import { normalizeDate, parseRegexHtml, parseShopifyProduct, withUsMarket, type PriceSource } from "../src/lib/parse.ts";
+import { extractRoboticApprovals } from "../src/lib/pdf.ts";
 
-const fixture = (name: string) => readFileSync(new URL(`./fixtures/${name}`, import.meta.url), "utf8");
+// Node's Buffer is a Uint8Array subclass, but pdfjs checks the exact constructor, so re-wrap it.
+const fixture = async (name: string) => new Uint8Array(await readFile(new URL(`./fixtures/${name}`, import.meta.url)));
 
 const go2: PriceSource = {
   seller: "unitree-official",
@@ -127,52 +121,51 @@ test("dates normalize from FCC / notice formats", () => {
   assert.equal(normalizeDate("garbage"), null);
 });
 
-test("DA-26-957 (flattened .txt): Appendix B parses, Husqvarna robotic row is exact", () => {
-  const { status, approvals } = parseConditionalApprovals(fixture("DA-26-957A1.txt"));
+// ---------- FCC Conditional Approvals: the real bug from task-fcc-3.md ----------
+// The old docs.fcc.gov .txt-based parser merged adjacent table cells (e.g. Askey's own second entry bled
+// into Ascento's, and a phantom "Verizon" record was invented from text that was really part of Arcadyan's
+// product list — see context/fcc-api-notes.md §8-9). These tests run against the *real* notice PDFs, read via
+// src/lib/pdf.ts's column-coordinate extraction, and assert the exact, complete, correctly-split text — not
+// just "it didn't crash".
+
+test("DA-26-957.pdf: Appendix B has one robotic entry, Husqvarna, complete and unmerged", async () => {
+  const { status, approvals } = await extractRoboticApprovals(await fixture("DA-26-957A1.pdf"));
   assert.equal(status, "ok");
-  assert.ok(approvals.length >= 25, `expected many rows, got ${approvals.length}`);
-  const robotic = approvals.filter((a) => a.equipment_type === "robotic_device");
   assert.deepEqual(
-    robotic.map((a) => [a.entry, a.company, a.models, a.effective_from, a.effective_to]),
+    approvals.map((a) => [a.entry, a.company, a.models, a.effective_from, a.effective_to]),
     [["Husqvarna AB 305v IQ, 310v IQ, 420v IQ, and 440v IQ robotic platforms", "Husqvarna AB", "305v IQ, 310v IQ, 420v IQ, and 440v IQ", "2026-09-09", null]],
   );
-  const netgear = approvals.find((a) => a.entry.startsWith("Netgear, Inc."));
-  assert.ok(netgear && netgear.equipment_type === "router" && netgear.company === "Netgear, Inc.");
-  assert.equal(netgear.effective_from, "2026-04-14");
-  assert.equal(netgear.effective_to, "2027-10-01");
-  const sifly = approvals[0];
-  assert.equal(sifly.entry, "SiFly Aviation, Inc. Q12 Uncrewed Aircraft System");
-  assert.equal(sifly.equipment_type, "uas");
-  assert.equal(sifly.effective_from, "2026-03-17");
 });
 
-test("DA-26-996 (line-per-cell .txt): both robotic approvals, ANSCER dated 2026-09-18", () => {
-  const { status, approvals } = parseConditionalApprovals(fixture("DA-26-996A1.txt"));
+test("DA-26-996.pdf: two robotic entries, Husqvarna and ANSCER, each complete and not bleeding into the other", async () => {
+  const { status, approvals } = await extractRoboticApprovals(await fixture("DA-26-996A1.pdf"));
   assert.equal(status, "ok");
-  const robotic = approvals.filter((a) => a.equipment_type === "robotic_device");
   assert.deepEqual(
-    robotic.map((a) => [a.company, a.models, a.effective_from]),
+    approvals.map((a) => [a.company, a.models, a.effective_from]),
     [
       ["Husqvarna AB", "305v IQ, 310v IQ, 420v IQ, and 440v IQ", "2026-09-09"],
       ["ANSCER Robotics", "AR250, AR650, and AR1250", "2026-09-18"],
     ],
   );
+  // The specific corruption task-fcc-3.md §1 found: Askey/Ascento and Verizon/Air VEV text must never appear
+  // anywhere in what we extract, because we only read the Robotic Devices column in the first place.
+  for (const a of approvals) {
+    assert.doesNotMatch(a.entry, /Askey|Ascento|Verizon|Arcadyan|Air VEV/);
+  }
 });
 
-test("DA-26-786 (Covered List addition, no Appendix B table) → no_appendix, nothing invented", () => {
-  const r = parseConditionalApprovals(fixture("DA-26-786A1.txt"));
+test("DA-26-786.pdf: has an Appendix B, but it's a National Security Determination, not the approvals table → no_appendix", async () => {
+  const r = await extractRoboticApprovals(await fixture("DA-26-786A1.pdf"));
   assert.equal(r.status, "no_appendix");
   assert.equal(r.approvals.length, 0);
 });
 
-test("appendix present but unreadable → parse_failed", () => {
-  const r = parseConditionalApprovals("APPENDIX B\nConditional Approvals\nUpdated someday\n\nsome text without any table");
-  assert.equal(r.status, "parse_failed");
+test("DA-26-789.pdf: no Appendix B at all → no_appendix, nothing invented", async () => {
+  const r = await extractRoboticApprovals(await fixture("DA-26-789A1.pdf"));
+  assert.equal(r.status, "no_appendix");
   assert.equal(r.approvals.length, 0);
 });
 
-test("equipment classification: UAS wins over 'Robotics' in a company name", () => {
-  assert.equal(classifyEquipment("Real-Time Robotics, Inc.’s HERA Tactical Uncrewed Aircraft Systems Platform"), "uas");
-  assert.equal(classifyEquipment("ANSCER Robotics AR250, AR650, and AR1250 robotic platforms"), "robotic_device");
-  assert.equal(classifyEquipment("Sercomm Corporation’s Air4992 Wi-Fi 7 Router"), "router");
+test("not a PDF → throws rather than silently returning nothing", async () => {
+  await assert.rejects(() => extractRoboticApprovals(new TextEncoder().encode("not a pdf")));
 });

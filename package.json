@@ -9,10 +9,12 @@
     "collect:prices": "tsx src/run.ts prices",
     "collect:fcc": "tsx src/run.ts fcc",
     "test": "tsx --test test/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "fcc:review": "tsx src/fcc-review.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0"
+    "@supabase/supabase-js": "^2.45.0",
+    "pdfjs-dist": "^6.3.289"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

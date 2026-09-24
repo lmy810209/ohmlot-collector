@@ -81,10 +81,10 @@ export function UsRegulatoryStatus({ model, facts }: { model: Model; facts: FccF
           <FccLink href={FCC_DOCS.coveredListNotice}>Covered List notice (DA 26-786)</FccLink>
         </Row>
         <Row label="Conditional approval">
-          {s.conditional_approval === true ? "Yes" : s.conditional_approval === false ? "No" : "Not checked"}
+          {s.conditional_approval === true ? "Yes" : s.conditional_approval === false ? "Not on the list" : "Not checked yet"}
           {s.conditional_approval_note ? <span className="text-ink-2"> · {humanizeIsoDates(s.conditional_approval_note)}</span> : null}
           {" — "}
-          <FccLink href={FCC_DOCS.conditionalApprovals}>Conditional Approvals list (DA 26-996)</FccLink>
+          <FccLink href={FCC_DOCS.conditionalApprovals}>Conditional Approvals list</FccLink>
         </Row>
         <Row label="Last verified">
           {s.last_verified ? <span className="num">{fmtDate(s.last_verified)}</span> : <span className="text-ink-2">Not verified against FCC records yet</span>}

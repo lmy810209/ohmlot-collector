@@ -29,6 +29,27 @@ export async function fetchText(url: string, tries = 3): Promise<string> {
   throw last;
 }
 
+/** Same retry/error policy as fetchText, for a binary body (PDFs). */
+export async function fetchBinary(url: string, tries = 3): Promise<Uint8Array> {
+  let last: unknown;
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await fetch(url, {
+        headers: { "user-agent": UA, accept: "application/pdf,*/*" },
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (res.ok) return new Uint8Array(await res.arrayBuffer());
+      const cf = res.headers.get("cf-mitigated");
+      last = new Error(`HTTP ${res.status}${cf ? ` (cloudflare ${cf})` : ""} ${url}`);
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) break;
+    } catch (e) {
+      last = e;
+    }
+    if (i < tries - 1) await sleep(2000 * (i + 1));
+  }
+  throw last;
+}
+
 export async function readJson<T>(path: string, fallback: T): Promise<T> {
   try {
     return JSON.parse(await readFile(path, "utf8")) as T;

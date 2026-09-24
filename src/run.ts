@@ -16,14 +16,18 @@ if (which === "all" || which === "prices") {
 }
 if (which === "all" || which === "fcc") {
   const r = await collectFcc(date);
-  const robotic = r.approvals.filter((a) => a.equipment_type === "robotic_device");
   console.log(
-    `[fcc] ${r.notices.length} notices, ${r.approvals.length} conditional approvals on file (${robotic.length} robotic)${r.wrote ? "" : " — nothing readable, nothing written"}`,
+    `[fcc] ${r.notices.length} notices, ${r.approvals.length} robotic-device Conditional Approvals on file${r.wrote ? "" : " — nothing readable, nothing written"}`,
   );
   r.notices.forEach((n) => console.log(`   ${n.da} ${n.status}${n.records ? ` (${n.records} rows)` : ""}${n.error ? ` ${n.error}` : ""}`));
-  robotic.forEach((a) => console.log(`   ROBOT ${a.entry} — from ${a.effective_from ?? "?"} (${a.source_da})`));
+  r.approvals.forEach((a) => console.log(`   ROBOT ${a.entry} — from ${a.effective_from ?? "?"} (${a.source_da}${a.also_in.length ? `, also ${a.also_in.join(", ")}` : ""})${a.matched_manufacturer ? ` — matches ${a.matched_manufacturer}` : ""}`));
   r.errors.forEach((e) => console.warn("  ", e));
-  // A manual/weekly FCC run should show red when no notice could be read; `all` (local) stays green for prices.
-  if (which === "fcc" && !r.wrote) failed = true;
+  // task-fcc-3.md §4: a consistency-check warning means a record looked like a parsing artifact and was
+  // dropped rather than published (see suspiciousReasons in src/fcc.ts). That must not pass silently — a
+  // weekly/manual FCC run fails so it gets looked at, even though prices and the rest of the site are fine.
+  r.warnings.forEach((w) => console.warn("  [consistency]", w));
+  // A manual/weekly FCC run should show red when no notice could be read, or a record was rejected. `all`
+  // (local) stays green for prices so a local `npm run collect` isn't blocked by FCC-side issues.
+  if (which === "fcc" && (!r.wrote || r.warnings.length > 0)) failed = true;
 }
 process.exit(failed ? 1 : 0);

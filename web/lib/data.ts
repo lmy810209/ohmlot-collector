@@ -71,10 +71,9 @@ export interface PriceRow {
    Written weekly by src/fcc.ts, which parses PSHSB public notices from docs.fcc.gov — see
    context/fcc-api-notes.md. Shape mirrors ApprovalRecord/ApprovalStore in src/fcc.ts exactly, since this is
    the same JSON read as plain data (no shared TS module between the collector and the site). */
-export type EquipmentType = "robotic_device" | "router" | "uas" | "unknown";
 export interface ConditionalApproval {
   id: string;
-  equipment_type: EquipmentType;
+  equipment_type: "robotic_device";
   entry: string;
   company: string | null;
   models: string | null;
@@ -85,6 +84,8 @@ export interface ConditionalApproval {
   source_url: string;
   also_in: string[];
   first_seen: string;
+  /** Manufacturer name from this catalog the record's company text matched, when it does. */
+  matched_manufacturer: string | null;
 }
 export interface NoticeStatus {
   da: string;
@@ -150,9 +151,28 @@ export function getApprovalStore(): ApprovalStore | null {
 }
 
 /** Robotic-device Conditional Approvals read from FCC public notices — the only Conditional Approvals data
- * this site stores comes from this file, never from press coverage (context/task-fcc-2.md §3). */
+ * this site stores comes from this file, never from press coverage (context/task-fcc-2.md §3). Every stored
+ * record already is a robotic device (src/lib/pdf.ts only reads that one column of Appendix B). */
 export function roboticApprovals(): ConditionalApproval[] {
-  return (load().approvals?.approvals ?? []).filter((a) => a.equipment_type === "robotic_device");
+  return load().approvals?.approvals ?? [];
+}
+
+export type ConditionalApprovalCheck =
+  | { state: "not_checked" }
+  | { state: "not_on_list"; asOf: string }
+  | { state: "approved"; asOf: string; approval: ConditionalApproval };
+
+/**
+ * task-fcc-3.md §5: "확인 안 됨" (the weekly notice collector has never run) is a different fact from "checked
+ * and this manufacturer isn't on the list" (it has run, and found no match) — conflating them was the whole
+ * complaint. Matches by manufacturer name against the same substring rule src/fcc.ts uses when it stamps
+ * matched_manufacturer, so a model matches here exactly when its own manufacturer produced that stamp.
+ */
+export function conditionalApprovalCheck(model: Model): ConditionalApprovalCheck {
+  const store = getApprovalStore();
+  if (!store) return { state: "not_checked" };
+  const approval = store.approvals.find((a) => a.matched_manufacturer === model.manufacturer);
+  return approval ? { state: "approved", asOf: store.updated, approval } : { state: "not_on_list", asOf: store.updated };
 }
 
 export function getPriceRows(modelId?: string): PriceRow[] {
@@ -293,18 +313,28 @@ export function fccFacts(model: Model): FccFact[] {
  * from the registry / seed grant date with conditional approval and last_verified left unknown.
  */
 export function modelUsStatus(model: Model): UsStatus {
-  if (model.us_status) return model.us_status;
-  const facts = fccFacts(model);
-  const date = facts.find((f) => f.grant_date)?.grant_date ?? null;
-  return {
+  const base: UsStatus = model.us_status ?? {
     fcc_id: model.fcc_ids[0] ?? null,
-    grant_date: date,
-    covered_list: coveredList(date),
+    grant_date: fccFacts(model).find((f) => f.grant_date)?.grant_date ?? null,
+    covered_list: coveredList(fccFacts(model).find((f) => f.grant_date)?.grant_date ?? null),
     conditional_approval: null,
-    conditional_approval_note: "",
+    conditional_approval_note: null,
     last_verified: null,
     source_url: null,
   };
+  // task-fcc-3.md §5: a hand-set true/false in the seed always wins (a human overrode it); otherwise fill it
+  // live from the weekly-collected Conditional Approvals list, so "checked, not on the list" and "never
+  // checked" read differently instead of both landing on the same "Not checked" text.
+  if (base.conditional_approval == null) {
+    const check = conditionalApprovalCheck(model);
+    if (check.state === "approved") {
+      return { ...base, conditional_approval: true, conditional_approval_note: `DoW Conditional Approval since ${check.approval.effective_from ?? "an unspecified date"} (FCC ${check.approval.source_da}), as of ${check.asOf}.` };
+    }
+    if (check.state === "not_on_list") {
+      return { ...base, conditional_approval: false, conditional_approval_note: `Not on the FCC's Robotic Devices Conditional Approvals list as of ${check.asOf}.` };
+    }
+  }
+  return base;
 }
 
 export interface FccSearchItem {
