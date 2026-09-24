@@ -9,7 +9,7 @@ import { Delta } from "./Delta";
 import { FccLine } from "./FccLine";
 import { PriceChart } from "./PriceChart";
 import type { RobotDetail } from "@/lib/data";
-import { CATEGORY_SINGULAR, CHART_MIN_SNAPSHOTS, fmtDate, fmtDay, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
+import { CATEGORY_SINGULAR, CHART_MIN_SNAPSHOTS, fmtDate, fmtDay, launchPriceNote, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
 
 function subscribe(cb: () => void) {
   const mq = window.matchMedia("(max-width: 639px)");
@@ -34,6 +34,7 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
   const cheapest = deltas.filter((d) => d.kind === "purchase").sort((a, b) => a.price_usd - b.price_usd)[0];
   const headDelta = cheapest && cheapest.from != null ? { amount: cheapest.price_usd - cheapest.from, pct: cheapest.from ? ((cheapest.price_usd - cheapest.from) / cheapest.from) * 100 : 0 } : null;
   const snapshots = detail?.history.dates.length ?? 0;
+  const launchNote = m ? launchPriceNote(m) : null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -90,8 +91,14 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
                 </div>
                 {!tracked ? (
                   <p className="mt-1 text-[13px] text-ink-2">
-                    Not tracked daily — {m.tracking_status === "announced" ? `announced${m.expected_launch ? `, ${m.expected_launch}` : ""}, not yet available` : (m.listed_reason ?? "no public price found")}.
-                    {" "}The range above is the manufacturer&rsquo;s published list price.
+                    Not tracked daily — {m.tracking_status === "announced" ? `announced${m.expected_launch ? `, ${m.expected_launch}` : ""}, not yet available` : (m.listed_reason ?? "no public price found")}.{" "}
+                    {launchNote ? (
+                      launchNote
+                    ) : m.price_provenance === "vendor_page" ? (
+                      `The range above was checked on a real sales page${m.price_provenance_date ? ` (${m.price_provenance_date})` : ""}, not from the collector.`
+                    ) : (
+                      "The range above is the manufacturer’s published list price."
+                    )}
                   </p>
                 ) : (
                   <ul className="mt-1 divide-y divide-line-soft">

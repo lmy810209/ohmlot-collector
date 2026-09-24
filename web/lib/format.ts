@@ -11,7 +11,7 @@ export const CHART_MIN_SNAPSHOTS = 7;
  * hours old — the daily run is scheduled once every 24h, so 36h means at least one full run was missed. */
 export const STALE_HOURS = 36;
 
-export type Priced = Pick<Model, "price_model" | "price_usd_min" | "price_usd_max" | "subscription_usd_month">;
+export type Priced = Pick<Model, "price_model" | "price_usd_min" | "price_usd_max" | "subscription_usd_month" | "price_provenance" | "price_provenance_date" | "price_provenance_source">;
 
 export function usd(n: number): string {
   return new Intl.NumberFormat("en-US", {
@@ -26,12 +26,37 @@ export function rangeText(min: number, max: number): string {
   return min === max ? usd(min) : `${usd(min)}–${usd(max)}`;
 }
 
-/** Published purchase price: "$1,600–$4,500", "$13,500" or "Quote". Subscriptions are labelled separately. */
+/**
+ * Published purchase price: "$1,600–$4,500", "$13,500" or "Quote". Subscriptions are labelled separately.
+ *
+ * task-prelaunch.md §A.2: an unverified ("press" or "unknown" provenance) price never appears here as a bare
+ * number — that's exactly the standalone-number exposure the task calls out. It returns "Not verified"
+ * instead; the actual figure, with its full citation and caveat, only ever appears through launchPriceNote
+ * below, in the one place a page chooses to show it.
+ */
 export function purchaseRange(m: Priced): string {
+  if (m.price_provenance === "press" || m.price_provenance === "unknown") return "Not verified";
   if (m.price_model === "quote" || (m.price_usd_min == null && m.price_usd_max == null)) return "Quote";
   const min = m.price_usd_min ?? (m.price_usd_max as number);
   const max = m.price_usd_max ?? min;
   return rangeText(min, max);
+}
+
+/**
+ * task-prelaunch.md §A.2's exact required sentence shape for a "press"/"unknown" price, e.g. "Launch price
+ * (press release, 2025-03): $5,999 — not verified, not current". Null for "observed"/"vendor_page" (nothing
+ * to disclaim) or when there's no price at all to disclaim in the first place. This is the *only* place an
+ * unverified number is allowed to appear on the site.
+ */
+export function launchPriceNote(m: Priced): string | null {
+  if (m.price_provenance !== "press" && m.price_provenance !== "unknown") return null;
+  if (m.price_usd_min == null && m.price_usd_max == null) return null;
+  const min = m.price_usd_min ?? (m.price_usd_max as number);
+  const max = m.price_usd_max ?? min;
+  const figure = rangeText(min, max);
+  const source = m.price_provenance_source ?? (m.price_provenance === "press" ? "press release" : "source unknown");
+  const cite = m.price_provenance_date ? `${source}, ${m.price_provenance_date}` : source;
+  return `Launch price (${cite}): ${figure} — not verified, not current.`;
 }
 
 /** "$499/mo subscription" or null. */

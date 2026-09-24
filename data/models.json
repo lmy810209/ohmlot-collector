@@ -42,7 +42,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-g1.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl."
+    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-g1.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "unitree-r1",
@@ -86,7 +89,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-r1.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl."
+    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-r1.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "unitree-h1",
@@ -128,7 +134,10 @@
     "tracking_status": "listed",
     "listed_reason": "Quote/inquiry only — no self-serve checkout price",
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-h1 — checked 2026-09-24: page shows a placeholder $90,000 figure explicitly disclaimed as not the real price ('Contact us for the real price'), no Add to Cart button, directs to sales_global@unitree.cc."
+    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-h1 — checked 2026-09-24: page shows a placeholder $90,000 figure explicitly disclaimed as not the real price ('Contact us for the real price'), no Add to Cart button, directs to sales_global@unitree.cc.",
+    "price_provenance": "press",
+    "price_provenance_date": "2026-09-24",
+    "price_provenance_source": "manufacturer's own disclaimed placeholder figure"
   },
   {
     "id": "unitree-h2",
@@ -172,7 +181,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-h2.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl."
+    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-h2.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "unitree-go2-air",
@@ -217,7 +229,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-go2.js (variant_map \"air\") — collected daily; confirmed live in data/prices/2026-09-24.jsonl."
+    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-go2.js (variant_map \"air\") — collected daily; confirmed live in data/prices/2026-09-24.jsonl.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "unitree-go2-pro",
@@ -262,7 +277,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-go2.js (variant_map \"pro\") — collected daily; confirmed live in data/prices/2026-09-24.jsonl."
+    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-go2.js (variant_map \"pro\") — collected daily; confirmed live in data/prices/2026-09-24.jsonl.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "unitree-go2-edu",
@@ -307,7 +325,10 @@
     "tracking_status": "listed",
     "listed_reason": "Contact-sales only on the manufacturer's own store; not a live Shopify variant we can read automatically",
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-go2.js — checked 2026-09-24: the live variants endpoint has only 5 SKUs (Go2 Pro w/wo controller, Go2 Air w/wo controller, Go2 X), EDU is absent and only referenced as 'Contact sales to get Go2 Edu price'. Confirmed no separate go2-edu product page exists on shop.unitree.com (collections/all checked, no such handle). A real public price ($11,780) exists at a third-party reseller, Top3DShop (top3dshop.com/product/unitree-robotics-go2-edu, checked 2026-09-24), but that's non-Shopify HTML needing separate scraping we haven't built."
+    "tracking_status_evidence": "https://shop.unitree.com/products/unitree-go2.js — checked 2026-09-24: the live variants endpoint has only 5 SKUs (Go2 Pro w/wo controller, Go2 Air w/wo controller, Go2 X), EDU is absent and only referenced as 'Contact sales to get Go2 Edu price'. Confirmed no separate go2-edu product page exists on shop.unitree.com (collections/all checked, no such handle). A real public price ($11,780) exists at a third-party reseller, Top3DShop (top3dshop.com/product/unitree-robotics-go2-edu, checked 2026-09-24), but that's non-Shopify HTML needing separate scraping we haven't built.",
+    "price_provenance": "press",
+    "price_provenance_date": null,
+    "price_provenance_source": "launch-price aggregator (Robot Price Index)"
   },
   {
     "id": "unitree-go2-w",
@@ -348,7 +369,10 @@
     "tracking_status": "listed",
     "listed_reason": "Not sold on the manufacturer's own store; only through third-party resellers we don't yet scrape",
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.unitree.com/collections/all — checked 2026-09-24: no go2-w product page exists on shop.unitree.com at all (not a Shopify variant, not a separate handle). A real public price ($13,999, in stock) exists at third-party reseller Top3DShop (top3dshop.com/product/unitree-go2-w-wheeled-quadruped-robot, checked 2026-09-24), non-Shopify HTML, not yet wired up as a source."
+    "tracking_status_evidence": "https://shop.unitree.com/collections/all — checked 2026-09-24: no go2-w product page exists on shop.unitree.com at all (not a Shopify variant, not a separate handle). A real public price ($13,999, in stock) exists at third-party reseller Top3DShop (top3dshop.com/product/unitree-go2-w-wheeled-quadruped-robot, checked 2026-09-24), non-Shopify HTML, not yet wired up as a source.",
+    "price_provenance": "press",
+    "price_provenance_date": null,
+    "price_provenance_source": "launch-price aggregator (Robot Price Index)"
   },
   {
     "id": "unitree-go1",
@@ -395,7 +419,10 @@
     "tracking_status": "listed",
     "listed_reason": "Discontinued — manufacturer's own listing says the product is unavailable",
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.unitree.com/products/unitreeyushutechnologydog-artificial-intelligence-companion-bionic-companion-intelligent-robot-go1-quadruped-robot-dog — checked 2026-09-24: page still exists but shows 'This product is unavailable' where Add to Cart would be; only Air/Pro appear as variant options, EDU is contact-sales-only text. Legacy contact address (Laikago@unitree.cc) is further evidence this listing is stale."
+    "tracking_status_evidence": "https://shop.unitree.com/products/unitreeyushutechnologydog-artificial-intelligence-companion-bionic-companion-intelligent-robot-go1-quadruped-robot-dog — checked 2026-09-24: page still exists but shows 'This product is unavailable' where Add to Cart would be; only Air/Pro appear as variant options, EDU is contact-sales-only text. Legacy contact address (Laikago@unitree.cc) is further evidence this listing is stale.",
+    "price_provenance": "press",
+    "price_provenance_date": null,
+    "price_provenance_source": "launch-price aggregator (Robot Price Index)"
   },
   {
     "id": "1x-neo",
@@ -436,7 +463,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://www.1x.tech/order — collected daily via regex_html; confirmed live in data/prices/2026-09-24.jsonl."
+    "tracking_status_evidence": "https://www.1x.tech/order — collected daily via regex_html; confirmed live in data/prices/2026-09-24.jsonl.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "booster-t1",
@@ -478,7 +508,10 @@
     "tracking_status": "listed",
     "listed_reason": "Manufacturer's own site is inquiry-only; every third-party reseller page found was blocked or broken, so no live public price could be independently confirmed",
     "expected_launch": null,
-    "tracking_status_evidence": "https://www.booster.tech/booster-t1/ and https://www.booster.tech/store/ — checked 2026-09-24: no price shown, store page is a lead-gen inquiry form, not checkout. Three third-party resellers that appear in search (robotshop.com, usrobotstore.com, k-robotic.com) returned 403/404 when checked directly."
+    "tracking_status_evidence": "https://www.booster.tech/booster-t1/ and https://www.booster.tech/store/ — checked 2026-09-24: no price shown, store page is a lead-gen inquiry form, not checkout. Three third-party resellers that appear in search (robotshop.com, usrobotstore.com, k-robotic.com) returned 403/404 when checked directly.",
+    "price_provenance": "press",
+    "price_provenance_date": null,
+    "price_provenance_source": "launch-price aggregator (Robot Price Index)"
   },
   {
     "id": "booster-k1",
@@ -518,7 +551,10 @@
     "tracking_status": "listed",
     "listed_reason": "Manufacturer sells inquiry-only; a third-party reseller has a public price, but across several different-priced editions (base/Professional/GEEK/EDU) that don't clearly map to our catalog's single figure",
     "expected_launch": null,
-    "tracking_status_evidence": "https://www.booster.tech/booster-k1/ — checked 2026-09-24: no price, inquiry-only. robotixmarket.com sells a base 'K1 Humanoid Robot' at $9,999.99 and a separate 'K1 Professional Edition' at $12,500 as different product pages; neither matches this catalog's $5,999 (from an original launch-price release, not current reseller pricing). Needs reconciling which edition this entry means before it can be tracked automatically — not done in this pass."
+    "tracking_status_evidence": "https://www.booster.tech/booster-k1/ — checked 2026-09-24: no price, inquiry-only. robotixmarket.com sells a base 'K1 Humanoid Robot' at $9,999.99 and a separate 'K1 Professional Edition' at $12,500 as different product pages; neither matches this catalog's $5,999 (from an original launch-price release, not current reseller pricing). Needs reconciling which edition this entry means before it can be tracked automatically — not done in this pass.",
+    "price_provenance": "press",
+    "price_provenance_date": "2025",
+    "price_provenance_source": "launch-price press release"
   },
   {
     "id": "engineai-pm01",
@@ -559,7 +595,10 @@
     "tracking_status": "listed",
     "listed_reason": "Manufacturer's own purchase page redirects to a Chinese marketplace (JD.com), not a US-facing checkout; public price exists only via a third-party reseller",
     "expected_launch": null,
-    "tracking_status_evidence": "https://en.engineai.com.cn/product-purchase.html — checked 2026-09-24: Buy Now button redirects out to JD.com. A public price ($26,000, in stock, matching the official RMB price) exists at third-party reseller robotixmarket.com/products/engineai-pm01-humanoid-robot, checked 2026-09-24, not yet wired up as a source."
+    "tracking_status_evidence": "https://en.engineai.com.cn/product-purchase.html — checked 2026-09-24: Buy Now button redirects out to JD.com. A public price ($26,000, in stock, matching the official RMB price) exists at third-party reseller robotixmarket.com/products/engineai-pm01-humanoid-robot, checked 2026-09-24, not yet wired up as a source.",
+    "price_provenance": "vendor_page",
+    "price_provenance_date": "2026-09-24",
+    "price_provenance_source": "robotixmarket.com (reseller)"
   },
   {
     "id": "engineai-se01",
@@ -599,7 +638,10 @@
     "tracking_status": "listed",
     "listed_reason": "Public price exists only via a third-party reseller (manufacturer's own purchase page doesn't list SE01 for direct sale)",
     "expected_launch": null,
-    "tracking_status_evidence": "https://en.engineai.com.cn/product-purchase.html — checked 2026-09-24: SE01 appears in navigation but has no Buy Now / price on the manufacturer's own purchase page (only PM01 and SA01 do). A public price ($54,000, in stock) exists at third-party reseller robotixmarket.com/products/engineai-se01, checked 2026-09-24, not yet wired up as a source."
+    "tracking_status_evidence": "https://en.engineai.com.cn/product-purchase.html — checked 2026-09-24: SE01 appears in navigation but has no Buy Now / price on the manufacturer's own purchase page (only PM01 and SA01 do). A public price ($54,000, in stock) exists at third-party reseller robotixmarket.com/products/engineai-se01, checked 2026-09-24, not yet wired up as a source.",
+    "price_provenance": "vendor_page",
+    "price_provenance_date": "2026-09-24",
+    "price_provenance_source": "robotixmarket.com (reseller)"
   },
   {
     "id": "fourier-n1",
@@ -638,7 +680,10 @@
     "tracking_status": "listed",
     "listed_reason": "Public price exists at a third-party reseller (Fourier itself has no direct N1 store), but the item is currently backordered, not shipping",
     "expected_launch": null,
-    "tracking_status_evidence": "https://fourierintelligence.com (redirects to fftai.com, no N1 product page there) — checked 2026-09-24. A public price ($40,000) and working cart exist at third-party reseller robotopian.com/products/fourier-n1-humanoid-robot, but that page explicitly says 'backordered and will ship as soon as it is back in stock', checked 2026-09-24."
+    "tracking_status_evidence": "https://fourierintelligence.com (redirects to fftai.com, no N1 product page there) — checked 2026-09-24. A public price ($40,000) and working cart exist at third-party reseller robotopian.com/products/fourier-n1-humanoid-robot, but that page explicitly says 'backordered and will ship as soon as it is back in stock', checked 2026-09-24.",
+    "price_provenance": "vendor_page",
+    "price_provenance_date": "2026-09-24",
+    "price_provenance_source": "robotopian.com (reseller)"
   },
   {
     "id": "agibot-x2",
@@ -681,7 +726,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://store.agibot.com/products/x2.js — added as a new source 2026-09-24 (task-catalog.md §4): AgiBot's own international Shopify store, $25,600, in stock, working Add to Cart."
+    "tracking_status_evidence": "https://store.agibot.com/products/x2.js — added as a new source 2026-09-24 (task-catalog.md §4): AgiBot's own international Shopify store, $25,600, in stock, working Add to Cart.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "noetix-n2",
@@ -724,7 +772,10 @@
     "tracking_status": "listed",
     "listed_reason": "No official direct-to-consumer store; only third-party resellers exist, marking the price up 2-4x with inconsistent stock status",
     "expected_launch": null,
-    "tracking_status_evidence": "https://rbtx.com/en-US/components/humanoid/noetix-robotics-n2 — checked 2026-09-24: marketplace says 'This product is currently not available.' Manufacturer's own official_url no longer resolves. Third-party resellers (aifitlab.com $18,000 backordered, robotixmarket.com $20,871 in stock) disagree with each other and with the manufacturer's own $5,500-9,000 launch price."
+    "tracking_status_evidence": "https://rbtx.com/en-US/components/humanoid/noetix-robotics-n2 — checked 2026-09-24: marketplace says 'This product is currently not available.' Manufacturer's own official_url no longer resolves. Third-party resellers (aifitlab.com $18,000 backordered, robotixmarket.com $20,871 in stock) disagree with each other and with the manufacturer's own $5,500-9,000 launch price.",
+    "price_provenance": "press",
+    "price_provenance_date": null,
+    "price_provenance_source": "manufacturer's launch price"
   },
   {
     "id": "limx-tron-1",
@@ -764,7 +815,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.limxdynamics.com/products/point-foot-pipedal-robot-for-reserach.js — added as a new source 2026-09-24 (task-catalog.md §4): LimX Dynamics' own Shopify store, $15,000 (Standard Edition), in stock."
+    "tracking_status_evidence": "https://shop.limxdynamics.com/products/point-foot-pipedal-robot-for-reserach.js — added as a new source 2026-09-24 (task-catalog.md §4): LimX Dynamics' own Shopify store, $15,000 (Standard Edition), in stock.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "pollen-reachy-2",
@@ -804,7 +858,10 @@
     "tracking_status": "listed",
     "listed_reason": "No storefront listing — enterprise/research quote only",
     "expected_launch": null,
-    "tracking_status_evidence": "https://pollen-robotics.com/reachy-2/ and https://store.pollen-robotics.com/collections/all — checked 2026-09-24: the product page has no pricing text or buy CTA (only docs/SDK/contact links), and Reachy 2 is absent from Pollen's actual store, which lists only accessories and the two Reachy Mini variants. The catalog's $70,000 figure is from an April 2025 announcement, not a live storefront price."
+    "tracking_status_evidence": "https://pollen-robotics.com/reachy-2/ and https://store.pollen-robotics.com/collections/all — checked 2026-09-24: the product page has no pricing text or buy CTA (only docs/SDK/contact links), and Reachy 2 is absent from Pollen's actual store, which lists only accessories and the two Reachy Mini variants. The catalog's $70,000 figure is from an April 2025 announcement, not a live storefront price.",
+    "price_provenance": "press",
+    "price_provenance_date": "2025-04",
+    "price_provenance_source": "Hugging Face announcement"
   },
   {
     "id": "pollen-reachy-mini-lite",
@@ -844,7 +901,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://store.pollen-robotics.com/products/reachy-mini-lite-version.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl at $399 (task-catalog.md §1 split)."
+    "tracking_status_evidence": "https://store.pollen-robotics.com/products/reachy-mini-lite-version.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl at $399 (task-catalog.md §1 split).",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "pollen-reachy-mini-wireless",
@@ -884,7 +944,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://store.pollen-robotics.com/products/reachy-mini-wireless-version.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl at $499 (task-catalog.md §1 split)."
+    "tracking_status_evidence": "https://store.pollen-robotics.com/products/reachy-mini-wireless-version.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl at $499 (task-catalog.md §1 split).",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "so-101-arm-kit",
@@ -924,7 +987,10 @@
     "tracking_status": "listed",
     "listed_reason": "A real public price exists at the primary US seller, but it's a non-Shopify storefront our collector doesn't yet parse",
     "expected_launch": null,
-    "tracking_status_evidence": "https://www.seeedstudio.com/SO-101-Low-Cost-AI-Arm-Kit-Pro-p-6427.html — checked 2026-09-24: $249.90, in stock, explicit United States Warehouse shipping option. Seeed's own OpenCart-derived storefront (not Shopify) would need new HTML-scraping logic — a reasonable future add, not done in this pass."
+    "tracking_status_evidence": "https://www.seeedstudio.com/SO-101-Low-Cost-AI-Arm-Kit-Pro-p-6427.html — checked 2026-09-24: $249.90, in stock, explicit United States Warehouse shipping option. Seeed's own OpenCart-derived storefront (not Shopify) would need new HTML-scraping logic — a reasonable future add, not done in this pass.",
+    "price_provenance": "vendor_page",
+    "price_provenance_date": "2026-09-24",
+    "price_provenance_source": "Seeed Studio"
   },
   {
     "id": "deep-robotics-lite3",
@@ -965,7 +1031,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://shop.deeprobotics.us/products/lite-3.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl."
+    "tracking_status_evidence": "https://shop.deeprobotics.us/products/lite-3.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "xiaomi-cyberdog-2",
@@ -1006,7 +1075,10 @@
     "tracking_status": "listed",
     "listed_reason": "Sold through Xiaomi's China store only; US resellers currently show it out of stock",
     "expected_launch": null,
-    "tracking_status_evidence": "https://www.giztop.com/xiaomi-cyberdog-2.html — checked 2026-09-24: third-party US reseller price $2,999 but marked 'Out of stock'. Xiaomi's own global/China store pages returned HTTP 403 to automated fetch (checked 2026-09-24); no official US storefront exists for this product."
+    "tracking_status_evidence": "https://www.giztop.com/xiaomi-cyberdog-2.html — checked 2026-09-24: third-party US reseller price $2,999 but marked 'Out of stock'. Xiaomi's own global/China store pages returned HTTP 403 to automated fetch (checked 2026-09-24); no official US storefront exists for this product.",
+    "price_provenance": "vendor_page",
+    "price_provenance_date": "2026-09-24",
+    "price_provenance_source": "giztop.com (reseller)"
   },
   {
     "id": "petoi-bittle",
@@ -1045,7 +1117,10 @@
     "tracking_status": "listed",
     "listed_reason": "Nearly sold out (labeled \"Final Stock\", 3 of 4 variants unavailable) — not worth adding as a new source",
     "expected_launch": null,
-    "tracking_status_evidence": "https://www.petoi.com/products/petoi-bittle-robot-dog — checked 2026-09-24: page labeled \"(Final Stock)\" in nav, only the $349 pre-assembled/alloy-servo variant in stock, other 3 variants sold out."
+    "tracking_status_evidence": "https://www.petoi.com/products/petoi-bittle-robot-dog — checked 2026-09-24: page labeled \"(Final Stock)\" in nav, only the $349 pre-assembled/alloy-servo variant in stock, other 3 variants sold out.",
+    "price_provenance": "vendor_page",
+    "price_provenance_date": "2026-09-24",
+    "price_provenance_source": "petoi.com"
   },
   {
     "id": "petoi-bittle-x",
@@ -1084,7 +1159,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://www.petoi.com/products/petoi-robot-dog-bittle-x-voice-controlled.js — collected daily; confirmed live 2026-09-24 at $319-469, matching data/prices/raw/2026-09-24/petoi-official__petoi-robot-dog-bittle-x-voice-controlled.json exactly."
+    "tracking_status_evidence": "https://www.petoi.com/products/petoi-robot-dog-bittle-x-voice-controlled.js — collected daily; confirmed live 2026-09-24 at $319-469, matching data/prices/raw/2026-09-24/petoi-official__petoi-robot-dog-bittle-x-voice-controlled.json exactly.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "petoi-nybble-q",
@@ -1122,7 +1200,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://www.petoi.com/products/petoi-nybble-q-robot-cat.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl."
+    "tracking_status_evidence": "https://www.petoi.com/products/petoi-nybble-q-robot-cat.js — collected daily; confirmed live in data/prices/2026-09-24.jsonl.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "keyi-loona",
@@ -1163,7 +1244,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://us.keyirobot.com/products.json?limit=250 (product_handle=petbot) — collected daily; confirmed live in data/prices/2026-09-24.jsonl."
+    "tracking_status_evidence": "https://us.keyirobot.com/products.json?limit=250 (product_handle=petbot) — collected daily; confirmed live in data/prices/2026-09-24.jsonl.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "ddl-vector-2",
@@ -1207,7 +1291,10 @@
     "tracking_status": "tracked",
     "listed_reason": null,
     "expected_launch": null,
-    "tracking_status_evidence": "https://anki.bot/products/vector-robot.js — added as a new source 2026-09-24 (task-catalog.md §4): Digital Dream Labs' own current storefront (digitaldreamlabs.com redirects here), $189.99-$269.99 across color/condition variants, in stock."
+    "tracking_status_evidence": "https://anki.bot/products/vector-robot.js — added as a new source 2026-09-24 (task-catalog.md §4): Digital Dream Labs' own current storefront (digitaldreamlabs.com redirects here), $189.99-$269.99 across color/condition variants, in stock.",
+    "price_provenance": "observed",
+    "price_provenance_date": null,
+    "price_provenance_source": "collector's own daily price snapshot"
   },
   {
     "id": "boston-dynamics-spot",
@@ -1247,7 +1334,10 @@
     "tracking_status": "listed",
     "listed_reason": "Quote/inquiry only — enterprise sales, no public price",
     "expected_launch": null,
-    "tracking_status_evidence": "https://bostondynamics.com/products/spot/ and https://bostondynamics.com/spot-sales/ — checked 2026-09-24: no dollar figure anywhere, every CTA ('Contact Sales', 'Get Started') routes to a sales-contact form."
+    "tracking_status_evidence": "https://bostondynamics.com/products/spot/ and https://bostondynamics.com/spot-sales/ — checked 2026-09-24: no dollar figure anywhere, every CTA ('Contact Sales', 'Get Started') routes to a sales-contact form.",
+    "price_provenance": "press",
+    "price_provenance_date": null,
+    "price_provenance_source": "launch-price aggregator (Robot Price Index)"
   },
   {
     "id": "agility-digit",
@@ -1291,7 +1381,10 @@
     "tracking_status": "listed",
     "listed_reason": "Quote/inquiry only — enterprise sales, no public price",
     "expected_launch": null,
-    "tracking_status_evidence": "https://agilityrobotics.com/robots, https://www.agilityrobotics.com/solutions/digit-5, https://www.agilityrobotics.com/get-started — checked 2026-09-24: no price shown anywhere, all CTAs ('Deploy Digit', 'Talk to our team') route to a sales page."
+    "tracking_status_evidence": "https://agilityrobotics.com/robots, https://www.agilityrobotics.com/solutions/digit-5, https://www.agilityrobotics.com/get-started — checked 2026-09-24: no price shown anywhere, all CTAs ('Deploy Digit', 'Talk to our team') route to a sales page.",
+    "price_provenance": "press",
+    "price_provenance_date": null,
+    "price_provenance_source": "launch-price aggregator (Robot Price Index)"
   },
   {
     "id": "rainbow-robotics-rb-y1",
@@ -1331,6 +1424,9 @@
     "tracking_status": "listed",
     "listed_reason": "Contact/inquiry-only — no live checkout or public price, research/industrial B2B sales model",
     "expected_launch": null,
-    "tracking_status_evidence": "https://rainbow-robotics.com/en/products/rb-y1/ — checked 2026-09-24: no price shown anywhere, only a 'Contact Us'/'Product Inquiry' CTA. The catalog's $80,000-120,000 range is from a May 2024 pre-order announcement, not a live price."
+    "tracking_status_evidence": "https://rainbow-robotics.com/en/products/rb-y1/ — checked 2026-09-24: no price shown anywhere, only a 'Contact Us'/'Product Inquiry' CTA. The catalog's $80,000-120,000 range is from a May 2024 pre-order announcement, not a live price.",
+    "price_provenance": "press",
+    "price_provenance_date": "2024-05",
+    "price_provenance_source": "pre-order announcement"
   }
 ]

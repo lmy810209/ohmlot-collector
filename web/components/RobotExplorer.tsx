@@ -99,6 +99,8 @@ export function RobotExplorer({
       if (filters.status !== "all" && r.status !== filters.status) return false;
       if (filters.tracking !== "all" && r.tracking_status !== filters.tracking) return false;
       if (filters.fccOnly && r.fcc_ids.length === 0) return false;
+      // sort_price is already Infinity for any row with an unverified ("press"/"unknown") price (lib/data.ts's
+      // robotRows), so an unconfirmed number can never sneak into a price filter's results here.
       if (filters.maxPrice != null && !(r.sort_price <= filters.maxPrice)) return false;
       return true;
     });

@@ -8,7 +8,7 @@ import { AlertSignup } from "@/components/AlertSignup";
 import { TrackRobotButton } from "@/components/TrackRobotButton";
 import { UsRegulatoryStatus } from "@/components/UsRegulatoryStatus";
 import { CHART_MIN_SNAPSHOTS, fccFacts, getModel, getModels, latestPrices, priceHistory, variantDeltas } from "@/lib/data";
-import { CATEGORY_LABEL, fmtDate, fmtDay, priceRange, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
+import { CATEGORY_LABEL, fmtDate, fmtDay, launchPriceNote, priceRange, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
 
 export const dynamicParams = false;
 
@@ -69,6 +69,7 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
   const cheapest = deltas.filter((d) => d.kind === "purchase").sort((a, b) => a.price_usd - b.price_usd)[0];
   const headDelta = cheapest && cheapest.from != null ? { amount: cheapest.price_usd - cheapest.from, pct: cheapest.from ? ((cheapest.price_usd - cheapest.from) / cheapest.from) * 100 : 0 } : null;
   const snapshots = history.dates.length;
+  const launchNote = launchPriceNote(m);
 
   return (
     <article className="py-8 sm:py-12">
@@ -123,8 +124,14 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
         <Card title={tracked ? "Yesterday → today" : "Latest prices"} id="prices-heading" aside={sellers.length === 1 ? <span className="text-[12px] text-ink-3">{sellers[0]}</span> : undefined}>
           {!tracked ? (
             <p className="text-[13.5px] text-ink-2">
-              Not tracked daily — {m.tracking_status === "announced" ? `announced${m.expected_launch ? `, ${m.expected_launch}` : ""}, not yet available` : (m.listed_reason ?? "no public price found")}.
-              {" "}The range shown is the manufacturer&rsquo;s published list price.
+              Not tracked daily — {m.tracking_status === "announced" ? `announced${m.expected_launch ? `, ${m.expected_launch}` : ""}, not yet available` : (m.listed_reason ?? "no public price found")}.{" "}
+              {launchNote ? (
+                launchNote
+              ) : m.price_provenance === "vendor_page" ? (
+                `The range above was checked on a real sales page${m.price_provenance_date ? ` (${m.price_provenance_date})` : ""}, not from the collector.`
+              ) : (
+                "The range above is the manufacturer’s published list price."
+              )}
             </p>
           ) : (
             <ul className="divide-y divide-line-soft">

@@ -56,7 +56,28 @@ export interface Model {
   expected_launch: string | null;
   /** "<url> — checked YYYY-MM-DD: <what was found>". The verification behind tracking_status. */
   tracking_status_evidence: string;
+  price_provenance: PriceProvenance;
+  /** ISO date (or a bare year/month when that's all that's known) for the price_provenance_source citation.
+   * Null when there's nothing to date (e.g. "observed" — the date is just whatever the latest snapshot is). */
+  price_provenance_date: string | null;
+  /** Short citation for where price_usd_min/max came from — a launch press release, which vendor page was
+   * checked, etc. Null only for "observed", where the collector itself is the source. */
+  price_provenance_source: string | null;
 }
+
+/**
+ * task-prelaunch.md §A: most of the 32 seed prices came from a launch article or a third-party aggregator,
+ * never independently checked. This is a fact about the *stored* price_usd_min/max, not about whether the
+ * robot is buyable (that's tracking_status) — a model can be "listed" (real, purchasable) and still have a
+ * "press" price if nobody has verified the number since launch.
+ * - "observed": the collector's own daily snapshot (always the 15 tracking_status:"tracked" models).
+ * - "vendor_page": a human checked an actual sales page and recorded the date (price_provenance_date).
+ * - "press": from a launch article/press release — never independently confirmed. Never shown as a bare
+ *   number (lib/format.ts's purchaseRange) — only inside the full "Launch price (...): $X — not verified,
+ *   not current" sentence, and excluded from price filters/sorting.
+ * - "unknown": no identifiable source at all. Same display/filter treatment as "press".
+ */
+export type PriceProvenance = "observed" | "vendor_page" | "press" | "unknown";
 
 /** "Can I buy this in the US?" — one block per model, mirrored from data/models.json. */
 export interface UsStatus {
@@ -570,11 +591,16 @@ export interface RobotRow {
   tracking_status: TrackingStatus;
   listed_reason: string | null;
   expected_launch: string | null;
+  price_provenance: PriceProvenance;
+  price_provenance_date: string | null;
+  price_provenance_source: string | null;
   /** Cheapest / dearest variant in the latest snapshot, when tracked. */
   latest_min: number | null;
   latest_max: number | null;
   latest_date: string | null;
-  /** What the table sorts on: the tracked minimum when available, else the published minimum. */
+  /** What the table sorts on: the tracked minimum when available, else the published minimum — but never a
+   * "press"/"unknown" price (task-prelaunch.md §A.3: an unverified number must never drive a sort, same as
+   * it must never drive a filter). Those rows sort to the very end, same treatment as no price at all. */
   sort_price: number;
   spark: number[];
   spark_dates: string[];
@@ -597,7 +623,8 @@ export function robotRows(): RobotRow[] {
     const latestRows = latestPrices(m.id).filter((p) => p.kind === "purchase");
     const latestMax = latestRows.length ? latestRows[latestRows.length - 1].price_usd : null;
     const latestDate = latestRows.reduce<string | null>((acc, p) => (acc && acc > p.date ? acc : p.date), null);
-    const publishedMin = m.price_model === "quote" || m.price_usd_min == null ? Number.POSITIVE_INFINITY : m.price_usd_min;
+    const priceUnverified = m.price_provenance === "press" || m.price_provenance === "unknown";
+    const publishedMin = m.price_model === "quote" || m.price_usd_min == null || priceUnverified ? Number.POSITIVE_INFINITY : m.price_usd_min;
     const us = modelUsStatus(m);
     const fcc_status: FccStatus = usStatusKind(us);
     return {
@@ -616,6 +643,9 @@ export function robotRows(): RobotRow[] {
       tracking_status: m.tracking_status,
       listed_reason: m.listed_reason,
       expected_launch: m.expected_launch,
+      price_provenance: m.price_provenance,
+      price_provenance_date: m.price_provenance_date,
+      price_provenance_source: m.price_provenance_source,
       latest_min: latest,
       latest_max: latestMax,
       latest_date: latestDate,
