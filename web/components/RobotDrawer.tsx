@@ -58,9 +58,13 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
                 <span className="num text-[22px] text-ink">{headline}</span>
                 {headDelta && <Delta amount={headDelta.amount} pct={headDelta.pct} className="text-[13px]" />}
                 <Badge tone={m.status === "shipping" ? "up" : "amber"}>{STATUS_LABEL[m.status] ?? m.status}</Badge>
-                {tracked && (
+                {m.tracking_status === "tracked" ? (
                   <Badge tone="accent" mono>
                     Tracked
+                  </Badge>
+                ) : (
+                  <Badge tone="muted" mono>
+                    {m.tracking_status === "listed" ? "Listed" : "Announced"}
                   </Badge>
                 )}
               </div>
@@ -85,7 +89,10 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
                   {sellers.length === 1 && <span className="text-[12px] text-ink-3">{sellers[0]}</span>}
                 </div>
                 {!tracked ? (
-                  <p className="mt-1 text-[13px] text-ink-2">Not tracked daily yet. The range above is the manufacturer&rsquo;s published list price.</p>
+                  <p className="mt-1 text-[13px] text-ink-2">
+                    Not tracked daily — {m.tracking_status === "announced" ? `announced${m.expected_launch ? `, ${m.expected_launch}` : ""}, not yet available` : (m.listed_reason ?? "no public price found")}.
+                    {" "}The range above is the manufacturer&rsquo;s published list price.
+                  </p>
                 ) : (
                   <ul className="mt-1 divide-y divide-line-soft">
                     {deltas.map((p) => (

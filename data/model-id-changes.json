@@ -1,0 +1,29 @@
+[
+  {
+    "date": "2026-09-24",
+    "old_id": "pollen-reachy-mini",
+    "new_ids": ["pollen-reachy-mini-lite", "pollen-reachy-mini-wireless"],
+    "reason": "Reachy Mini Lite ($399) and Wireless ($499) are different products at different prices — config/price-sources.json already had two distinct URLs (reachy-mini-lite-version, reachy-mini-wireless-version) both wrongly mapped to one shared model_id. task-catalog.md §1.",
+    "remap": {
+      "by": "url",
+      "rules": [
+        { "url_contains": "reachy-mini-lite-version", "new_id": "pollen-reachy-mini-lite" },
+        { "url_contains": "reachy-mini-wireless-version", "new_id": "pollen-reachy-mini-wireless" }
+      ]
+    },
+    "note": "Historical rows in data/prices/*.jsonl with model_id=pollen-reachy-mini are left untouched (past data is never rewritten). A reader applies `remap` at load time, matching each row's own url against url_contains, to recover which product it actually was. config/price-sources.json's default_model was updated on the same date, so every row written from 2026-09-24 onward already carries the correct new id directly and needs no remapping."
+  },
+  {
+    "date": "2026-09-24",
+    "old_id": "petoi-bittle",
+    "new_ids": ["petoi-bittle-x"],
+    "reason": "The 'petoi-bittle' id's own catalog metadata (official_url, price range $289-349) described plain Bittle, but the only price source ever configured under it (petoi-robot-dog-bittle-x-voice-controlled.js) was actually Bittle X ($319-469) — a live data/metadata mismatch, not just a naming gap (task-catalog.md §1). This is a rename, not a genuine split: every historical row ever collected under 'petoi-bittle' is Bittle X data, since no other source URL was ever configured for this id. 'petoi-bittle' is reused as a fresh id for the real plain-Bittle product (tracking_status: listed — no price source configured for it), which has never had any price rows collected, so there is no ambiguity to resolve for that id going forward.",
+    "remap": {
+      "by": "url",
+      "rules": [
+        { "url_contains": "bittle-x-voice-controlled", "new_id": "petoi-bittle-x" }
+      ]
+    },
+    "note": "Historical rows in data/prices/*.jsonl with model_id=petoi-bittle are left untouched. A reader applies `remap` at load time; every such row's url matches the one rule above (there was only ever one Petoi Bittle source), so all of them become petoi-bittle-x. config/price-sources.json's default_model was updated on the same date, so every row written from 2026-09-24 onward already carries petoi-bittle-x directly."
+  }
+]

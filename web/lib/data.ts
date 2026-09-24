@@ -14,6 +14,17 @@ export const CONFIG_DIR = process.env.OHMLOT_CONFIG_DIR ?? path.resolve(process.
 
 export type Category = "humanoid" | "quadruped" | "desktop" | "arm";
 
+/**
+ * task-catalog.md §2: every catalog model is exactly one of these — never removed, always shown, the price
+ * column always says why instead of going blank. Decided by checking a real page, not guessed; each model's
+ * `tracking_status_evidence` names the URL and date behind the call.
+ * - "tracked": buyable in the US right now, and the daily collector actually has a price source for it.
+ * - "listed": a real product, but no price the collector can read automatically (`listed_reason` says why —
+ *   quote/inquiry only, no public price, no US seller, etc.).
+ * - "announced": not yet buyable at all (`expected_launch` if a date has been given).
+ */
+export type TrackingStatus = "tracked" | "listed" | "announced";
+
 export interface Model {
   id: string;
   name: string;
@@ -38,6 +49,13 @@ export interface Model {
   data_source_license: string | null;
   /** Written by the collector (src/lib/parse.ts buildUsStatus); older seed rows may not have it yet. */
   us_status?: UsStatus | null;
+  tracking_status: TrackingStatus;
+  /** Only meaningful (non-null) when tracking_status is "listed". */
+  listed_reason: string | null;
+  /** Only meaningful (non-null) when tracking_status is "announced"; free text, e.g. "Q4 2026". */
+  expected_launch: string | null;
+  /** "<url> — checked YYYY-MM-DD: <what was found>". The verification behind tracking_status. */
+  tracking_status_evidence: string;
 }
 
 /** "Can I buy this in the US?" — one block per model, mirrored from data/models.json. */
@@ -150,11 +168,38 @@ interface Store {
   events: CollectorEvent[];
 }
 
+export interface ModelIdChange {
+  date: string;
+  old_id: string;
+  new_ids: string[];
+  reason: string;
+  remap: { by: "url"; rules: { url_contains: string; new_id: string }[] };
+  note: string;
+}
+
+/** task-catalog.md §1: "과거를 조작하지 않는다" — a model_id split is never applied by rewriting
+ * data/prices/*.jsonl. Instead data/model-id-changes.json records the split, and every historical row with
+ * the old, now-retired model_id is remapped to its correct new id right here at read time, by matching the
+ * row's own url against each rule's url_contains. A row whose model_id was never split, or whose url matches
+ * no rule (should not happen for a real change, but never silently mis-tags a row if it does), passes
+ * through unchanged. config/price-sources.json's default_model is updated on the same date as the change, so
+ * every row collected from that date on already carries the new id directly and never needs remapping.
+ */
+function remapModelId(r: PriceRow, changes: ModelIdChange[]): PriceRow {
+  const change = changes.find((c) => c.old_id === r.model_id);
+  if (!change) return r;
+  const rule = change.remap.rules.find((rule) => r.url.includes(rule.url_contains));
+  return rule ? { ...r, model_id: rule.new_id } : r;
+}
+
 let store: Store | null = null;
 
 function load(): Store {
   if (store) return store;
   const models = JSON.parse(readFileSync(path.join(DATA_DIR, "models.json"), "utf8")) as Model[];
+
+  const modelIdChangesPath = path.join(DATA_DIR, "model-id-changes.json");
+  const modelIdChanges: ModelIdChange[] = existsSync(modelIdChangesPath) ? (JSON.parse(readFileSync(modelIdChangesPath, "utf8")) as ModelIdChange[]) : [];
 
   const pricesDir = path.join(DATA_DIR, "prices");
   const prices: PriceRow[] = existsSync(pricesDir)
@@ -167,7 +212,8 @@ function load(): Store {
             .filter(Boolean)
             .map((line) => JSON.parse(line) as PriceRow)
             // Shopify's placeholder name for a single-variant product.
-            .map((r) => (r.variant === "Default Title" ? { ...r, variant: "Standard" } : r)),
+            .map((r) => (r.variant === "Default Title" ? { ...r, variant: "Standard" } : r))
+            .map((r) => remapModelId(r, modelIdChanges)),
         )
         // "Contact us" items carry $90,000 / $100,000 placeholders; they never reach the UI.
         .filter((r) => !r.flags?.includes("placeholder_price"))
@@ -518,7 +564,12 @@ export interface RobotRow {
   price_usd_min: number | null;
   price_usd_max: number | null;
   subscription_usd_month: number | null;
+  /** True exactly when tracking_status is "tracked" — the deliberate, verified classification
+   * (task-catalog.md §2), not a "does it happen to have rows today" guess. */
   tracked: boolean;
+  tracking_status: TrackingStatus;
+  listed_reason: string | null;
+  expected_launch: string | null;
   /** Cheapest / dearest variant in the latest snapshot, when tracked. */
   latest_min: number | null;
   latest_max: number | null;
@@ -539,7 +590,6 @@ export interface RobotRow {
 }
 
 export function robotRows(): RobotRow[] {
-  const tracked = trackedModelIds();
   return getModels().map((m) => {
     const sp = sparkline(m.id);
     const latest = sp.values.at(-1) ?? null;
@@ -562,7 +612,10 @@ export function robotRows(): RobotRow[] {
       price_usd_min: m.price_usd_min,
       price_usd_max: m.price_usd_max,
       subscription_usd_month: m.subscription_usd_month,
-      tracked: tracked.has(m.id),
+      tracked: m.tracking_status === "tracked",
+      tracking_status: m.tracking_status,
+      listed_reason: m.listed_reason,
+      expected_launch: m.expected_launch,
       latest_min: latest,
       latest_max: latestMax,
       latest_date: latestDate,
@@ -650,7 +703,12 @@ export interface RunSummary {
   /** Price rows and distinct stores in the latest snapshot. */
   rows: number;
   sellers: number;
+  /** Counts by tracking_status (task-catalog.md §2-3) — the site's own honest "N tracked · M listed ·
+   * K announced" language, never a bare model-count. `models` is their sum, for anything that still needs
+   * "how many robots does this catalog know about at all". */
   tracked: number;
+  listed: number;
+  announced: number;
   models: number;
   changes: PriceChange[];
   baselineDay: number;
@@ -662,6 +720,8 @@ export function runSummary(): RunSummary {
   const all = load().prices;
   const pc = priceChanges();
   const latestRows = pc.latest ? all.filter((r) => r.date === pc.latest) : [];
+  const models = getModels();
+  const countBy = (s: TrackingStatus) => models.filter((m) => m.tracking_status === s).length;
   return {
     latest: pc.latest,
     previous: pc.previous,
@@ -669,8 +729,10 @@ export function runSummary(): RunSummary {
     snapshots: pc.snapshots,
     rows: latestRows.length,
     sellers: new Set(latestRows.map((r) => r.seller)).size,
-    tracked: trackedModelIds().size,
-    models: getModels().length,
+    tracked: countBy("tracked"),
+    listed: countBy("listed"),
+    announced: countBy("announced"),
+    models: models.length,
     changes: pc.changes,
     baselineDay: Math.min(pc.snapshots, BASELINE_DAYS),
     baselineDays: BASELINE_DAYS,

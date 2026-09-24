@@ -9,7 +9,7 @@ import { Badge } from "./Badge";
 import { Delta } from "./Delta";
 import { RobotDrawer } from "./RobotDrawer";
 import { UsStatusBadge } from "./UsStatusBadge";
-import type { Category, RobotDetail, RobotRow } from "@/lib/data";
+import type { Category, RobotDetail, RobotRow, TrackingStatus } from "@/lib/data";
 import { CATEGORY_SINGULAR, COVERED_LIST_LABEL, fmtMonth, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel } from "@/lib/format";
 
 const CATEGORY_ITEMS = [
@@ -24,16 +24,23 @@ const STATUS_ITEMS = [
   { value: "shipping", label: "Shipping" },
   { value: "preorder", label: "Pre-order" },
 ];
+/** task-catalog.md §3: the table's own tracking_status filter — defaults to "tracked" (Filters.NONE below),
+ * not "all", so "N robots tracked daily" is what a visitor sees first, not a padded total. */
+const TRACKING_ITEMS = [
+  { value: "tracked", label: "Tracked daily" },
+  { value: "listed", label: "Listed, not tracked" },
+  { value: "announced", label: "Announced" },
+  { value: "all", label: "All robots" },
+];
 
-type Filters = { category: string; status: string; trackedOnly: boolean; maxPrice: number | null; fccOnly: boolean };
-const NONE: Filters = { category: "all", status: "all", trackedOnly: false, maxPrice: null, fccOnly: false };
+type Filters = { category: string; status: string; tracking: TrackingStatus | "all"; maxPrice: number | null; fccOnly: boolean };
+const NONE: Filters = { category: "all", status: "all", tracking: "tracked", maxPrice: null, fccOnly: false };
 
 const CHIPS: { label: string; on: (f: Filters) => boolean; toggle: (f: Filters) => Filters }[] = [
   { label: "Humanoids", on: (f) => f.category === "humanoid", toggle: (f) => ({ ...f, category: f.category === "humanoid" ? "all" : "humanoid" }) },
   { label: "Robot dogs", on: (f) => f.category === "quadruped", toggle: (f) => ({ ...f, category: f.category === "quadruped" ? "all" : "quadruped" }) },
   { label: "Desktop", on: (f) => f.category === "desktop", toggle: (f) => ({ ...f, category: f.category === "desktop" ? "all" : "desktop" }) },
   { label: "Under $1,000", on: (f) => f.maxPrice === 1000, toggle: (f) => ({ ...f, maxPrice: f.maxPrice === 1000 ? null : 1000 }) },
-  { label: "Tracked daily", on: (f) => f.trackedOnly, toggle: (f) => ({ ...f, trackedOnly: !f.trackedOnly }) },
   { label: "FCC ID on file", on: (f) => f.fccOnly, toggle: (f) => ({ ...f, fccOnly: !f.fccOnly }) },
 ];
 
@@ -41,6 +48,24 @@ type Meta = { className?: string; align?: "right"; width: string };
 
 function StatusPill({ status }: { status: string }) {
   return <Badge tone={status === "shipping" ? "up" : "amber"}>{STATUS_LABEL[status] ?? status}</Badge>;
+}
+
+/** task-catalog.md §2-3: every row says which of the three states it's in — not just a badge for "tracked"
+ * and silence otherwise. Listed/announced rows are real robots too, just without a daily price. */
+function TrackingBadge({ status }: { status: TrackingStatus }) {
+  if (status === "tracked") return (
+    <Badge tone="accent" mono>Tracked</Badge>
+  );
+  return (
+    <Badge tone="muted" mono>{status === "listed" ? "Listed" : "Announced"}</Badge>
+  );
+}
+
+/** task-catalog.md §3: "listed/announced 행은 가격 칸에 not tracked와 이유를 쓴다. 빈 칸 금지" — never
+ * just "published list price" with the reason left implicit. */
+function notTrackedReason(r: RobotRow): string {
+  if (r.tracking_status === "announced") return `announced${r.expected_launch ? ` — ${r.expected_launch}` : ""}, not yet available`;
+  return r.listed_reason ?? "no public price found";
 }
 
 export function RobotExplorer({
@@ -61,13 +86,18 @@ export function RobotExplorer({
   const [sorting, setSorting] = useState<SortingState>([{ id: "price", desc: false }]);
   const [openId, setOpenId] = useState<string | null>(null);
 
+  // task-catalog.md §3: "N robots tracked daily · M listed, not tracked · K announced" — never "30 robots".
+  const trackedCount = rows.filter((r) => r.tracking_status === "tracked").length;
+  const listedCount = rows.filter((r) => r.tracking_status === "listed").length;
+  const announcedCount = rows.filter((r) => r.tracking_status === "announced").length;
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return rows.filter((r) => {
       if (needle && !`${r.name} ${r.manufacturer} ${r.hq_country ?? ""}`.toLowerCase().includes(needle)) return false;
       if (filters.category !== "all" && r.category !== filters.category) return false;
       if (filters.status !== "all" && r.status !== filters.status) return false;
-      if (filters.trackedOnly && !r.tracked) return false;
+      if (filters.tracking !== "all" && r.tracking_status !== filters.tracking) return false;
       if (filters.fccOnly && r.fcc_ids.length === 0) return false;
       if (filters.maxPrice != null && !(r.sort_price <= filters.maxPrice)) return false;
       return true;
@@ -98,11 +128,7 @@ export function RobotExplorer({
               </span>
               <span className="mt-1.5 flex flex-wrap gap-1.5 sm:hidden">
                 <StatusPill status={r.status} />
-                {r.tracked && (
-                  <Badge tone="accent" mono>
-                    Tracked
-                  </Badge>
-                )}
+                <TrackingBadge status={r.tracking_status} />
                 {r.fcc_ids.length > 0 && <UsStatusBadge kind={r.fcc_status} short />}
               </span>
             </button>
@@ -128,8 +154,8 @@ export function RobotExplorer({
           return (
             <div className="text-right">
               <div className="num whitespace-nowrap text-[14px] text-ink">{tracked ? rangeText(r.latest_min as number, r.latest_max as number) : purchaseRange(r)}</div>
-              <div className="whitespace-nowrap text-[12px] text-ink-3">
-                {sub ? sub : tracked ? `${r.variants} variant${r.variants === 1 ? "" : "s"} · tracked` : "published list price"}
+              <div className="text-[12px] text-ink-3">
+                {sub ? sub : tracked ? `${r.variants} variant${r.variants === 1 ? "" : "s"} · tracked` : `not tracked — ${notTrackedReason(r)}`}
               </div>
             </div>
           );
@@ -155,11 +181,7 @@ export function RobotExplorer({
         cell: ({ row }) => (
           <span className="flex flex-wrap gap-1.5">
             <StatusPill status={row.original.status} />
-            {row.original.tracked && (
-              <Badge tone="accent" mono>
-                Tracked
-              </Badge>
-            )}
+            <TrackingBadge status={row.original.tracking_status} />
           </span>
         ),
         meta: { className: "hidden sm:table-cell", width: "sm:w-[16%] md:w-[14%] lg:w-[16%]" } satisfies Meta,
@@ -204,8 +226,9 @@ export function RobotExplorer({
         <div>
           <h1 className="display max-w-3xl">The original marketplace for personal robots.</h1>
           <p className="mt-4 max-w-xl text-[16px] text-ink-2 sm:text-[17px]">
-            Manufacturer list prices collected every day and FCC authorization records for {rows.length} humanoids, robot dogs, and desktop
-            robots. No listings, no affiliate links.
+            {trackedCount} robots tracked daily with manufacturer list prices, {listedCount} more listed without a public price to collect
+            {announcedCount > 0 ? `, ${announcedCount} announced but not yet available` : ""}, and FCC authorization records across all of them.
+            No listings, no affiliate links.
           </p>
           <div className="mt-6">
             <label htmlFor="robot-q" className="sr-only">
@@ -283,6 +306,18 @@ export function RobotExplorer({
               </SelectTrigger>
               <SelectContent>
                 {STATUS_ITEMS.map((it) => (
+                  <SelectItem key={it.value} value={it.value}>
+                    {it.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select items={TRACKING_ITEMS} value={filters.tracking} onValueChange={(v) => setFilters({ ...filters, tracking: (v as TrackingStatus | "all") ?? "tracked" })}>
+              <SelectTrigger className="h-10 w-44 rounded-ctl bg-card" aria-label="Filter by tracking status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TRACKING_ITEMS.map((it) => (
                   <SelectItem key={it.value} value={it.value}>
                     {it.label}
                   </SelectItem>

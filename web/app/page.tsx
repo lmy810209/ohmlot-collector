@@ -44,10 +44,8 @@ export default function Home() {
           <dd className="num text-ink">{run.changes.length}</dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">
-          <dt className="text-ink-2">Robots tracked</dt>
-          <dd className="num text-ink">
-            {run.tracked} of {run.models}
-          </dd>
+          <dt className="text-ink-2">Robots tracked daily</dt>
+          <dd className="num text-ink">{run.tracked}</dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-ink-2">Next run</dt>
@@ -91,14 +89,22 @@ export default function Home() {
         </div>
         <div className="mt-2 flex items-baseline gap-2">
           <span className="num text-3xl font-semibold">{run.tracked}</span>
-          <span className="text-[13px] text-ink-2">of {run.models} robots</span>
+          <span className="text-[13px] text-ink-2">
+            tracked · {run.listed} listed{run.announced > 0 ? ` · ${run.announced} announced` : ""}
+          </span>
         </div>
-        <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-sunk" role="img" aria-label={`${run.tracked} tracked, ${run.models - run.tracked} published only`}>
+        <div
+          className="mt-3 flex h-2 overflow-hidden rounded-full bg-sunk"
+          role="img"
+          aria-label={`${run.tracked} tracked daily, ${run.listed} listed but not tracked${run.announced > 0 ? `, ${run.announced} announced` : ""}`}
+        >
           <span className="bg-accent" style={{ width: `${(run.tracked / run.models) * 100}%` }} />
+          <span className="bg-amber" style={{ width: `${(run.listed / run.models) * 100}%` }} />
+          {run.announced > 0 && <span className="bg-sunk" style={{ width: `${(run.announced / run.models) * 100}%` }} />}
         </div>
         <p className="mt-3 text-[13px] text-ink-2">
-          {run.models - run.tracked} robots show the manufacturer&rsquo;s published list price only. They are marked{" "}
-          <span className="font-mono text-[11px] text-ink-3">not tracked</span>, never left blank.
+          {run.listed} more are real, currently-sold robots with no public price we can collect automatically. They&rsquo;re marked{" "}
+          <span className="font-mono text-[11px] text-ink-3">not tracked</span> with the reason, never left blank.
         </p>
       </section>
 

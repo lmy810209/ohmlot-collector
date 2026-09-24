@@ -90,12 +90,14 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
             <span className="num text-[28px] text-ink">{headline}</span>
             {headDelta && <Delta amount={headDelta.amount} pct={headDelta.pct} className="text-[14px]" />}
             <Badge tone={m.status === "shipping" ? "up" : "amber"}>{STATUS_LABEL[m.status] ?? m.status}</Badge>
-            {tracked ? (
+            {m.tracking_status === "tracked" ? (
               <Badge tone="accent" mono>
                 Tracked
               </Badge>
             ) : (
-              <Badge mono>Not tracked</Badge>
+              <Badge tone="muted" mono>
+                {m.tracking_status === "listed" ? "Listed" : "Announced"}
+              </Badge>
             )}
             {m.price_model === "quote" && <Badge>Price on request</Badge>}
           </div>
@@ -120,7 +122,10 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
 
         <Card title={tracked ? "Yesterday → today" : "Latest prices"} id="prices-heading" aside={sellers.length === 1 ? <span className="text-[12px] text-ink-3">{sellers[0]}</span> : undefined}>
           {!tracked ? (
-            <p className="text-[13.5px] text-ink-2">Not tracked daily yet. The range shown is the manufacturer&rsquo;s published list price.</p>
+            <p className="text-[13.5px] text-ink-2">
+              Not tracked daily — {m.tracking_status === "announced" ? `announced${m.expected_launch ? `, ${m.expected_launch}` : ""}, not yet available` : (m.listed_reason ?? "no public price found")}.
+              {" "}The range shown is the manufacturer&rsquo;s published list price.
+            </p>
           ) : (
             <ul className="divide-y divide-line-soft">
               {deltas.map((p) => (

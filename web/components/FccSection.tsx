@@ -7,12 +7,14 @@ import { COVERED_LIST_LABEL, COVERED_LIST_RULE } from "@/lib/format";
 // task-fcc-4.md §4: once all three Appendix B columns are read, the empty-result sentence can say we checked
 // the whole appendix (UAS, Routers, and Robotic Devices) — but still only that our own catalog isn't on it,
 // never a count of FCC's total approvals (§1 warns against exactly that).
+// task-catalog.md §3: "tracked" now specifically means daily price collection — this sentence is about the
+// whole catalog, tracked and listed alike, so it says "robots in this catalog", not "robots this site tracks".
 function approvalsSentence(approvals: ConditionalApproval[], catalogSize: number, asOf: string | null): string {
   if (approvals.length === 0) {
-    return `We checked all three columns of the FCC's Conditional Approvals notices (Appendix B: UAS, Routers, and Robotic Devices) — none of the ${catalogSize} robots this site tracks has a manufacturer match${asOf ? `, as of ${asOf}` : ""}.`;
+    return `We checked all three columns of the FCC's Conditional Approvals notices (Appendix B: UAS, Routers, and Robotic Devices) — none of the ${catalogSize} robots in this catalog has a manufacturer match${asOf ? `, as of ${asOf}` : ""}.`;
   }
   const companies = [...new Set(approvals.map((a) => a.company ?? a.entry))];
-  return `Robotic-device manufacturers found in FCC Conditional Approval notices: ${companies.join(", ")}. None of these match the ${catalogSize} robots this site tracks.`;
+  return `Robotic-device manufacturers found in FCC Conditional Approval notices: ${companies.join(", ")}. None of these match the ${catalogSize} robots in this catalog.`;
 }
 
 /** Guide §4.5: an explanation card plus three figures, split the way the US status block classifies robots. */

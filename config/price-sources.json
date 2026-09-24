@@ -13,19 +13,21 @@
     "seller": "pollen-official",
     "type": "shopify_js",
     "url": "https://store.pollen-robotics.com/products/reachy-mini-wireless-version.js",
-    "default_model": "pollen-reachy-mini"
+    "default_model": "pollen-reachy-mini-wireless",
+    "_note": "task-catalog.md §1: Lite and Wireless are different products at different prices ($399 vs $499), not two options of one product — see data/model-id-changes.json for the 2026-09-24 split of the old shared 'pollen-reachy-mini' id."
   },
   {
     "seller": "pollen-official",
     "type": "shopify_js",
     "url": "https://store.pollen-robotics.com/products/reachy-mini-lite-version.js",
-    "default_model": "pollen-reachy-mini"
+    "default_model": "pollen-reachy-mini-lite"
   },
   {
     "seller": "petoi-official",
     "type": "shopify_js",
     "url": "https://www.petoi.com/products/petoi-robot-dog-bittle-x-voice-controlled.js",
-    "default_model": "petoi-bittle"
+    "default_model": "petoi-bittle-x",
+    "_note": "task-catalog.md §1: this was 'petoi-bittle' until 2026-09-24, but that id's own catalog metadata (official_url, price range) described plain Bittle while this source was actually reading Bittle X — a live mismatch, not just a naming one. See data/model-id-changes.json."
   },
   { "seller": "petoi-official", "type": "shopify_js", "url": "https://www.petoi.com/products/petoi-nybble-q-robot-cat.js", "default_model": "petoi-nybble-q" },
   {
@@ -53,5 +55,26 @@
       { "variant": "Ownership", "regex": "\\$([0-9,]+)\\s*Ownership" },
       { "variant": "Subscription (per month)", "regex": "\\$([0-9,]+)\\s*/\\s*mo" }
     ]
+  },
+  {
+    "seller": "agibot-official",
+    "type": "shopify_js",
+    "url": "https://store.agibot.com/products/x2.js",
+    "default_model": "agibot-x2",
+    "_note": "task-catalog.md §4: verified live 2026-09-24 — $25,600, in stock, AgiBot's own international Shopify store (not a reseller)."
+  },
+  {
+    "seller": "limx-official",
+    "type": "shopify_js",
+    "url": "https://shop.limxdynamics.com/products/point-foot-pipedal-robot-for-reserach.js",
+    "default_model": "limx-tron-1",
+    "_note": "task-catalog.md §4: verified live 2026-09-24 — $15,000, in stock, LimX Dynamics' own Shopify store (Standard Edition)."
+  },
+  {
+    "seller": "ddl-official",
+    "type": "shopify_js",
+    "url": "https://anki.bot/products/vector-robot.js",
+    "default_model": "ddl-vector-2",
+    "_note": "task-catalog.md §4: verified live 2026-09-24 — anki.bot is Digital Dream Labs' current storefront domain (digitaldreamlabs.com 301-redirects here). Variants include 'Open Box' (discounted, used) alongside new units — no separate handling for that yet, same as any other multi-variant product on this site."
   }
 ]
