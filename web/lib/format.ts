@@ -7,6 +7,9 @@ export const COVERED_LIST_DATE = "2026-07-28";
 export const BASELINE_DAYS = 14;
 /** … and below this many snapshots the UI shows yesterday → today deltas instead of a chart. */
 export const CHART_MIN_SNAPSHOTS = 7;
+/** task-changes-page.md §2: the collection status card turns red once the last collection is this many
+ * hours old — the daily run is scheduled once every 24h, so 36h means at least one full run was missed. */
+export const STALE_HOURS = 36;
 
 export type Priced = Pick<Model, "price_model" | "price_usd_min" | "price_usd_max" | "subscription_usd_month">;
 
@@ -121,4 +124,24 @@ export function signedUsd(n: number): string {
 export function fmtDay(iso: string): string {
   const [y, mo, d] = iso.split("-").map(Number);
   return new Date(Date.UTC(y, mo - 1, d)).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+/** A YYYY-MM-DD date, n days later (n may be negative) — still a plain date, no time component. */
+export function addDaysUTC(iso: string, n: number): string {
+  const [y, mo, d] = iso.split("-").map(Number);
+  return new Date(Date.UTC(y, mo - 1, d + n)).toISOString().slice(0, 10);
+}
+
+/** Hours between a full ISO instant and now (positive = in the past). Takes `now` as a param so the collection-
+ * status card's staleness check is testable against a fixed clock, not React-render-time wall time. */
+export function hoursSince(iso: string, now: Date): number {
+  return (now.getTime() - new Date(iso).getTime()) / 3_600_000;
+}
+
+/** "Sep 24, 2026, 06:03 UTC" — for a full ISO instant (observed_at), not just a YYYY-MM-DD date. */
+export function fmtDateTime(iso: string): string {
+  const d = new Date(iso);
+  const day = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
+  return `${day}, ${time} UTC`;
 }

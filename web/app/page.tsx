@@ -1,8 +1,9 @@
 import { AlertSignup } from "@/components/AlertSignup";
 import { FccSection } from "@/components/FccSection";
+import { RecentChanges } from "@/components/RecentChanges";
 import { RobotExplorer } from "@/components/RobotExplorer";
 import { Delta } from "@/components/Delta";
-import { getApprovalStore, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
+import { getApprovalStore, realEvents, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
 import { fmtDate, fmtDay } from "@/lib/format";
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
   const approvals = roboticApprovals();
   const approvalsAsOf = getApprovalStore()?.updated || null;
   const changes = run.changes.slice(0, 3);
+  const recentRealEvents = realEvents();
 
   const aside = (
     <aside className="card card-accent p-5 sm:p-6" aria-labelledby="run-heading">
@@ -122,6 +124,11 @@ export default function Home() {
   return (
     <>
       <RobotExplorer rows={rows} details={details} aside={aside} cards={cards} />
+
+      {/* Recent changes (task-changes-page.md §3) — renders nothing when there are no real events yet */}
+      <div className="mt-10 sm:mt-14">
+        <RecentChanges events={recentRealEvents} />
+      </div>
 
       {/* 5. FCC */}
       <div className="mt-14 sm:mt-20">

@@ -3,10 +3,14 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import { BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE } from "./format";
-export { BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE };
+import { addDaysUTC, BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE, hoursSince, STALE_HOURS } from "./format";
+export { BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE, STALE_HOURS };
 
 export const DATA_DIR = process.env.OHMLOT_DATA_DIR ?? path.resolve(process.cwd(), "..", "data");
+// config/price-sources.json sits next to data/ at the repo root — read only for its length (task-changes-
+// page.md §2's "of 11 sources" denominator), same env-override pattern as DATA_DIR so a test fixture can
+// point both at once.
+export const CONFIG_DIR = process.env.OHMLOT_CONFIG_DIR ?? path.resolve(process.cwd(), "..", "config");
 
 export type Category = "humanoid" | "quadruped" | "desktop" | "arm";
 
@@ -58,6 +62,9 @@ export function usStatusKind(s: Pick<UsStatus, "covered_list" | "conditional_app
 
 export interface PriceRow {
   date: string; // YYYY-MM-DD (UTC)
+  /** ISO instant this row was actually fetched (task-events.md §1) — absent on rows from before that schema
+   * (2026-09-22/23), so this is optional here even though every row from 2026-09-24 on has it. */
+  observed_at?: string;
   model_id: string;
   seller: string;
   variant: string;
@@ -105,10 +112,42 @@ export interface ApprovalStore {
   approvals: ConditionalApproval[];
 }
 
+/* ---------- Collector events (from data/events.jsonl) ----------
+   Written daily by src/events.ts's generateEvents — a pure snapshot diff, never hand-entered (task-events.md
+   §5). Shape mirrors CollectorEvent in src/events.ts exactly, the same plain-JSON-mirroring pattern as
+   ApprovalRecord above. */
+export type EventType =
+  | "price_changed"
+  | "availability_changed"
+  | "discount_started"
+  | "discount_ended"
+  | "variant_added"
+  | "variant_removed"
+  | "lead_time_changed"
+  | "product_unpublished"
+  | "observation_started";
+
+export interface CollectorEvent {
+  date: string;
+  type: EventType;
+  model_id: string;
+  seller: string;
+  variant: string;
+  from: unknown;
+  to: unknown;
+  source_url: string;
+  /** task-events-2.md §1: true when this row is not evidence anything changed in the world — only that
+   * collection started observing it, or started observing it differently. Hidden by default on /changes,
+   * never dropped from the data. */
+  observation_change: boolean;
+  reason: string | null;
+}
+
 interface Store {
   models: Model[];
   prices: PriceRow[];
   approvals: ApprovalStore | null;
+  events: CollectorEvent[];
 }
 
 let store: Store | null = null;
@@ -137,7 +176,15 @@ function load(): Store {
   const approvalsPath = path.join(DATA_DIR, "fcc", "conditional-approvals.json");
   const approvals = existsSync(approvalsPath) ? (JSON.parse(readFileSync(approvalsPath, "utf8")) as ApprovalStore) : null;
 
-  store = { models, prices, approvals };
+  const eventsPath = path.join(DATA_DIR, "events.jsonl");
+  const events: CollectorEvent[] = existsSync(eventsPath)
+    ? readFileSync(eventsPath, "utf8")
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as CollectorEvent)
+    : [];
+
+  store = { models, prices, approvals, events };
   return store;
 }
 
@@ -238,11 +285,14 @@ export interface SellerPrice {
   date: string;
 }
 
-/** Latest observation for each seller + variant, cheapest first. */
+/** Latest observation for each seller + variant, cheapest first. Keyed by seller+url+variant, not just
+ * seller+variant: Pollen sells two distinct products (Reachy Mini Lite and Wireless) under the same model,
+ * same seller, and the same Shopify placeholder variant name ("Default Title" → "Standard") — url is what
+ * actually tells them apart. Without it, one product's rows silently overwrite the other's in this map. */
 export function latestPrices(modelId: string): SellerPrice[] {
   const byKey = new Map<string, PriceRow>();
   for (const r of getPriceRows(modelId)) {
-    const key = `${r.seller}|${r.variant}`;
+    const key = `${r.seller}|${r.url}|${r.variant}`;
     const prev = byKey.get(key);
     if (!prev || r.date > prev.date) byKey.set(key, r);
   }
@@ -266,17 +316,37 @@ export interface PriceSeries {
   points: { date: string; price: number }[];
 }
 
-/** One series per seller + variant, ordered by first-seen price so colors stay stable as data grows. */
+/** Last path segment of a product URL, prettified — only used to tell two products apart in a chart legend
+ * when they'd otherwise share an identical seller+variant label (see priceHistory below). */
+function productSlug(url: string): string {
+  const last = new URL(url).pathname.split("/").filter(Boolean).pop() ?? "";
+  return last.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** One series per seller + variant, ordered by first-seen price so colors stay stable as data grows. Keyed by
+ * seller+url+variant, not just seller+variant: Pollen sells two distinct products (Reachy Mini Lite and
+ * Wireless) under the same model, same seller, and the same Shopify placeholder variant name ("Default
+ * Title" → "Standard") — without url in the key, one product's points would silently merge into the
+ * other's series instead of getting its own. When that ambiguity exists, the series label also gets a
+ * product-name suffix so the legend doesn't show two identical labels for genuinely different products. */
 export function priceHistory(modelId: string): { dates: string[]; series: PriceSeries[] } {
   const rows = getPriceRows(modelId).filter((r) => variantKind(r.variant) === "purchase");
   const dates = [...new Set(rows.map((r) => r.date))].sort();
   const sellers = new Set(rows.map((r) => r.seller));
+  const urlsBySellerVariant = new Map<string, Set<string>>();
+  for (const r of rows) {
+    const svKey = `${r.seller}|${r.variant}`;
+    if (!urlsBySellerVariant.has(svKey)) urlsBySellerVariant.set(svKey, new Set());
+    urlsBySellerVariant.get(svKey)!.add(r.url);
+  }
   const map = new Map<string, PriceSeries>();
   for (const r of rows) {
-    const key = `${r.seller}|${r.variant}`;
+    const key = `${r.seller}|${r.url}|${r.variant}`;
     let s = map.get(key);
     if (!s) {
-      s = { key, label: sellers.size > 1 ? `${sellerName(r.seller)} · ${r.variant}` : r.variant, points: [] };
+      const ambiguous = (urlsBySellerVariant.get(`${r.seller}|${r.variant}`)?.size ?? 1) > 1;
+      const base = sellers.size > 1 ? `${sellerName(r.seller)} · ${r.variant}` : r.variant;
+      s = { key, label: ambiguous ? `${base} (${productSlug(r.url)})` : base, points: [] };
       map.set(key, s);
     }
     s.points.push({ date: r.date, price: r.price_usd });
@@ -392,7 +462,16 @@ export interface PriceChange {
   prev_date: string;
 }
 
-/** Seller+variant rows whose price in the latest snapshot differs from the previous snapshot. */
+/**
+ * Seller+variant rows whose price in the latest snapshot differs from the previous snapshot. Keyed with url
+ * included, not just model_id+seller+variant: Pollen sells two distinct products (Reachy Mini Lite and
+ * Wireless) under the same model, same seller, and the same Shopify placeholder variant name ("Default
+ * Title" → "Standard"). Without url in the key, the two rows collide in `prev` (one overwrites the other),
+ * and the latest-snapshot loop below then compares *both* products against whichever one won that
+ * collision — fabricating a price "change" from one product's old price to the other's unrelated current
+ * price even when neither actually changed. Confirmed live: this produced a false "▲ $100 (+25%)" home-page
+ * badge for Reachy Mini with genuinely flat prices on both dates.
+ */
 export function priceChanges(): { changes: PriceChange[]; latest: string | null; previous: string | null; first: string | null; snapshots: number } {
   const rows = load().prices;
   const dates = [...new Set(rows.map((r) => r.date))].sort();
@@ -400,7 +479,7 @@ export function priceChanges(): { changes: PriceChange[]; latest: string | null;
   const previous = dates.at(-2) ?? null;
   const first = dates[0] ?? null;
   if (!latest || !previous) return { changes: [], latest, previous, first, snapshots: dates.length };
-  const key = (r: PriceRow) => `${r.model_id}|${r.seller}|${r.variant}`;
+  const key = (r: PriceRow) => `${r.model_id}|${r.seller}|${r.url}|${r.variant}`;
   const prev = new Map(rows.filter((r) => r.date === previous).map((r) => [key(r), r]));
   const changes: PriceChange[] = [];
   for (const r of rows) {
@@ -550,14 +629,15 @@ export interface VariantDelta extends SellerPrice {
   from_date: string | null;
 }
 
-/** Every latest row paired with the same seller+variant from the previous snapshot. */
+/** Every latest row paired with the same seller+url+variant from the previous snapshot. Keyed with url, not
+ * just seller+variant, for the same reason as latestPrices above (Pollen's Lite/Wireless collision). */
 export function variantDeltas(modelId: string): VariantDelta[] {
   const rows = getPriceRows(modelId);
   const dates = [...new Set(rows.map((r) => r.date))].sort();
   const prevDate = dates.length >= 2 ? dates[dates.length - 2] : null;
-  const prev = new Map(rows.filter((r) => r.date === prevDate).map((r) => [`${r.seller}|${r.variant}`, r]));
+  const prev = new Map(rows.filter((r) => r.date === prevDate).map((r) => [`${r.seller}|${r.url}|${r.variant}`, r]));
   return latestPrices(modelId).map((p) => {
-    const q = prevDate ? prev.get(`${p.seller}|${p.variant}`) : undefined;
+    const q = prevDate ? prev.get(`${p.seller}|${p.url}|${p.variant}`) : undefined;
     return { ...p, from: q?.price_usd ?? null, from_date: q ? prevDate : null };
   });
 }
@@ -594,5 +674,88 @@ export function runSummary(): RunSummary {
     changes: pc.changes,
     baselineDay: Math.min(pc.snapshots, BASELINE_DAYS),
     baselineDays: BASELINE_DAYS,
+  };
+}
+
+/* ---------- /changes page (data/events.jsonl) ---------- */
+
+export interface ChangeEventView extends CollectorEvent {
+  model_name: string;
+  seller_name: string;
+}
+
+function resolveEvent(e: CollectorEvent): ChangeEventView {
+  return { ...e, model_name: getModel(e.model_id)?.name ?? e.model_id, seller_name: sellerName(e.seller) };
+}
+
+/** Every collector event, newest first. Same-day events keep the order generateEvents produced them in
+ * (stable sort) — there is no finer-grained timestamp to order by within one day. */
+export function getEvents(): ChangeEventView[] {
+  return load()
+    .events.map(resolveEvent)
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/** Real-world changes only — what task-changes-page.md §1 calls the list itself. */
+export function realEvents(): ChangeEventView[] {
+  return getEvents().filter((e) => !e.observation_change);
+}
+
+/** "Observation started" rows — hidden by default behind the /changes toggle, never deleted. */
+export function observationEvents(): ChangeEventView[] {
+  return getEvents().filter((e) => e.observation_change);
+}
+
+export interface CollectionStatus {
+  /** Max observed_at across every price row on file, or null before the schema/first run. */
+  lastObservedAt: string | null;
+  /** Hours since lastObservedAt, or null when there's no observed_at to measure from. */
+  staleHours: number | null;
+  /** true once staleHours exceeds STALE_HOURS — the daily-run health check going red. */
+  isStale: boolean;
+  todayDate: string | null;
+  /** Price points collected on todayDate. */
+  todayRows: number;
+  /** Distinct seller+url pairs represented in todayDate's rows, out of totalSources configured. */
+  todaySourcesOk: number;
+  totalSources: number;
+  baselineDay: number;
+  baselineDays: number;
+  /** Real (non-observation) events dated in the trailing 7 days ending on todayDate. */
+  weekRealEvents: number;
+}
+
+/**
+ * The health-check card at the top of /changes (task-changes-page.md §2). `now` defaults to the actual
+ * build-time clock but takes a fixed value in tests, so the 36-hour staleness flag is verifiable without
+ * waiting 36 hours or editing real data — see test/collectionStatus.test.ts.
+ */
+export function collectionStatus(now: Date = new Date()): CollectionStatus {
+  const all = load().prices;
+  const observedAts = all.map((r) => r.observed_at).filter((v): v is string => !!v);
+  const lastObservedAt = observedAts.length ? observedAts.reduce((a, b) => (a > b ? a : b)) : null;
+  const staleHours = lastObservedAt ? hoursSince(lastObservedAt, now) : null;
+
+  const todayDate = lastUpdated();
+  const todayRows = todayDate ? all.filter((r) => r.date === todayDate) : [];
+  const todaySourcesOk = new Set(todayRows.map((r) => `${r.seller}\u0000${r.url}`)).size;
+  const sourcesConfigPath = path.join(CONFIG_DIR, "price-sources.json");
+  const totalSources = existsSync(sourcesConfigPath) ? (JSON.parse(readFileSync(sourcesConfigPath, "utf8")) as unknown[]).length : todaySourcesOk;
+
+  const pc = priceChanges();
+  const weekStart = todayDate ? addDaysUTC(todayDate, -6) : null;
+  const weekRealEvents = weekStart && todayDate ? realEvents().filter((e) => e.date >= weekStart && e.date <= todayDate).length : 0;
+
+  return {
+    lastObservedAt,
+    staleHours,
+    isStale: staleHours != null && staleHours > STALE_HOURS,
+    todayDate,
+    todayRows: todayRows.length,
+    todaySourcesOk,
+    totalSources,
+    baselineDay: Math.min(pc.snapshots, BASELINE_DAYS),
+    baselineDays: BASELINE_DAYS,
+    weekRealEvents,
   };
 }
