@@ -9,8 +9,9 @@ const date = process.env.COLLECT_DATE ?? todayUTC();
 let failed = false;
 if (which === "all" || which === "prices") {
   const r = await collectPrices(date);
-  console.log(`[prices] ${r.count} rows, ${r.errors.length} errors`);
+  console.log(`[prices] ${r.count} rows, ${r.errors.length} errors, ${r.events.length} events`);
   r.errors.forEach((e) => console.warn("  ", e));
+  r.events.forEach((e) => console.log(`   EVENT ${e.type} ${e.model_id}/${e.seller}/${e.variant}: ${JSON.stringify(e.from)} -> ${JSON.stringify(e.to)}`));
   // Fail only if every price source failed, so partial outages still get archived.
   if (r.count === 0) failed = true;
 }

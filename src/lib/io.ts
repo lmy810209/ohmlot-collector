@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, appendFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile, appendFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
 export const UA =
@@ -72,6 +72,30 @@ export async function writeText(path: string, text: string) {
 export async function writeJsonl(path: string, rows: unknown[]) {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, rows.map((r) => JSON.stringify(r)).join("\n") + (rows.length ? "\n" : ""));
+}
+
+export async function readJsonl<T>(path: string): Promise<T[]> {
+  try {
+    const text = await readFile(path, "utf8");
+    return text
+      .split("\n")
+      .filter(Boolean)
+      .map((l) => JSON.parse(l) as T);
+  } catch {
+    return [];
+  }
+}
+
+/** Every YYYY-MM-DD.jsonl date found directly in `dir` (not its subdirectories), sorted ascending. */
+export async function listSnapshotDates(dir: string): Promise<string[]> {
+  try {
+    return (await readdir(dir))
+      .filter((f) => /^\d{4}-\d{2}-\d{2}\.jsonl$/.test(f))
+      .map((f) => f.slice(0, 10))
+      .sort();
+  } catch {
+    return [];
+  }
 }
 
 export async function appendLog(path: string, line: string) {

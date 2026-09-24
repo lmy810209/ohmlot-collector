@@ -17,3 +17,9 @@ test("sourceId: strips extension and query string, keeps the product handle", ()
   assert.equal(sourceId({ seller: "keyi-official", url: "https://us.keyirobot.com/products/petbot.json" }), "keyi-official__petbot");
   assert.equal(sourceId({ seller: "1x-official", url: "https://www.1x.tech/order" }), "1x-official__order");
 });
+
+test("sourceId: a collection endpoint (no product name in the path) falls back to product_handle", () => {
+  // task-events.md §2: KEYi's URL is now the store-wide /products.json, which has no per-product path segment
+  // at all — without product_handle the id would collapse to the generic "keyi-official__products".
+  assert.equal(sourceId({ seller: "keyi-official", url: "https://us.keyirobot.com/products.json?limit=250", product_handle: "petbot" }), "keyi-official__petbot");
+});

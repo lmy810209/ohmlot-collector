@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { normalizeDate, parseRegexHtml, parseShopifyProduct, withUsMarket, type PriceSource } from "../src/lib/parse.ts";
+import { extractLeadTime, normalizeDate, parseRegexHtml, parseShopifyProduct, withUsMarket, type PriceSource } from "../src/lib/parse.ts";
 import { extractRoboticApprovals } from "../src/lib/pdf.ts";
 
 // Node's Buffer is a Uint8Array subclass, but pdfjs checks the exact constructor, so re-wrap it.
@@ -28,6 +28,7 @@ test("shopify: cents -> USD, variant mapping, availability", () => {
     },
     go2,
     "2026-09-22",
+    "2026-09-24T00:17:03.000Z",
   );
   assert.deepEqual(rows.map((r) => [r.model_id, r.price_usd, r.available]), [
     ["unitree-go2-air", 1600, true],
@@ -42,6 +43,7 @@ test("shopify: 'pro' does not match inside 'product'", () => {
     { title: "Go2", handle: "x", variants: [{ title: "Go2 Air (product bundle)", price: 160000 }] },
     go2,
     "2026-09-22",
+    "2026-09-24T00:17:03.000Z",
   );
   assert.equal(rows[0].model_id, "unitree-go2-air");
 });
@@ -51,6 +53,7 @@ test("shopify: placeholder prices are flagged", () => {
     { title: "Unitree H1 - Contact us", handle: "h1", variants: [{ title: "Default", price: 9000000 }] },
     { ...go2, default_model: "unitree-h1", variant_map: undefined },
     "2026-09-22",
+    "2026-09-24T00:17:03.000Z",
   );
   assert.deepEqual(rows[0].flags, ["placeholder_price"]);
 });
@@ -69,6 +72,7 @@ test("shopify: .json endpoint shape ({ product }, dollar strings) is accepted", 
     },
     { seller: "keyi-official", type: "shopify_js", url: "https://us.keyirobot.com/products/petbot.json", default_model: "keyi-loona" },
     "2026-09-22",
+    "2026-09-24T00:17:03.000Z",
   );
   assert.deepEqual(rows.map((r) => [r.model_id, r.variant, r.price_usd, r.available]), [
     ["keyi-loona", "Premium", 499, true],
@@ -79,7 +83,7 @@ test("shopify: .json endpoint shape ({ product }, dollar strings) is accepted", 
 
 test("shopify: HTML body is rejected with a clear error", () => {
   assert.throws(
-    () => parseShopifyProduct("<!DOCTYPE html>" as unknown, { seller: "x", type: "shopify_js", url: "https://x/y.js", default_model: "m" }, "2026-09-22"),
+    () => parseShopifyProduct("<!DOCTYPE html>" as unknown, { seller: "x", type: "shopify_js", url: "https://x/y.js", default_model: "m" }, "2026-09-22", "2026-09-24T00:17:03.000Z"),
     /not a Shopify product/,
   );
 });
@@ -100,10 +104,15 @@ test("regex html: price and label split across sibling tags (live 1X markup)", (
       ],
     },
     "2026-09-22",
+    "2026-09-24T00:17:03.000Z",
   );
   assert.deepEqual(rows.map((r) => [r.variant, r.price_usd]), [
     ["Ownership", 20000],
     ["Subscription (per month)", 499],
+  ]);
+  assert.deepEqual(rows.map((r) => [r.purchase_mode, r.availability_status, r.variant_id]), [
+    ["preorder", "pre_order", null],
+    ["preorder", "pre_order", null],
   ]);
 });
 
@@ -119,6 +128,150 @@ test("dates normalize from FCC / notice formats", () => {
   assert.equal(normalizeDate("Mar 3, 2025"), "2025-03-03");
   assert.equal(normalizeDate("September 9, 2026"), "2026-09-09");
   assert.equal(normalizeDate("garbage"), null);
+});
+
+// ---------- task-events.md §1-4: fields the raw response already had but the parser used to discard ----------
+
+test("shopify: compare_at_price -> on_sale, sku/id/published_at/updated_at are captured", () => {
+  const rows = parseShopifyProduct(
+    {
+      title: "Loona Petbot",
+      handle: "petbot",
+      published_at: "2026-01-21T00:01:02-05:00",
+      variants: [
+        { id: 111, title: "Premium", price: "499.00", compare_at_price: "529.00", sku: "LOONAZHTZ26", available: true, updated_at: "2026-09-23T22:07:50-04:00" },
+        { id: 222, title: "Space Edition", price: "699.00", compare_at_price: "699.00", sku: null, available: true }, // compare == price: not on sale
+        { id: 333, title: "No Compare", price: "39.00", available: true }, // compare_at_price absent entirely
+      ],
+    },
+    { seller: "keyi-official", type: "shopify_js", url: "https://us.keyirobot.com/products.json?limit=250", product_handle: "petbot", default_model: "keyi-loona" },
+    "2026-09-24",
+    "2026-09-24T00:17:03.000Z",
+  );
+  assert.deepEqual(
+    rows.map((r) => [r.variant, r.compare_at_price_usd, r.on_sale, r.variant_sku, r.variant_id]),
+    [
+      ["Premium", 529, true, "LOONAZHTZ26", 111],
+      ["Space Edition", 699, false, null, 222],
+      ["No Compare", null, false, null, 333],
+    ],
+  );
+  assert.equal(rows[0].observed_at, "2026-09-24T00:17:03.000Z");
+});
+
+test("shopify: collection endpoint ({ products: [...] }) is unwrapped by product_handle, not products[0]", () => {
+  const rows = parseShopifyProduct(
+    {
+      products: [
+        { title: "Space Explorer", handle: "space-explorer", variants: [{ title: "Default", price: "129.00", available: true }] },
+        { title: "Loona Petbot", handle: "petbot", variants: [{ title: "Premium", price: "499.00", available: true }] },
+      ],
+    },
+    { seller: "keyi-official", type: "shopify_js", url: "https://us.keyirobot.com/products.json?limit=250", product_handle: "petbot", default_model: "keyi-loona" },
+    "2026-09-24",
+    "2026-09-24T00:17:03.000Z",
+  );
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].variant, "Premium");
+  assert.equal(rows[0].url, "https://us.keyirobot.com/products/petbot");
+});
+
+test("shopify: collection endpoint without a matching handle throws (never silently picks products[0])", () => {
+  assert.throws(
+    () =>
+      parseShopifyProduct(
+        { products: [{ title: "Space Explorer", handle: "space-explorer", variants: [{ title: "Default", price: "1.00" }] }] },
+        { seller: "keyi-official", type: "shopify_js", url: "https://x/products.json", product_handle: "petbot", default_model: "keyi-loona" },
+        "2026-09-24",
+        "2026-09-24T00:17:03.000Z",
+      ),
+    /product_handle "petbot" not found/,
+  );
+});
+
+test("shopify: no `available` field on a variant -> availability_status unknown, with a named reason (KEYi's old endpoint)", () => {
+  const rows = parseShopifyProduct(
+    { product: { title: "Loona Petbot", handle: "petbot", variants: [{ title: "Premium", price: "499.00" }] } },
+    { seller: "keyi-official", type: "shopify_js", url: "https://us.keyirobot.com/products/petbot.json", default_model: "keyi-loona" },
+    "2026-09-24",
+    "2026-09-24T00:17:03.000Z",
+  );
+  assert.equal(rows[0].availability_status, "unknown");
+  assert.match(rows[0].availability_evidence, /no `available` field/);
+});
+
+test("shopify: available true/false -> in_stock/out_of_stock with the exact evidence string", () => {
+  const rows = parseShopifyProduct(
+    { title: "H2", handle: "unitree-h2", variants: [{ title: "H2", price: "29900.00", available: false }] },
+    { seller: "unitree-official", type: "shopify_js", url: "https://shop.unitree.com/products/unitree-h2.js", default_model: "unitree-h2" },
+    "2026-09-24",
+    "2026-09-24T00:17:03.000Z",
+  );
+  assert.equal(rows[0].availability_status, "out_of_stock");
+  assert.equal(rows[0].availability_evidence, "variants[0].available=false");
+});
+
+test("shopify: contact_sales_variants overrides purchase_mode and availability_status for an exact title match", () => {
+  const source: PriceSource = {
+    seller: "deeprobotics-us",
+    type: "shopify_js",
+    url: "https://shop.deeprobotics.us/products/lite-3.js",
+    default_model: "deep-robotics-lite3",
+    contact_sales_variants: ["Venture", "Pro", "LiDAR"],
+  };
+  const rows = parseShopifyProduct(
+    {
+      title: "Lite3",
+      handle: "lite-3",
+      variants: [
+        { title: "Basic", price: "2890.00", available: true },
+        { title: "Basic AI", price: "4968.00", available: true }, // contains "Basic" but is not in the list — must stay direct
+        { title: "Venture", price: "6480.00", available: true },
+        { title: "Pro", price: "12510.00", available: true },
+      ],
+    },
+    source,
+    "2026-09-24",
+    "2026-09-24T00:17:03.000Z",
+  );
+  assert.deepEqual(
+    rows.map((r) => [r.variant, r.purchase_mode, r.availability_status]),
+    [
+      ["Basic", "direct", "in_stock"],
+      ["Basic AI", "direct", "in_stock"],
+      ["Venture", "contact_sales", "contact_sales"],
+      ["Pro", "contact_sales", "contact_sales"],
+    ],
+  );
+});
+
+test("extractLeadTime: Pollen's exact sentence, and null for everyone else — never guessed", () => {
+  const pollen = extractLeadTime(
+    "<p>Shipping &amp; Import Duties</p><p>Lead time: up to 90 days after purchase (many orders ship sooner). Import duties are calculated at checkout.</p>",
+  );
+  assert.equal(pollen.text, "up to 90 days after purchase (many orders ship sooner).");
+  assert.equal(pollen.days, 90);
+
+  assert.deepEqual(extractLeadTime("<p>A regular product description with no shipping info.</p>"), { text: null, days: null });
+  assert.deepEqual(extractLeadTime(null), { text: null, days: null });
+  assert.deepEqual(extractLeadTime(undefined), { text: null, days: null });
+});
+
+test("shopify: lead_time_text/days flow from description into every variant row", () => {
+  const rows = parseShopifyProduct(
+    {
+      title: "Reachy Mini Wireless",
+      handle: "reachy-mini-wireless-version",
+      description: "<p>Lead time: up to 90 days after purchase (many orders ship sooner).</p>",
+      variants: [{ title: "Default Title", price: "499.00", available: true }],
+    },
+    { seller: "pollen-official", type: "shopify_js", url: "https://store.pollen-robotics.com/products/reachy-mini-wireless-version.js", default_model: "pollen-reachy-mini" },
+    "2026-09-24",
+    "2026-09-24T00:17:03.000Z",
+  );
+  assert.equal(rows[0].lead_time_text, "up to 90 days after purchase (many orders ship sooner).");
+  assert.equal(rows[0].lead_time_days, 90);
+  assert.equal(rows[0].market, "US");
 });
 
 // ---------- FCC Conditional Approvals: the real bug from task-fcc-3.md ----------

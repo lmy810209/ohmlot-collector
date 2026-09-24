@@ -28,8 +28,22 @@
     "default_model": "petoi-bittle"
   },
   { "seller": "petoi-official", "type": "shopify_js", "url": "https://www.petoi.com/products/petoi-nybble-q-robot-cat.js", "default_model": "petoi-nybble-q" },
-  { "seller": "keyi-official", "type": "shopify_js", "url": "https://us.keyirobot.com/products/petbot.json", "default_model": "keyi-loona" },
-  { "seller": "deeprobotics-us", "type": "shopify_js", "url": "https://shop.deeprobotics.us/products/lite-3.js", "default_model": "deep-robotics-lite3" },
+  {
+    "seller": "keyi-official",
+    "type": "shopify_js",
+    "url": "https://us.keyirobot.com/products.json?limit=250",
+    "product_handle": "petbot",
+    "default_model": "keyi-loona",
+    "_note": "task-events.md §2: the single-product /products/petbot.json has no `available` field at all (confirmed, context/observability.md). The store-wide collection endpoint does, at the cost of fetching all 15 products to find this one — product_handle picks it out."
+  },
+  {
+    "seller": "deeprobotics-us",
+    "type": "shopify_js",
+    "url": "https://shop.deeprobotics.us/products/lite-3.js",
+    "default_model": "deep-robotics-lite3",
+    "contact_sales_variants": ["Venture", "Pro", "LiDAR"],
+    "_note": "task-events.md §4: the product description says 'For Lite3 Venture, Pro, and LiDAR editions, please contact our sales team … for detailed configurations and available discounts' — these three variant titles show a list price but aren't directly purchasable at it."
+  },
   {
     "seller": "1x-official",
     "type": "regex_html",
