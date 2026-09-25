@@ -1,12 +1,25 @@
 import { collectPrices } from "./prices.ts";
 import { collectFcc } from "./fcc.ts";
+import { collectIntraday } from "./intraday.ts";
 import { todayUTC } from "./lib/io.ts";
 
-// `prices` runs daily (daily.yml). `fcc` runs weekly + manually (fcc.yml). `all` is for local runs.
+// `prices` runs daily (daily.yml). `fcc` runs weekly + manually (fcc.yml). `intraday` runs every 6h
+// (intraday.yml, task-measure.md §B) — deliberately NOT part of `all`, since `all` is the plain local/daily
+// run and intraday is a separate, opt-in-only experiment scoped to 3 sources.
 const which = process.argv[2] ?? "all";
 const date = process.env.COLLECT_DATE ?? todayUTC();
 
 let failed = false;
+if (which === "intraday") {
+  const r = await collectIntraday();
+  if (r.skipped) {
+    console.log(`[intraday] skipped — circuit breaker tripped at ${r.disabledReason!.disabled_at}: ${r.disabledReason!.reason}`);
+  } else {
+    console.log(`[intraday] ${r.count} rows, ${r.errors.length} errors${r.tripped ? " — CIRCUIT BREAKER TRIPPED THIS RUN, reverting to daily-only" : ""}`);
+    r.errors.forEach((e) => console.warn("  ", e));
+    if (r.count === 0) failed = true;
+  }
+}
 if (which === "all" || which === "prices") {
   const r = await collectPrices(date);
   console.log(`[prices] ${r.count} rows, ${r.errors.length} errors, ${r.events.length} events`);

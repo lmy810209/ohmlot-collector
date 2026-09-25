@@ -8,6 +8,8 @@
     "collect": "tsx src/run.ts",
     "collect:prices": "tsx src/run.ts prices",
     "collect:fcc": "tsx src/run.ts fcc",
+    "collect:intraday": "tsx src/run.ts intraday",
+    "intraday:compare": "tsx src/intraday-compare.ts",
     "test": "tsx --test test/*.test.ts",
     "typecheck": "tsc --noEmit",
     "fcc:review": "tsx src/fcc-review.ts"
