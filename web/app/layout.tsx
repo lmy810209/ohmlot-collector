@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Schibsted_Grotesk } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -23,6 +24,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader lastUpdated={updated} />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 sm:px-6">{children}</main>
         <SiteFooter lastUpdated={updated} />
+        {/* Vercel Web Analytics: cookieless page views; only reports when deployed on Vercel with Web Analytics enabled. */}
+        <Analytics />
       </body>
     </html>
   );
