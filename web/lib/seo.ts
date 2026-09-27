@@ -96,6 +96,18 @@ export function robotLastModified(modelId: string): string | null {
   return dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : null;
 }
 
+// One definition of each page's path, used by both the sitemap and the page's canonical tag so the two can't
+// disagree about a URL.
+export const HOME_PATH = "/";
+export const CHANGES_PATH = "/changes";
+export const FCC_PATH = "/fcc";
+export const robotPath = (id: string): string => `/robots/${id}`;
+
+/** Absolute URL for a path. The home page is the bare origin, which is what Next writes into its canonical tag. */
+export function absoluteUrl(path: string): string {
+  return path === HOME_PATH ? SITE_URL : `${SITE_URL}${path}`;
+}
+
 export interface SitemapEntry {
   url: string;
   lastModified?: string;
@@ -106,9 +118,9 @@ export function sitemapEntries(): SitemapEntry[] {
   const withDate = (url: string, date: string | null | undefined): SitemapEntry => (date ? { url, lastModified: date } : { url });
   const snapshot = lastUpdated();
   return [
-    withDate(SITE_URL, snapshot),
-    withDate(`${SITE_URL}/changes`, snapshot),
-    withDate(`${SITE_URL}/fcc`, getApprovalStore()?.updated),
-    ...getModels().map((m) => withDate(`${SITE_URL}/robots/${m.id}`, robotLastModified(m.id))),
+    withDate(absoluteUrl(HOME_PATH), snapshot),
+    withDate(absoluteUrl(CHANGES_PATH), snapshot),
+    withDate(absoluteUrl(FCC_PATH), getApprovalStore()?.updated),
+    ...getModels().map((m) => withDate(absoluteUrl(robotPath(m.id)), robotLastModified(m.id))),
   ];
 }

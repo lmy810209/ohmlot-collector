@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { CollectionStatusCard } from "@/components/CollectionStatusCard";
 import { ChangesList } from "@/components/ChangesList";
 import { collectionStatus, observationEvents, realEvents } from "@/lib/data";
-import { CHANGES_DESCRIPTION, CHANGES_TITLE } from "@/lib/seo";
+import { CHANGES_DESCRIPTION, CHANGES_PATH, CHANGES_TITLE } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: CHANGES_TITLE,
   description: CHANGES_DESCRIPTION,
+  alternates: { canonical: CHANGES_PATH },
 };
 
 export default function ChangesPage() {

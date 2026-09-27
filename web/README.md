@@ -45,4 +45,6 @@ vercel project ls               # then set Root Directory = web in the dashboard
 vercel --prod
 ```
 
-Point `ohmlot.com` at the project under Settings → Domains.
+Add both `www.ohmlot.com` and `ohmlot.com` under Settings → Domains, with **www as the primary** and the apex
+redirecting to it (308). `SITE_URL` in `lib/site.ts` must match the primary domain: the sitemap, `robots.txt`
+and every page's canonical tag are built from it.

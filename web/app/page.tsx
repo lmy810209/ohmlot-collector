@@ -6,11 +6,12 @@ import { RobotExplorer } from "@/components/RobotExplorer";
 import { Delta } from "@/components/Delta";
 import { getApprovalStore, realEvents, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
 import { fmtDate, fmtDay } from "@/lib/format";
-import { homeDescription, homeTitle } from "@/lib/seo";
+import { HOME_PATH, homeDescription, homeTitle } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { absolute: homeTitle() },
   description: homeDescription(),
+  alternates: { canonical: HOME_PATH },
 };
 
 export default function Home() {

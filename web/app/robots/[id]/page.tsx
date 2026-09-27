@@ -9,7 +9,7 @@ import { TrackRobotButton } from "@/components/TrackRobotButton";
 import { UsRegulatoryStatus } from "@/components/UsRegulatoryStatus";
 import { CHART_MIN_SNAPSHOTS, fccFacts, getModel, getModels, latestPrices, priceHistory, variantDeltas } from "@/lib/data";
 import { CATEGORY_LABEL, fmtDate, fmtDay, launchPriceNote, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
-import { robotDescription, robotTitle } from "@/lib/seo";
+import { robotDescription, robotPath, robotTitle } from "@/lib/seo";
 
 export const dynamicParams = false;
 
@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: PageProps<"/robots/[id]">): P
   return {
     title: robotTitle(m),
     description: robotDescription(m),
+    alternates: { canonical: robotPath(m.id) },
   };
 }
 

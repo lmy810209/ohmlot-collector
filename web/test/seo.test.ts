@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getModels } from "../lib/data.ts";
-import { CHANGES_DESCRIPTION, CHANGES_TITLE, FCC_DESCRIPTION, FCC_TITLE, homeDescription, homeTitle, MAX_DESCRIPTION, MAX_TITLE, plainName, robotDescription, robotTitle, sitemapEntries, TITLE_SUFFIX } from "../lib/seo.ts";
+import { absoluteUrl, CHANGES_DESCRIPTION, CHANGES_PATH, CHANGES_TITLE, FCC_DESCRIPTION, FCC_PATH, FCC_TITLE, HOME_PATH, homeDescription, homeTitle, MAX_DESCRIPTION, MAX_TITLE, plainName, robotDescription, robotPath, robotTitle, sitemapEntries, TITLE_SUFFIX } from "../lib/seo.ts";
 import { SITE_URL } from "../lib/site.ts";
 
 // These read the real ../data catalog (cwd is web/ under `npm test`), so they double as a guard: a newly
@@ -70,8 +70,8 @@ test("sitemap: home, /changes, /fcc and every robot — and nothing else", () =>
   const urls = sitemapEntries().map((e) => e.url);
   assert.equal(urls.length, 3 + models.length);
   assert.equal(new Set(urls).size, urls.length, "no duplicate URLs");
-  for (const u of [SITE_URL, `${SITE_URL}/changes`, `${SITE_URL}/fcc`]) assert.ok(urls.includes(u), u);
-  for (const m of models) assert.ok(urls.includes(`${SITE_URL}/robots/${m.id}`), m.id);
+  for (const path of [HOME_PATH, CHANGES_PATH, FCC_PATH]) assert.ok(urls.includes(absoluteUrl(path)), path);
+  for (const m of models) assert.ok(urls.includes(absoluteUrl(robotPath(m.id))), m.id);
   assert.ok(!urls.some((u) => u.includes("unsubscribe")), "/unsubscribe is noindex, so it stays out of the sitemap");
 });
 
@@ -79,4 +79,18 @@ test("sitemap: lastModified is a real YYYY-MM-DD date or absent — never invent
   for (const e of sitemapEntries()) {
     if (e.lastModified !== undefined) assert.match(e.lastModified, /^\d{4}-\d{2}-\d{2}$/, e.url);
   }
+});
+
+test("SITE_URL is the www origin — the apex domain 308-redirects to it, so no sitemap/robots/canonical URL may use the apex", () => {
+  assert.equal(SITE_URL, "https://www.ohmlot.com");
+  assert.ok(!SITE_URL.endsWith("/"), "no trailing slash: paths are appended with a leading slash");
+  for (const e of sitemapEntries()) {
+    assert.ok(e.url === SITE_URL || e.url.startsWith(`${SITE_URL}/`), `${e.url} is not under ${SITE_URL}`);
+    assert.ok(!e.url.startsWith("https://ohmlot.com"), `${e.url} names the redirecting apex domain`);
+  }
+});
+
+test("absoluteUrl: home is the bare origin (what Next writes into its canonical tag), everything else is origin + path", () => {
+  assert.equal(absoluteUrl(HOME_PATH), SITE_URL);
+  assert.equal(absoluteUrl(robotPath("unitree-g1")), `${SITE_URL}/robots/unitree-g1`);
 });
