@@ -5,6 +5,7 @@ import { UnsubscribeForm } from "./UnsubscribeForm";
 export const metadata: Metadata = {
   title: "Unsubscribe",
   description: "Remove your email from Ohmlot price and stock alerts.",
+  robots: { index: false, follow: false },
 };
 
 export default function UnsubscribePage() {

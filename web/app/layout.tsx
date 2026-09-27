@@ -5,13 +5,15 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { lastUpdated } from "@/lib/data";
+import { homeTitle } from "@/lib/seo";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const schibsted = Schibsted_Grotesk({ variable: "--font-schibsted", subsets: ["latin"], weight: "variable" });
 const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ohmlot.com"),
-  title: { default: "Ohmlot — The original marketplace for personal robots", template: "%s · Ohmlot" },
+  metadataBase: new URL(SITE_URL),
+  title: { default: homeTitle(), template: `%s · ${SITE_NAME}` },
   description:
     "Daily list prices and FCC authorization records for personal robots: humanoids, robot dogs, and desktop robots.",
 };

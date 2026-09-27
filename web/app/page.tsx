@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AlertSignup } from "@/components/AlertSignup";
 import { FccSection } from "@/components/FccSection";
 import { RecentChanges } from "@/components/RecentChanges";
@@ -5,6 +6,12 @@ import { RobotExplorer } from "@/components/RobotExplorer";
 import { Delta } from "@/components/Delta";
 import { getApprovalStore, realEvents, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
 import { fmtDate, fmtDay } from "@/lib/format";
+import { homeDescription, homeTitle } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: { absolute: homeTitle() },
+  description: homeDescription(),
+};
 
 export default function Home() {
   const rows = robotRows();

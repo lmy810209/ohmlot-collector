@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { CollectionStatusCard } from "@/components/CollectionStatusCard";
 import { ChangesList } from "@/components/ChangesList";
 import { collectionStatus, observationEvents, realEvents } from "@/lib/data";
+import { CHANGES_DESCRIPTION, CHANGES_TITLE } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Changes",
-  description: "Every price, availability, and discount change the daily collector has found, plus a health check for the collector itself.",
+  title: CHANGES_TITLE,
+  description: CHANGES_DESCRIPTION,
 };
 
 export default function ChangesPage() {

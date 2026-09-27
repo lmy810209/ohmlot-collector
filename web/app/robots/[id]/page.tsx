@@ -8,7 +8,8 @@ import { AlertSignup } from "@/components/AlertSignup";
 import { TrackRobotButton } from "@/components/TrackRobotButton";
 import { UsRegulatoryStatus } from "@/components/UsRegulatoryStatus";
 import { CHART_MIN_SNAPSHOTS, fccFacts, getModel, getModels, latestPrices, priceHistory, variantDeltas } from "@/lib/data";
-import { CATEGORY_LABEL, fmtDate, fmtDay, launchPriceNote, priceRange, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
+import { CATEGORY_LABEL, fmtDate, fmtDay, launchPriceNote, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
+import { robotDescription, robotTitle } from "@/lib/seo";
 
 export const dynamicParams = false;
 
@@ -21,8 +22,8 @@ export async function generateMetadata({ params }: PageProps<"/robots/[id]">): P
   const m = getModel(id);
   if (!m) return {};
   return {
-    title: `${m.name} price and US regulatory status`,
-    description: `${m.name} by ${m.manufacturer}: ${priceRange(m)}. Daily list prices, FCC ID, Covered List status, and resale notes.`,
+    title: robotTitle(m),
+    description: robotDescription(m),
   };
 }
 

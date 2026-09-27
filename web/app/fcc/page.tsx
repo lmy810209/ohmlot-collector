@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { FccSearch } from "@/components/FccSearch";
 import { fccSearchItems, getApprovalStore, roboticApprovals } from "@/lib/data";
 import { COVERED_LIST_RULE, FCC_DOCS } from "@/lib/format";
+import { FCC_DESCRIPTION, FCC_TITLE } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "FCC ID search and US status",
-  description: "Search personal-robot FCC equipment authorizations by model name or FCC ID, filtered by Covered List status.",
+  title: FCC_TITLE,
+  description: FCC_DESCRIPTION,
 };
 
 export default function FccPage() {
