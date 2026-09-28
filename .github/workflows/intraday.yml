@@ -32,7 +32,14 @@ jobs:
         run: |
           git config user.name "collector-bot"
           git config user.email "collector-bot@users.noreply.github.com"
-          git add data/prices/intraday data/logs data/intraday-disabled.json
+          # data/prices/intraday is always written by the collect step above; data/logs and the circuit-
+          # breaker flag are only created when something actually goes wrong, so a bare `git add` on either
+          # fails with "did not match any files" (exit 128) on every clean run — the common case — and that
+          # aborts this script before commit/push ever execute, silently discarding the collected data. Add
+          # them only when they exist.
+          git add data/prices/intraday
+          [ -d data/logs ] && git add data/logs
+          [ -f data/intraday-disabled.json ] && git add data/intraday-disabled.json
           git diff --cached --quiet || git commit -m "intraday snapshot $(date -u +%FT%H:%M)"
           git pull --rebase -q
           git push
