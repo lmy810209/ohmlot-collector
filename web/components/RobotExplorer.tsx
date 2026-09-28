@@ -226,7 +226,7 @@ export function RobotExplorer({
       {/* 2. Hero */}
       <section className="grid grid-cols-1 gap-8 pt-10 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
         <div>
-          <h1 className="display max-w-3xl">The original marketplace for personal robots.</h1>
+          <h1 className="display max-w-3xl">What personal robots cost, and whether you can actually buy them.</h1>
           <p className="mt-4 max-w-xl text-[16px] text-ink-2 sm:text-[17px]">
             {trackedCount} robots tracked daily with manufacturer list prices, {listedCount} more listed without a public price to collect
             {announcedCount > 0 ? `, ${announcedCount} announced but not yet available` : ""}, and FCC authorization records across all of them.
