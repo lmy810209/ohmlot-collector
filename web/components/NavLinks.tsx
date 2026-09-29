@@ -21,7 +21,7 @@ export function NavLinks() {
             key={l.href}
             href={l.href}
             aria-current={current ? "page" : undefined}
-            className={`inline-flex h-9 items-center rounded-full px-4 text-[13px] font-medium transition-colors duration-150 ${
+            className={`inline-flex h-9 items-center rounded-full px-3 text-[13px] font-medium transition-colors duration-150 sm:px-4 ${
               current ? "bg-card text-ink shadow-card" : "text-ink-2 hover:text-ink"
             }`}
           >
