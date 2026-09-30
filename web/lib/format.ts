@@ -85,6 +85,19 @@ export function fmtMonth(iso: string): string {
   return utcDate(iso).toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 }
 
+/**
+ * "05:26 UTC" from a full ISO instant (a price row's `observed_at`, e.g. "2026-09-28T05:26:11.488Z") — the
+ * daily run's own observed collection time, not the cron's scheduled trigger time (task-runtime-label.md:
+ * that schedule has never actually held, sometimes slipping 5+ hours, so the site prints what happened, not
+ * what was hoped for). Returns null on anything that doesn't parse to a valid instant — callers show "—",
+ * never a guessed time.
+ */
+export function fmtTime(iso: string): string | null {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")} UTC`;
+}
+
 export const COVERED_LIST_LABEL = fmtDate(COVERED_LIST_DATE);
 
 /** FCC primary documents behind the US regulatory status block (context/fcc-api-notes.md). */

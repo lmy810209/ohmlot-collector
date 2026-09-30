@@ -12,7 +12,7 @@ export function SiteHeader({ lastUpdated }: { lastUpdated: string | null }) {
             <Wordmark />
           </Link>
           {lastUpdated && (
-            <span className="hidden items-center gap-1.5 font-mono text-[11px] text-ink-2 sm:inline-flex" title="Prices are collected once a day at 00:17 UTC">
+            <span className="hidden items-center gap-1.5 font-mono text-[11px] text-ink-2 sm:inline-flex" title="Prices are collected once a day">
               <span className="size-2 rounded-full bg-up" aria-hidden="true" />
               Live · {fmtDay(lastUpdated)}
             </span>

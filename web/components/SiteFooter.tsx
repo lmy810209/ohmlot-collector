@@ -14,7 +14,7 @@ export function SiteFooter({ lastUpdated }: { lastUpdated: string | null }) {
         <div>
           <div className="micro mb-2">Methodology</div>
           <p>
-            One snapshot per store per day at 00:17 UTC. &ldquo;Contact us&rdquo; placeholder prices are hidden. Ranges cover the robot&rsquo;s own
+            One snapshot per store per day. &ldquo;Contact us&rdquo; placeholder prices are hidden. Ranges cover the robot&rsquo;s own
             variants; subscriptions and accessories are listed but never set a range. Lowest-price badges wait for a 14-day baseline.
             {lastUpdated ? ` Last collection: ${fmtDate(lastUpdated)} (UTC).` : ""}
           </p>

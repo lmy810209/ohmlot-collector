@@ -289,7 +289,7 @@ export function RobotExplorer({
               )}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Select items={CATEGORY_ITEMS} value={filters.category} onValueChange={(v) => setFilters({ ...filters, category: v ?? "all" })}>
               <SelectTrigger className="h-10 w-40 rounded-ctl bg-card" aria-label="Filter by type">
                 <SelectValue />

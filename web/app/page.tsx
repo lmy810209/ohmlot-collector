@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { AlertSignup } from "@/components/AlertSignup";
 import { FccSection } from "@/components/FccSection";
 import { RecentChanges } from "@/components/RecentChanges";
 import { RobotExplorer } from "@/components/RobotExplorer";
 import { Delta } from "@/components/Delta";
 import { getApprovalStore, realEvents, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
-import { fmtDate, fmtDay } from "@/lib/format";
+import { fmtDate, fmtDay, fmtTime } from "@/lib/format";
 import { HOME_PATH, homeDescription, homeTitle } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -27,6 +28,11 @@ export default function Home() {
   const approvalsAsOf = getApprovalStore()?.updated || null;
   const changes = run.changes.slice(0, 3);
   const recentRealEvents = realEvents();
+  // task-first-variant-event.md §B: the aside/card above only count price deltas (priceChanges() diffs
+  // price_usd directly, never touches events.jsonl) — a real same-day event of any other kind (a new
+  // variant, a restock, ...) would otherwise vanish between "0" here and a row on /changes. Counted from the
+  // already-computed real-event list, not a new read.
+  const otherEventsToday = run.latest ? recentRealEvents.filter((e) => e.date === run.latest && e.type !== "price_changed").length : 0;
 
   const aside = (
     <aside className="card card-accent p-5 sm:p-6" aria-labelledby="run-heading">
@@ -48,7 +54,7 @@ export default function Home() {
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">
-          <dt className="text-ink-2">Changed vs {run.previous ? fmtDay(run.previous) : "—"}</dt>
+          <dt className="text-ink-2">Price changes vs {run.previous ? fmtDay(run.previous) : "—"}</dt>
           <dd className="num text-ink">{run.changes.length}</dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">
@@ -56,8 +62,8 @@ export default function Home() {
           <dd className="num text-ink">{run.tracked}</dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">
-          <dt className="text-ink-2">Next run</dt>
-          <dd className="num text-ink">00:17 UTC</dd>
+          <dt className="text-ink-2">Collected</dt>
+          <dd className="num text-ink">{run.collectedAt ? fmtTime(run.collectedAt) ?? "—" : "—"}</dd>
         </div>
       </dl>
     </aside>
@@ -67,7 +73,7 @@ export default function Home() {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <section className="card p-5" aria-labelledby="changes-heading">
         <div id="changes-heading" className="micro">
-          Today&rsquo;s changes
+          Today&rsquo;s price changes
         </div>
         <div className="mt-2 flex items-baseline gap-2">
           <span className="num text-3xl font-semibold">{run.changes.length}</span>
@@ -88,6 +94,14 @@ export default function Home() {
           </ul>
         ) : (
           <p className="mt-3 text-[13px] text-ink-2">No tracked price moved overnight.</p>
+        )}
+        {otherEventsToday > 0 && (
+          <p className="mt-3 text-[13px] text-ink-2">
+            {otherEventsToday} other change{otherEventsToday === 1 ? "" : "s"} today &mdash;{" "}
+            <Link href="/changes" className="underline decoration-line underline-offset-2 hover:decoration-ink">
+              see Changes
+            </Link>
+          </p>
         )}
       </section>
 

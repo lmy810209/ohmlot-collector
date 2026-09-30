@@ -743,6 +743,10 @@ export interface RunSummary {
   changes: PriceChange[];
   baselineDay: number;
   baselineDays: number;
+  /** Earliest `observed_at` among the latest snapshot's rows — when collection actually started, not the
+   * cron's scheduled (and never-honored) time. Null when no row on file has a valid observed_at (task-
+   * runtime-label.md §1). */
+  collectedAt: string | null;
 }
 
 /** What "Today's run" and the three summary cards show. */
@@ -752,6 +756,7 @@ export function runSummary(): RunSummary {
   const latestRows = pc.latest ? all.filter((r) => r.date === pc.latest) : [];
   const models = getModels();
   const countBy = (s: TrackingStatus) => models.filter((m) => m.tracking_status === s).length;
+  const observedAts = latestRows.map((r) => r.observed_at).filter((v): v is string => !!v && !Number.isNaN(new Date(v).getTime()));
   return {
     latest: pc.latest,
     previous: pc.previous,
@@ -766,6 +771,7 @@ export function runSummary(): RunSummary {
     changes: pc.changes,
     baselineDay: Math.min(pc.snapshots, BASELINE_DAYS),
     baselineDays: BASELINE_DAYS,
+    collectedAt: observedAts.length ? observedAts.reduce((a, b) => (a < b ? a : b)) : null,
   };
 }
 
