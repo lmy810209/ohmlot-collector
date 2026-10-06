@@ -34,3 +34,28 @@ jobs:
           git diff --cached --quiet || git commit -m "snapshot $(date -u +%F)"
           git pull --rebase -q
           git push
+      - name: Keep Supabase awake
+        # Collection never touches Supabase (see README) — this step exists only so the project gets one
+        # request a day, since a 7-day-idle Supabase project auto-pauses and a paused project makes the
+        # site's email signup form fail silently (no error shown, no row written, no one notified).
+        #
+        # NOT a direct `GET /subscribers` (the task that added this step originally specified one): that
+        # 401s here — supabase/migrations/0001_subscribers.sql deliberately revokes all anon/authenticated
+        # grants on that table ("belt-and-suspenders" against RLS, by design) on top of its RLS policy, so
+        # anon has zero access to it, full stop. Granting anon a SELECT to make a keep-alive ping succeed
+        # would be exactly the kind of quiet security loosening the project's own principles rule out.
+        #
+        # Instead this calls the public `subscribe` RPC (already anon-executable — it's what the site's own
+        # signup form calls) with a deliberately invalid email. subscribe() returns 'invalid_email' at the
+        # very first check, before touching signup_attempts or subscribers — so this writes nothing, anywhere,
+        # ever, while still exercising a real query against the live database. anon key only — never
+        # service_role, since this step has no business writing anything.
+        if: always()
+        continue-on-error: true
+        run: |
+          curl -sS -X POST -o /dev/null -w '%{http_code}\n' \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"p_email":"keep-awake-ping (not a real address, never inserted)"}' \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/subscribe"

@@ -15,7 +15,7 @@
 | `src/prices.ts` | 가격 수집 → `data/prices/YYYY-MM-DD.jsonl` |
 | `src/fcc.ts` | FCC 공식 API(KDB 953436 `getFCCIDList`)로 인증 수집 → `data/fcc/grants.json` (누적), 응답 원문 `data/fcc/raw/<날짜>-<코드>.json`, 새 인증은 `data/fcc/new-grants.log`, `data/models.json`의 `us_status` 갱신. 아무 코드도 응답하지 않으면 파일을 쓰지 않음. 조사 노트: `context/fcc-api-notes.md` |
 | `supabase/schema.sql` | Supabase 테이블 (models, price_snapshots, fcc_grants, latest_prices 뷰) |
-| `.github/workflows/daily.yml` | 매일 00:17 UTC(09:17 KST) **가격만** 수집 후 `data/` 커밋 |
+| `.github/workflows/daily.yml` | cron은 매일 00:17 UTC(09:17 KST)로 설정돼 있지만 **실제 시작 시각은 아니다** — GitHub Actions 스케줄 큐 자체가 지연되고(관측치: 05:20~05:56 UTC, 날마다 더 밀리는 추세) cron 값을 바꿔도 해결되지 않는다(`context/task-runtime-label.md`). 가격만 수집 후 `data/` 커밋, 마지막 스텝에서 Supabase를 한 번 건드려 7일-무활동 자동 일시정지를 막는다 |
 | `.github/workflows/fcc.yml` | FCC 인증 수집. 지금은 Actions **수동 실행(Run workflow)** 전용 — 러너에서 한 번 성공하면 매주 월요일 스케줄(`0 1 * * 1`)을 켠다 (파일 안 주석 참고) |
 | `web/` | ohmlot.com 사이트 v0 (Next.js). 빌드 시 `data/`를 읽어 정적 생성. 배포 방법은 `web/README.md` |
 
