@@ -47,9 +47,7 @@ export function CollectionStatusCard({ status }: { status: CollectionStatus }) {
         </div>
         <div>
           <dt className="text-ink-2">Baseline</dt>
-          <dd className="num mt-1 text-ink">
-            Day {status.baselineDay} of {status.baselineDays}
-          </dd>
+          <dd className="num mt-1 text-ink">{status.baselineComplete ? `Complete · ${status.baselineDay}` : `Day ${status.baselineDay} of ${status.baselineDays}`}</dd>
         </div>
         <div>
           <dt className="text-ink-2">This week</dt>

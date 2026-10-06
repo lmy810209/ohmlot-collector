@@ -5,7 +5,7 @@ import { FccSection } from "@/components/FccSection";
 import { RecentChanges } from "@/components/RecentChanges";
 import { RobotExplorer } from "@/components/RobotExplorer";
 import { Delta } from "@/components/Delta";
-import { getApprovalStore, realEvents, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
+import { CHART_MIN_SNAPSHOTS, getApprovalStore, realEvents, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
 import { fmtDate, fmtDay, fmtTime } from "@/lib/format";
 import { HOME_PATH, homeDescription, homeTitle } from "@/lib/seo";
 
@@ -135,14 +135,29 @@ export default function Home() {
           Baseline
         </div>
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="num text-3xl font-semibold">Day {run.baselineDay}</span>
-          <span className="text-[13px] text-ink-2">of {run.baselineDays}</span>
+          {run.baselineComplete ? (
+            <span className="num text-3xl font-semibold">Baseline complete</span>
+          ) : (
+            <>
+              <span className="num text-3xl font-semibold">Day {run.baselineDay}</span>
+              <span className="text-[13px] text-ink-2">of {run.baselineDays}</span>
+            </>
+          )}
         </div>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-sunk" role="progressbar" aria-valuemin={0} aria-valuemax={run.baselineDays} aria-valuenow={run.baselineDay} aria-label="Baseline progress">
-          <span className="block h-full rounded-full bg-accent" style={{ width: `${(run.baselineDay / run.baselineDays) * 100}%` }} />
+        <div
+          className="mt-3 h-2 overflow-hidden rounded-full bg-sunk"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={run.baselineDays}
+          aria-valuenow={Math.min(run.baselineDay, run.baselineDays)}
+          aria-label="Baseline progress"
+        >
+          <span className="block h-full rounded-full bg-accent" style={{ width: `${Math.min((run.baselineDay / run.baselineDays) * 100, 100)}%` }} />
         </div>
         <p className="mt-3 text-[13px] text-ink-2">
-          Lowest-price badges and charts unlock after {run.baselineDays} daily snapshots. Until then every row shows yesterday → today.
+          {run.baselineComplete
+            ? `${run.baselineDay} consecutive daily snapshots — a full ${run.baselineDays}-day price history for every tracked robot.`
+            : `Charts unlock after ${CHART_MIN_SNAPSHOTS} daily snapshots; this baseline runs ${run.baselineDays}. Until then every row shows yesterday → today.`}
           {run.first ? ` First snapshot ${fmtDate(run.first)}.` : ""}
         </p>
       </section>

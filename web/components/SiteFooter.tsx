@@ -1,4 +1,4 @@
-import { fmtDate } from "@/lib/format";
+import { CHART_MIN_SNAPSHOTS, fmtDate } from "@/lib/format";
 
 export function SiteFooter({ lastUpdated }: { lastUpdated: string | null }) {
   return (
@@ -15,7 +15,7 @@ export function SiteFooter({ lastUpdated }: { lastUpdated: string | null }) {
           <div className="micro mb-2">Methodology</div>
           <p>
             One snapshot per store per day. &ldquo;Contact us&rdquo; placeholder prices are hidden. Ranges cover the robot&rsquo;s own
-            variants; subscriptions and accessories are listed but never set a range. Lowest-price badges wait for a 14-day baseline.
+            variants; subscriptions and accessories are listed but never set a range. Price history charts appear after {CHART_MIN_SNAPSHOTS} daily snapshots.
             {lastUpdated ? ` Last collection: ${fmtDate(lastUpdated)} (UTC).` : ""}
           </p>
         </div>

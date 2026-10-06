@@ -763,8 +763,16 @@ export interface RunSummary {
   announced: number;
   models: number;
   changes: PriceChange[];
+  /** Daily snapshots collected so far, uncapped — 작업2.5: this used to be `Math.min(snapshots,
+   * BASELINE_DAYS)`, so once the real count passed 14 the card stayed stuck reading "Day 14 of 14" forever
+   * instead of ever showing baseline as done. Equal to `snapshots` above; kept as its own field because
+   * `baselineComplete` below is defined in terms of it, not of "today's date minus first date" (an elapsed-
+   * days count would be wrong the moment GitHub Actions drops a single scheduled run — see 작업4 §1). */
   baselineDay: number;
   baselineDays: number;
+  /** `baselineDay >= baselineDays` — the one place this is decided; page.tsx and CollectionStatusCard both
+   * read this instead of each re-deriving it from the two numbers above. */
+  baselineComplete: boolean;
   /** Earliest `observed_at` among the latest snapshot's rows — when collection actually started, not the
    * cron's scheduled (and never-honored) time. Null when no row on file has a valid observed_at (task-
    * runtime-label.md §1). */
@@ -791,8 +799,9 @@ export function runSummary(): RunSummary {
     announced: countBy("announced"),
     models: models.length,
     changes: pc.changes,
-    baselineDay: Math.min(pc.snapshots, BASELINE_DAYS),
+    baselineDay: pc.snapshots,
     baselineDays: BASELINE_DAYS,
+    baselineComplete: pc.snapshots >= BASELINE_DAYS,
     collectedAt: observedAts.length ? observedAts.reduce((a, b) => (a < b ? a : b)) : null,
   };
 }
@@ -841,6 +850,9 @@ export interface CollectionStatus {
   totalSources: number;
   baselineDay: number;
   baselineDays: number;
+  /** `baselineDay >= baselineDays` — see RunSummary's field of the same name for why this isn't re-derived
+   * at each call site. */
+  baselineComplete: boolean;
   /** Real (non-observation) events dated in the trailing 7 days ending on todayDate. */
   weekRealEvents: number;
 }
@@ -874,8 +886,9 @@ export function collectionStatus(now: Date = new Date()): CollectionStatus {
     todayRows: todayRows.length,
     todaySourcesOk,
     totalSources,
-    baselineDay: Math.min(pc.snapshots, BASELINE_DAYS),
+    baselineDay: pc.snapshots,
     baselineDays: BASELINE_DAYS,
+    baselineComplete: pc.snapshots >= BASELINE_DAYS,
     weekRealEvents,
   };
 }
