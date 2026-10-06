@@ -573,6 +573,26 @@ export function sparkline(modelId: string): { dates: string[]; values: number[] 
 
 export type FccStatus = UsStatusKind;
 
+/**
+ * 작업2: the home table's own stock read, aggregated across a tracked model's latest purchase variants —
+ * deliberately coarser than the per-variant `In stock`/`Sold out` badges the detail page shows, and never
+ * guessed. A model that's never been read by the collector (`tracking_status !== "tracked"`) has no stock
+ * signal to aggregate at all, so it's its own state rather than being folded into "unknown".
+ * - "in_stock": at least one purchase variant is available === true.
+ * - "out_of_stock": every purchase variant is available === false (and there's at least one).
+ * - "stock_unknown": no row said true, and at least one said null/missing — never inferred from price
+ *   presence or anything else.
+ * - "not_tracked": tracking_status is "listed" or "announced" — the collector has no row for this model at
+ *   all, so there's nothing to aggregate.
+ */
+export type Availability = "in_stock" | "out_of_stock" | "stock_unknown" | "not_tracked";
+
+export function aggregateAvailability(purchaseRows: Pick<SellerPrice, "available">[]): Exclude<Availability, "not_tracked"> {
+  if (purchaseRows.some((p) => p.available === true)) return "in_stock";
+  if (purchaseRows.length > 0 && purchaseRows.every((p) => p.available === false)) return "out_of_stock";
+  return "stock_unknown";
+}
+
 export interface RobotRow {
   id: string;
   name: string;
@@ -613,6 +633,7 @@ export interface RobotRow {
   fcc_status: FccStatus;
   fcc_ids: string[];
   fcc_grant_date: string | null;
+  availability: Availability;
 }
 
 export function robotRows(): RobotRow[] {
@@ -658,6 +679,7 @@ export function robotRows(): RobotRow[] {
       fcc_status,
       fcc_ids: m.fcc_ids,
       fcc_grant_date: us.grant_date,
+      availability: m.tracking_status !== "tracked" ? "not_tracked" : aggregateAvailability(latestRows),
     };
   });
 }

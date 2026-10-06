@@ -9,7 +9,7 @@ import { Badge } from "./Badge";
 import { Delta } from "./Delta";
 import { RobotDrawer } from "./RobotDrawer";
 import { UsStatusBadge } from "./UsStatusBadge";
-import type { Category, RobotDetail, RobotRow, TrackingStatus } from "@/lib/data";
+import type { Availability, Category, RobotDetail, RobotRow, TrackingStatus } from "@/lib/data";
 import { CATEGORY_SINGULAR, COVERED_LIST_LABEL, fmtMonth, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel } from "@/lib/format";
 
 const CATEGORY_ITEMS = [
@@ -25,16 +25,17 @@ const STATUS_ITEMS = [
   { value: "preorder", label: "Pre-order" },
 ];
 /** task-catalog.md §3: the table's own tracking_status filter — defaults to "tracked" (Filters.NONE below),
- * not "all", so "N robots tracked daily" is what a visitor sees first, not a padded total. */
-const TRACKING_ITEMS = [
+ * not "all", so "N robots tracked daily" is what a visitor sees first, not a padded total. Base labels here;
+ * RobotExplorer appends each option's live count (작업2: "필터 드롭다운에 개수를 표시") since that needs `rows`. */
+const TRACKING_ITEMS_BASE = [
   { value: "tracked", label: "Tracked daily" },
   { value: "listed", label: "Listed, not tracked" },
   { value: "announced", label: "Announced" },
   { value: "all", label: "All robots" },
 ];
 
-type Filters = { category: string; status: string; tracking: TrackingStatus | "all"; maxPrice: number | null; fccOnly: boolean };
-const NONE: Filters = { category: "all", status: "all", tracking: "tracked", maxPrice: null, fccOnly: false };
+type Filters = { category: string; status: string; tracking: TrackingStatus | "all"; maxPrice: number | null; fccOnly: boolean; inStockOnly: boolean };
+const NONE: Filters = { category: "all", status: "all", tracking: "tracked", maxPrice: null, fccOnly: false, inStockOnly: false };
 
 const CHIPS: { label: string; on: (f: Filters) => boolean; toggle: (f: Filters) => Filters }[] = [
   { label: "Humanoids", on: (f) => f.category === "humanoid", toggle: (f) => ({ ...f, category: f.category === "humanoid" ? "all" : "humanoid" }) },
@@ -42,7 +43,38 @@ const CHIPS: { label: string; on: (f: Filters) => boolean; toggle: (f: Filters) 
   { label: "Desktop", on: (f) => f.category === "desktop", toggle: (f) => ({ ...f, category: f.category === "desktop" ? "all" : "desktop" }) },
   { label: "Under $1,000", on: (f) => f.maxPrice === 1000, toggle: (f) => ({ ...f, maxPrice: f.maxPrice === 1000 ? null : 1000 }) },
   { label: "FCC ID on file", on: (f) => f.fccOnly, toggle: (f) => ({ ...f, fccOnly: !f.fccOnly }) },
+  { label: "In stock now", on: (f) => f.inStockOnly, toggle: (f) => ({ ...f, inStockOnly: !f.inStockOnly }) },
 ];
+
+/** Plain colored dot + text — deliberately not a Badge pill, so this column reads differently at a glance
+ * from the Shipping/Pre-order sales-stage badges in the Status column (작업2: "배지 vs 텍스트"로 구분). */
+const AVAILABILITY_LABEL: Record<Availability, string> = {
+  in_stock: "In stock",
+  out_of_stock: "Out of stock",
+  stock_unknown: "Stock unknown",
+  not_tracked: "Not tracked",
+};
+const AVAILABILITY_DOT: Record<Availability, string> = {
+  in_stock: "bg-up",
+  out_of_stock: "bg-down",
+  stock_unknown: "bg-ink-3",
+  not_tracked: "bg-ink-3",
+};
+const AVAILABILITY_TEXT: Record<Availability, string> = {
+  in_stock: "text-up",
+  out_of_stock: "text-down",
+  stock_unknown: "text-ink-2",
+  not_tracked: "text-ink-3",
+};
+
+function AvailabilityText({ r }: { r: RobotRow }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-[13px] font-medium ${AVAILABILITY_TEXT[r.availability]}`} title={r.availability === "not_tracked" ? notTrackedReason(r) : undefined}>
+      <span className={`size-1.5 shrink-0 rounded-full ${AVAILABILITY_DOT[r.availability]}`} aria-hidden="true" />
+      {AVAILABILITY_LABEL[r.availability]}
+    </span>
+  );
+}
 
 type Meta = { className?: string; align?: "right"; width: string };
 
@@ -90,6 +122,15 @@ export function RobotExplorer({
   const trackedCount = rows.filter((r) => r.tracking_status === "tracked").length;
   const listedCount = rows.filter((r) => r.tracking_status === "listed").length;
   const announcedCount = rows.filter((r) => r.tracking_status === "announced").length;
+  // 작업2: the tracking-status dropdown shows how many robots each option hides, so "Listed, not tracked (17)"
+  // doesn't read as an empty/dead option — the 17 excluded-by-default models stay reachable and countable.
+  const trackingCounts: Record<(typeof TRACKING_ITEMS_BASE)[number]["value"], number> = {
+    tracked: trackedCount,
+    listed: listedCount,
+    announced: announcedCount,
+    all: rows.length,
+  };
+  const trackingItems = TRACKING_ITEMS_BASE.map((it) => ({ ...it, label: `${it.label} (${trackingCounts[it.value]})` }));
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
@@ -99,6 +140,7 @@ export function RobotExplorer({
       if (filters.status !== "all" && r.status !== filters.status) return false;
       if (filters.tracking !== "all" && r.tracking_status !== filters.tracking) return false;
       if (filters.fccOnly && r.fcc_ids.length === 0) return false;
+      if (filters.inStockOnly && r.availability !== "in_stock") return false;
       // sort_price is already Infinity for any row with an unverified ("press"/"unknown") price (lib/data.ts's
       // robotRows), so an unconfirmed number can never sneak into a price filter's results here.
       if (filters.maxPrice != null && !(r.sort_price <= filters.maxPrice)) return false;
@@ -128,22 +170,25 @@ export function RobotExplorer({
                 {r.manufacturer}
                 {r.hq_country ? ` · ${r.hq_country}` : ""}
               </span>
-              <span className="mt-1.5 flex flex-wrap gap-1.5 sm:hidden">
+              <span className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:hidden">
                 <StatusPill status={r.status} />
                 <TrackingBadge status={r.tracking_status} />
                 {r.fcc_ids.length > 0 && <UsStatusBadge kind={r.fcc_status} short />}
               </span>
+              <span className="mt-1 block sm:hidden">
+                <AvailabilityText r={r} />
+              </span>
             </button>
           );
         },
-        meta: { width: "w-[56%] sm:w-[40%] md:w-[32%] lg:w-[26%]" } satisfies Meta,
+        meta: { width: "w-[56%] sm:w-[34%] md:w-[28%] lg:w-[23%]" } satisfies Meta,
       },
       {
         id: "category",
         accessorKey: "category",
         header: "Type",
         cell: ({ getValue }) => <span className="text-[13px] text-ink-2">{CATEGORY_SINGULAR[getValue() as Category]}</span>,
-        meta: { className: "hidden lg:table-cell", width: "lg:w-[10%]" } satisfies Meta,
+        meta: { className: "hidden lg:table-cell", width: "lg:w-[9%]" } satisfies Meta,
       },
       {
         id: "price",
@@ -162,7 +207,7 @@ export function RobotExplorer({
             </div>
           );
         },
-        meta: { align: "right", width: "w-[44%] sm:w-[28%] md:w-[22%] lg:w-[18%]" } satisfies Meta,
+        meta: { align: "right", width: "w-[44%] sm:w-[24%] md:w-[19%] lg:w-[15%]" } satisfies Meta,
       },
       {
         id: "delta",
@@ -174,7 +219,7 @@ export function RobotExplorer({
           if (!r.delta) return <span className="font-mono text-[11px] whitespace-nowrap text-ink-3">first day</span>;
           return <Delta amount={r.delta.amount} pct={r.delta.pct} className="text-[13px]" />;
         },
-        meta: { align: "right", className: "hidden sm:table-cell", width: "sm:w-[16%] md:w-[14%] lg:w-[12%]" } satisfies Meta,
+        meta: { align: "right", className: "hidden sm:table-cell", width: "sm:w-[14%] md:w-[12%] lg:w-[10%]" } satisfies Meta,
       },
       {
         id: "status",
@@ -186,7 +231,18 @@ export function RobotExplorer({
             <TrackingBadge status={row.original.tracking_status} />
           </span>
         ),
-        meta: { className: "hidden sm:table-cell", width: "sm:w-[16%] md:w-[14%] lg:w-[16%]" } satisfies Meta,
+        meta: { className: "hidden sm:table-cell", width: "sm:w-[14%] md:w-[12%] lg:w-[14%]" } satisfies Meta,
+      },
+      {
+        id: "availability",
+        accessorKey: "availability",
+        header: "Availability",
+        sortingFn: (a, b) => {
+          const order: Record<Availability, number> = { in_stock: 0, stock_unknown: 1, out_of_stock: 2, not_tracked: 3 };
+          return order[a.original.availability] - order[b.original.availability];
+        },
+        cell: ({ row }) => <AvailabilityText r={row.original} />,
+        meta: { className: "hidden sm:table-cell", width: "sm:w-[14%] md:w-[12%] lg:w-[14%]" } satisfies Meta,
       },
       {
         id: "fcc",
@@ -207,7 +263,7 @@ export function RobotExplorer({
             </span>
           );
         },
-        meta: { className: "hidden md:table-cell", width: "md:w-[18%] lg:w-[18%]" } satisfies Meta,
+        meta: { className: "hidden md:table-cell", width: "md:w-[15%] lg:w-[15%]" } satisfies Meta,
       },
     ],
     [],
@@ -314,12 +370,12 @@ export function RobotExplorer({
                 ))}
               </SelectContent>
             </Select>
-            <Select items={TRACKING_ITEMS} value={filters.tracking} onValueChange={(v) => setFilters({ ...filters, tracking: (v as TrackingStatus | "all") ?? "tracked" })}>
+            <Select items={trackingItems} value={filters.tracking} onValueChange={(v) => setFilters({ ...filters, tracking: (v as TrackingStatus | "all") ?? "tracked" })}>
               <SelectTrigger className="h-10 w-44 rounded-ctl bg-card" aria-label="Filter by tracking status">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {TRACKING_ITEMS.map((it) => (
+                {trackingItems.map((it) => (
                   <SelectItem key={it.value} value={it.value}>
                     {it.label}
                   </SelectItem>
