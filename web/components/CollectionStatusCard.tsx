@@ -1,6 +1,6 @@
 import { Badge } from "./Badge";
 import type { CollectionStatus } from "@/lib/data";
-import { fmtDateTime, STALE_HOURS } from "@/lib/format";
+import { fmtDate, fmtDateTime, STALE_HOURS } from "@/lib/format";
 
 /**
  * task-changes-page.md §2: the daily health check. Every field is exposed as the raw underlying data (guide
@@ -34,6 +34,15 @@ export function CollectionStatusCard({ status }: { status: CollectionStatus }) {
         </p>
       )}
 
+      {/* 작업4 §1: GitHub Actions can drop a scheduled run outright under load, not just delay it — a gap
+          in the daily record is never swallowed silently into "N daily snapshots" elsewhere on the site. */}
+      {status.missingSnapshotDates.length > 0 && (
+        <p className="mt-3 text-[13.5px] font-medium text-amber">
+          No snapshot on {status.missingSnapshotDates.map((d) => fmtDate(d)).join(", ")} — the daily collector didn&rsquo;t run, or its result never
+          committed, on {status.missingSnapshotDates.length === 1 ? "that date" : "those dates"}.
+        </p>
+      )}
+
       <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-4 text-[13.5px] sm:grid-cols-4">
         <div>
           <dt className="text-ink-2">Last collection</dt>
@@ -41,7 +50,10 @@ export function CollectionStatusCard({ status }: { status: CollectionStatus }) {
         </div>
         <div>
           <dt className="text-ink-2">Today&rsquo;s prices</dt>
-          <dd className="num mt-1 text-ink">
+          <dd
+            className="num mt-1 text-ink"
+            title={`Each configured product page is one "source" — a retailer with several product lines counts as several sources. Not the same count as the home page's "stores" (distinct retailers).`}
+          >
             {status.todayRows} pts · {status.todaySourcesOk} of {status.totalSources} sources
           </dd>
         </div>

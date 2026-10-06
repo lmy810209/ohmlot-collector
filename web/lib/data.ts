@@ -559,6 +559,34 @@ export function priceChanges(): { changes: PriceChange[]; latest: string | null;
   return { changes, latest, previous, first, snapshots: dates.length };
 }
 
+/** Every distinct date with a price snapshot on file, sorted. */
+export function snapshotDates(): string[] {
+  return [...new Set(load().prices.map((r) => r.date))].sort();
+}
+
+/**
+ * 작업4 §1: GitHub Actions drops scheduled workflow runs under load (task-runtime-label.md already measured
+ * the queue delay; a dropped run entirely is the same root cause, worse outcome) — so "N consecutive daily
+ * snapshots" can't be assumed just because N snapshot files exist. This counts actual gaps instead of
+ * trusting elapsed-calendar-days math. Pure and given `dates` directly (not re-reading data/) so it's unit-
+ * testable without a fixture data dir — see test/collectionStatus.test.ts. Never invents a date outside the
+ * [first, last] range — a missing day before the first snapshot or after the latest one isn't a gap, it's
+ * just before collection started or not caught up yet.
+ */
+export function missingDates(dates: string[]): string[] {
+  const have = new Set(dates);
+  const sorted = [...have].sort();
+  if (sorted.length < 2) return [];
+  const out: string[] = [];
+  let d = sorted[0];
+  const last = sorted[sorted.length - 1];
+  while (d < last) {
+    d = addDaysUTC(d, 1);
+    if (!have.has(d)) out.push(d);
+  }
+  return out;
+}
+
 /** Cheapest tracked price per snapshot date for a model (the sparkline series). */
 export function sparkline(modelId: string): { dates: string[]; values: number[] } {
   const byDate = new Map<string, number>();
@@ -855,6 +883,10 @@ export interface CollectionStatus {
   baselineComplete: boolean;
   /** Real (non-observation) events dated in the trailing 7 days ending on todayDate. */
   weekRealEvents: number;
+  /** Calendar dates strictly between the first and latest snapshot that have no snapshot file at all — e.g.
+   * a scheduled run GitHub Actions dropped outright, not just delayed (작업4 §1). Empty when the record is
+   * unbroken, which is what "N daily snapshots" should mean before it's shown as a clean streak anywhere. */
+  missingSnapshotDates: string[];
 }
 
 /**
@@ -890,5 +922,6 @@ export function collectionStatus(now: Date = new Date()): CollectionStatus {
     baselineDays: BASELINE_DAYS,
     baselineComplete: pc.snapshots >= BASELINE_DAYS,
     weekRealEvents,
+    missingSnapshotDates: missingDates(snapshotDates()),
   };
 }

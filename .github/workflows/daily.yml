@@ -50,12 +50,26 @@ jobs:
         # very first check, before touching signup_attempts or subscribers — so this writes nothing, anywhere,
         # ever, while still exercising a real query against the live database. anon key only — never
         # service_role, since this step has no business writing anything.
+        #
+        # 작업4 §4: this safety depends entirely on that email staying invalid by supabase/migrations/
+        # 0001_subscribers.sql's own regex. If someone loosens subscribe()'s email validation later, this
+        # step silently starts inserting one junk row into `subscribers` every single day, forever, with
+        # nothing here to notice. So the response is checked, not just the HTTP status: anything other than
+        # the literal string "invalid_email" makes this step fail loudly (while `continue-on-error: true`
+        # still keeps collection itself from being blocked by it).
         if: always()
         continue-on-error: true
         run: |
-          curl -sS -X POST -o /dev/null -w '%{http_code}\n' \
+          body=$(curl -sS -X POST -w '\n%{http_code}' \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Content-Type: application/json" \
             -d '{"p_email":"keep-awake-ping (not a real address, never inserted)"}' \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/subscribe"
+            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/subscribe")
+          code=$(echo "$body" | tail -n1)
+          resp=$(echo "$body" | sed '$d')
+          echo "HTTP $code: $resp"
+          if [ "$resp" != '"invalid_email"' ]; then
+            echo "::error::Keep-awake probe got '$resp' instead of \"invalid_email\" — subscribe()'s validation may have been loosened, and this daily ping could now be inserting a junk row into public.subscribers. Investigate before this runs again."
+            exit 1
+          fi

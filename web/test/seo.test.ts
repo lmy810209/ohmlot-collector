@@ -81,6 +81,18 @@ test("sitemap: lastModified is a real YYYY-MM-DD date or absent — never invent
   }
 });
 
+// 작업4 §3: 17 of 35 sitemap URLs had no lastmod — every one of them a listed/announced (not daily-tracked)
+// robot, since robotLastModified() only ever checked the daily price snapshot. Falls back to
+// tracking_status_evidence's own "checked YYYY-MM-DD" date, which every model has regardless of tracking
+// status (unlike us_status.last_verified, which only 3 of the 17 untracked models happen to have).
+test("sitemap: every robot gets a lastmod, tracked or not", () => {
+  const byUrl = new Map(sitemapEntries().map((e) => [e.url, e.lastModified]));
+  for (const m of models) {
+    const lm = byUrl.get(absoluteUrl(robotPath(m.id)));
+    assert.ok(lm, `${m.id} (tracking_status=${m.tracking_status}) has no lastmod`);
+  }
+});
+
 test("SITE_URL is the www origin — the apex domain 308-redirects to it, so no sitemap/robots/canonical URL may use the apex", () => {
   assert.equal(SITE_URL, "https://www.ohmlot.com");
   assert.ok(!SITE_URL.endsWith("/"), "no trailing slash: paths are appended with a leading slash");

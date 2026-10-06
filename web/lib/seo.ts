@@ -91,9 +91,22 @@ export const FCC_DESCRIPTION = `Search FCC IDs for humanoids, robot dogs and des
 
 /** Newest per-robot date the site can actually vouch for: the latest daily snapshot for a tracked robot.
  * Robots the collector doesn't read have no such date, so they get none rather than a made-up one. */
-export function robotLastModified(modelId: string): string | null {
-  const dates = latestPrices(modelId).map((p) => p.date);
-  return dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : null;
+/** `tracking_status_evidence` is always "<url> — checked YYYY-MM-DD: <what was found>" (lib/data.ts's own
+ * Model comment) — pulls just the date back out. */
+const EVIDENCE_DATE = /checked (\d{4}-\d{2}-\d{2})/;
+
+/**
+ * Newest date the site can actually vouch for, for sitemap lastmod. A tracked model uses its latest daily
+ * price snapshot; a listed/announced model has no such snapshot (that's what "not tracked" means), so it
+ * falls back to the date its tracking_status itself was last checked by a human
+ * (`tracking_status_evidence`) — the only verification date every one of the 32 models has (task-measure.md
+ * audit: `us_status.last_verified` only covers 3 of the 17 untracked models, `price_provenance_date` is
+ * missing or year-only for several). Still null, never guessed, on the rare row that matches neither.
+ */
+export function robotLastModified(m: Pick<Model, "id" | "tracking_status_evidence">): string | null {
+  const dates = latestPrices(m.id).map((p) => p.date);
+  if (dates.length) return dates.reduce((a, b) => (a > b ? a : b));
+  return m.tracking_status_evidence.match(EVIDENCE_DATE)?.[1] ?? null;
 }
 
 // One definition of each page's path, used by both the sitemap and the page's canonical tag so the two can't
@@ -121,6 +134,6 @@ export function sitemapEntries(): SitemapEntry[] {
     withDate(absoluteUrl(HOME_PATH), snapshot),
     withDate(absoluteUrl(CHANGES_PATH), snapshot),
     withDate(absoluteUrl(FCC_PATH), getApprovalStore()?.updated),
-    ...getModels().map((m) => withDate(absoluteUrl(robotPath(m.id)), robotLastModified(m.id))),
+    ...getModels().map((m) => withDate(absoluteUrl(robotPath(m.id)), robotLastModified(m))),
   ];
 }
