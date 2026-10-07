@@ -5,7 +5,7 @@ import { FccSection } from "@/components/FccSection";
 import { RecentChanges } from "@/components/RecentChanges";
 import { RobotExplorer } from "@/components/RobotExplorer";
 import { Delta } from "@/components/Delta";
-import { CHART_MIN_SNAPSHOTS, getApprovalStore, realEvents, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
+import { getApprovalStore, realEvents, robotDetails, robotRows, roboticApprovals, runSummary } from "@/lib/data";
 import { fmtDate, fmtDay, fmtTime } from "@/lib/format";
 import { HOME_PATH, homeDescription, homeTitle } from "@/lib/seo";
 
@@ -134,13 +134,20 @@ export default function Home() {
         <div id="baseline-heading" className="micro">
           Baseline
         </div>
-        <div className="mt-2 flex items-baseline gap-2">
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
           {run.baselineComplete ? (
-            <span className="num text-3xl font-semibold">Baseline complete</span>
+            <>
+              <span className="num text-3xl font-semibold">Baseline complete</span>
+              <span className="text-[13px] text-ink-2">
+                · {run.baselineDay} daily snapshots since {run.first ? fmtDate(run.first) : "—"}
+              </span>
+            </>
           ) : (
             <>
               <span className="num text-3xl font-semibold">Day {run.baselineDay}</span>
-              <span className="text-[13px] text-ink-2">of {run.baselineDays}</span>
+              <span className="text-[13px] text-ink-2">
+                of {run.baselineDays} since {run.first ? fmtDate(run.first) : "—"}
+              </span>
             </>
           )}
         </div>
@@ -154,11 +161,12 @@ export default function Home() {
         >
           <span className="block h-full rounded-full bg-accent" style={{ width: `${Math.min((run.baselineDay / run.baselineDays) * 100, 100)}%` }} />
         </div>
+        {/* 작업2.6: facts only, no "unlocks after..." promise — nothing in the UI actually gates on this
+            count (charts gate on CHART_MIN_SNAPSHOTS=7, already separately true; no badge exists). */}
         <p className="mt-3 text-[13px] text-ink-2">
           {run.baselineComplete
-            ? `${run.baselineDay} consecutive daily snapshots — a full ${run.baselineDays}-day price history for every tracked robot.`
-            : `Charts unlock after ${CHART_MIN_SNAPSHOTS} daily snapshots; this baseline runs ${run.baselineDays}. Until then every row shows yesterday → today.`}
-          {run.first ? ` First snapshot ${fmtDate(run.first)}.` : ""}
+            ? `Every tracked robot now has a full ${run.baselineDays}-day price history.`
+            : `Building a full ${run.baselineDays}-day price history for every tracked robot.`}
         </p>
       </section>
     </div>

@@ -9,7 +9,7 @@ import { Delta } from "./Delta";
 import { FccLine } from "./FccLine";
 import { PriceChart } from "./PriceChart";
 import type { RobotDetail } from "@/lib/data";
-import { CATEGORY_SINGULAR, CHART_MIN_SNAPSHOTS, fmtDate, fmtDay, launchPriceNote, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
+import { CATEGORY_SINGULAR, CHART_MIN_SNAPSHOTS, fmtDate, fmtDay, launchPriceNote, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, UNCHANGED_MIN_DAYS, usd } from "@/lib/format";
 
 function subscribe(cb: () => void) {
   const mq = window.matchMedia("(max-width: 639px)");
@@ -72,6 +72,9 @@ export function RobotDrawer({ detail, open, onOpenChange }: { detail: RobotDetai
               <p className="mt-1 font-mono text-[11px] text-ink-3">
                 {tracked && lastSeen ? `latest ${fmtDate(lastSeen)} UTC` : "published list price · not tracked"}
                 {sub ? ` · ${sub}` : ""}
+                {/* 작업2.6 §3: a long unchanged streak is itself a daily-collected fact, not a blank screen —
+                    proof the robot is still being watched even when nothing moved. */}
+                {detail && detail.unchangedDays >= UNCHANGED_MIN_DAYS ? ` · Unchanged for ${detail.unchangedDays} days` : ""}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Link href={`/robots/${m.id}`} className="inline-flex h-9 items-center rounded-ctl bg-accent px-3.5 text-[13px] font-semibold text-accent-fg hover:brightness-95">

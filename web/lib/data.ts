@@ -3,8 +3,8 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
-import { addDaysUTC, BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE, hoursSince, STALE_HOURS } from "./format";
-export { BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE, STALE_HOURS };
+import { addDaysUTC, BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE, hoursSince, STALE_HOURS, UNCHANGED_MIN_DAYS } from "./format";
+export { BASELINE_DAYS, CHART_MIN_SNAPSHOTS, COVERED_LIST_DATE, STALE_HOURS, UNCHANGED_MIN_DAYS };
 
 export const DATA_DIR = process.env.OHMLOT_DATA_DIR ?? path.resolve(process.cwd(), "..", "data");
 // config/price-sources.json sits next to data/ at the repo root — read only for its length (task-changes-
@@ -599,6 +599,21 @@ export function sparkline(modelId: string): { dates: string[]; values: number[] 
   return { dates, values: dates.map((d) => byDate.get(d) as number) };
 }
 
+/**
+ * 작업2.6 §3: "no change" is a real, collected fact — not an empty screen. Counts consecutive trailing days
+ * (nearest the end of `values`, i.e. today backward) where the cheapest tracked price held at today's value.
+ * Pure (takes `sparkline()`'s own `values`, not a modelId) so it's unit-testable without fixture data. A
+ * single-day history is trivially "unchanged for 1 day" — callers decide whether that's worth showing (it
+ * usually isn't; see UNCHANGED_MIN_DAYS).
+ */
+export function unchangedStreakDays(values: number[]): number {
+  if (values.length === 0) return 0;
+  const last = values[values.length - 1];
+  let n = 0;
+  for (let i = values.length - 1; i >= 0 && values[i] === last; i--) n++;
+  return n;
+}
+
 export type FccStatus = UsStatusKind;
 
 /**
@@ -725,13 +740,16 @@ export interface RobotDetail {
   deltas: VariantDelta[];
   history: { dates: string[]; series: PriceSeries[] };
   fcc: FccFact[];
+  /** unchangedStreakDays() on the model's own sparkline — see that function and UNCHANGED_MIN_DAYS for the
+   * display threshold. 0 for an untracked model (no sparkline to measure). */
+  unchangedDays: number;
 }
 
 /** Everything the detail drawer needs, keyed by model id (serialized into the home page). */
 export function robotDetails(): Record<string, RobotDetail> {
   const out: Record<string, RobotDetail> = {};
   for (const m of getModels()) {
-    out[m.id] = { model: m, latest: latestPrices(m.id), deltas: variantDeltas(m.id), history: priceHistory(m.id), fcc: fccFacts(m) };
+    out[m.id] = { model: m, latest: latestPrices(m.id), deltas: variantDeltas(m.id), history: priceHistory(m.id), fcc: fccFacts(m), unchangedDays: unchangedStreakDays(sparkline(m.id).values) };
   }
   return out;
 }

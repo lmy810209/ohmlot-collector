@@ -7,7 +7,7 @@ import { PriceChart } from "@/components/PriceChart";
 import { AlertSignup } from "@/components/AlertSignup";
 import { TrackRobotButton } from "@/components/TrackRobotButton";
 import { UsRegulatoryStatus } from "@/components/UsRegulatoryStatus";
-import { CHART_MIN_SNAPSHOTS, fccFacts, getModel, getModels, latestPrices, priceHistory, variantDeltas } from "@/lib/data";
+import { CHART_MIN_SNAPSHOTS, fccFacts, getModel, getModels, latestPrices, priceHistory, sparkline, UNCHANGED_MIN_DAYS, unchangedStreakDays, variantDeltas } from "@/lib/data";
 import { CATEGORY_LABEL, fmtDate, fmtDay, launchPriceNote, purchaseRange, rangeText, STATUS_LABEL, subscriptionLabel, usd } from "@/lib/format";
 import { robotDescription, robotPath, robotTitle } from "@/lib/seo";
 
@@ -72,6 +72,7 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
   const headDelta = cheapest && cheapest.from != null ? { amount: cheapest.price_usd - cheapest.from, pct: cheapest.from ? ((cheapest.price_usd - cheapest.from) / cheapest.from) * 100 : 0 } : null;
   const snapshots = history.dates.length;
   const launchNote = launchPriceNote(m);
+  const unchangedDays = unchangedStreakDays(sparkline(m.id).values);
 
   return (
     <article className="py-8 sm:py-12">
@@ -107,6 +108,8 @@ export default async function RobotPage({ params }: PageProps<"/robots/[id]">) {
           <p className="mt-1 font-mono text-[11.5px] text-ink-3">
             {tracked && lastSeen ? `latest snapshot ${fmtDate(lastSeen)} UTC` : "published list price · not tracked daily yet"}
             {sub ? ` · ${sub}` : ""}
+            {/* 작업2.6 §3: a long unchanged streak is itself a daily-collected fact, not a blank screen. */}
+            {unchangedDays >= UNCHANGED_MIN_DAYS ? ` · Unchanged for ${unchangedDays} days` : ""}
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             {m.buy_url && (

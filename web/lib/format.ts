@@ -3,13 +3,19 @@ import type { Category, Model } from "./data";
 /** FCC DA 26-786: foreign-produced advanced robotic devices were added to the Covered List on this date. */
 export const COVERED_LIST_DATE = "2026-07-28";
 
-/** Low-data rules (guide §6): lowest-price badges and charts wait for this many daily snapshots … */
+/** Low-data rules (guide §6): the full price-history window this site reports on once it's been collecting
+ * this many days. No UI feature currently gates on this (작업2.6: a planned lowest-price badge never got
+ * built — see style-guide-modern.md §6 for the condition it'll need when it does). */
 export const BASELINE_DAYS = 14;
-/** … and below this many snapshots the UI shows yesterday → today deltas instead of a chart. */
+/** Below this many snapshots the UI shows yesterday → today deltas instead of a chart. */
 export const CHART_MIN_SNAPSHOTS = 7;
 /** task-changes-page.md §2: the collection status card turns red once the last collection is this many
  * hours old — the daily run is scheduled once every 24h, so 36h means at least one full run was missed. */
 export const STALE_HOURS = 36;
+/** 작업2.6 §3: below this many days, "unchanged for N days" is too trivial to print — every fresh price is
+ * "unchanged for 1 day" the moment it's first observed. Reuses CHART_MIN_SNAPSHOTS's threshold rather than
+ * inventing a third low-data number. */
+export const UNCHANGED_MIN_DAYS = CHART_MIN_SNAPSHOTS;
 
 export type Priced = Pick<Model, "price_model" | "price_usd_min" | "price_usd_max" | "subscription_usd_month" | "price_provenance" | "price_provenance_date" | "price_provenance_source">;
 
