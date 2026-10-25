@@ -1,5 +1,7 @@
 import { CHART_MIN_SNAPSHOTS, fmtDate } from "@/lib/format";
 
+const ext = "underline decoration-line underline-offset-2 hover:decoration-ink";
+
 export function SiteFooter({ lastUpdated }: { lastUpdated: string | null }) {
   return (
     <footer className="mt-20 border-t border-line">
@@ -14,8 +16,13 @@ export function SiteFooter({ lastUpdated }: { lastUpdated: string | null }) {
         <div>
           <div className="micro mb-2">Methodology</div>
           <p>
-            One snapshot per store per day. &ldquo;Contact us&rdquo; placeholder prices are hidden. Ranges cover the robot&rsquo;s own
-            variants; subscriptions and accessories are listed but never set a range. Price history charts appear after {CHART_MIN_SNAPSHOTS} daily snapshots.
+            One snapshot per store per day. Every snapshot is committed{" "}
+            <a href="https://github.com/lmy810209/ohmlot-collector" target="_blank" rel="noopener noreferrer" className={ext}>
+              here
+            </a>{" "}
+            the day it&rsquo;s taken — the collector and its history are public. &ldquo;Contact us&rdquo; placeholder prices are hidden. Ranges cover
+            the robot&rsquo;s own variants; subscriptions and accessories are listed but never set a range. Price history charts appear after{" "}
+            {CHART_MIN_SNAPSHOTS} daily snapshots.
             {lastUpdated ? ` Last collection: ${fmtDate(lastUpdated)} (UTC).` : ""}
           </p>
         </div>
