@@ -49,8 +49,8 @@ export default function Home() {
       <dl className="mt-4 space-y-2.5 text-[13.5px]">
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-ink-2">Prices collected</dt>
-          <dd className="num text-ink" title={`${run.sellers} distinct retailers. Not the same count as "sources" on /changes, which counts each product page separately — one retailer can have several.`}>
-            {run.rows} · {run.sellers} stores
+          <dd className="num text-ink" title={`${run.sellers} distinct retailers with a price today. Not the same count as "sources" on /changes, which counts each configured product page separately — one retailer can have several.`}>
+            {run.rows} prices · {run.sellers} stores with data today
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-3">

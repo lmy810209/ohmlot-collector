@@ -24,14 +24,23 @@ export function RecentChanges({ events }: { events: ChangeEventView[] }) {
         </Link>
       </div>
       <ul className="mt-3 divide-y divide-line-soft text-[13px]">
-        {top.map((e, i) => (
-          <li key={`${e.date}|${e.model_id}|${e.seller}|${e.variant}|${e.type}|${i}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
-            <span className="w-14 shrink-0 font-mono text-[11px] text-ink-3">{fmtDay(e.date)}</span>
-            <span className="min-w-[9rem] flex-1 font-medium text-ink">{e.model_name}</span>
-            <Badge tone={eventTone(e)}>{EVENT_LABEL[e.type]}</Badge>
-            <span className="num truncate text-ink-2">{eventValueText(e)}</span>
-          </li>
-        ))}
+        {top.map((e, i) => {
+          // task-prelaunch-2.md §B.2: same variant-visibility fix as /changes — null/empty stays unrendered.
+          const variant = (e.variant ?? "").trim();
+          return (
+            <li key={`${e.date}|${e.model_id}|${e.seller}|${e.variant}|${e.type}|${i}`} className="flex flex-wrap items-start gap-x-3 gap-y-1 py-2">
+              <span className="w-14 shrink-0 pt-0.5 font-mono text-[11px] text-ink-3">{fmtDay(e.date)}</span>
+              <span className="min-w-[9rem] flex-1">
+                <span className="block font-medium text-ink">{e.model_name}</span>
+                {variant && <span className="block truncate text-[11px] text-ink-3">{variant}</span>}
+              </span>
+              <span className="flex shrink-0 items-center gap-x-3 pt-0.5">
+                <Badge tone={eventTone(e)}>{EVENT_LABEL[e.type]}</Badge>
+                <span className="num truncate text-ink-2">{eventValueText(e)}</span>
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

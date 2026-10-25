@@ -9,20 +9,29 @@ import { fmtDay } from "@/lib/format";
 /** One event row. `muted` is task-events-2.md's "shown in gray, not by its usual color" rule for the
  * observation-started section — the row's own event-type color never applies there. */
 function ChangeRow({ e, muted }: { e: ChangeEventView; muted: boolean }) {
+  // task-prelaunch-2.md §B.2: the variant name was collected but never shown — "40% of /changes looks
+  // duplicated" turned out to be two real, distinct variants of the same product with no way to tell them
+  // apart on screen. null/empty is skipped, not rendered as "—" or "(unknown)" (never invented).
+  const variant = (e.variant ?? "").trim();
   return (
-    <li className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-3 text-[13px]" title={muted ? (e.reason ?? undefined) : undefined}>
-      <span className="w-14 shrink-0 font-mono text-[11px] text-ink-3">{fmtDay(e.date)}</span>
-      <span className="min-w-[9rem] flex-1 font-medium text-ink">{e.model_name}</span>
-      <Badge tone={muted ? "muted" : eventTone(e)}>{EVENT_LABEL[e.type]}</Badge>
-      <span className={`num truncate ${muted ? "text-ink-3" : "text-ink-2"}`}>{eventValueText(e)}</span>
-      <a
-        href={e.source_url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="shrink-0 text-[12px] text-accent underline decoration-line underline-offset-2 hover:decoration-accent"
-      >
-        Source
-      </a>
+    <li className="flex flex-wrap items-start gap-x-3 gap-y-1.5 py-3 text-[13px]" title={muted ? (e.reason ?? undefined) : undefined}>
+      <span className="w-14 shrink-0 pt-0.5 font-mono text-[11px] text-ink-3">{fmtDay(e.date)}</span>
+      <span className="min-w-[9rem] flex-1">
+        <span className="block font-medium text-ink">{e.model_name}</span>
+        {variant && <span className="mt-0.5 block truncate text-[11.5px] text-ink-3">{variant}</span>}
+      </span>
+      <span className="flex flex-wrap items-center gap-x-3 gap-y-1.5 pt-0.5">
+        <Badge tone={muted ? "muted" : eventTone(e)}>{EVENT_LABEL[e.type]}</Badge>
+        <span className={`num truncate ${muted ? "text-ink-3" : "text-ink-2"}`}>{eventValueText(e)}</span>
+        <a
+          href={e.source_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 text-[12px] text-accent underline decoration-line underline-offset-2 hover:decoration-accent"
+        >
+          Source
+        </a>
+      </span>
     </li>
   );
 }

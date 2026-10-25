@@ -54,7 +54,7 @@ export function CollectionStatusCard({ status }: { status: CollectionStatus }) {
             className="num mt-1 text-ink"
             title={`Each configured product page is one "source" — a retailer with several product lines counts as several sources. Not the same count as the home page's "stores" (distinct retailers).`}
           >
-            {status.todayRows} pts · {status.todaySourcesOk} of {status.totalSources} sources
+            {status.todayRows} pts · {status.todaySourcesOk} of {status.totalSources} sources responded
           </dd>
         </div>
         <div>

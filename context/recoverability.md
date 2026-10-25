@@ -104,3 +104,31 @@ Wayback에서 발견한, Ohmlot 수집기가 존재하기 전의 실제 변화 3
   없다**는 걸 확인한 뒤, bare `keyirobot.com`/`www.keyirobot.com` 호스트로 같은 내용을 찾아 대체
   확인했다 — 이것도 "캡처 자체 없음"의 한 형태로 별도 기록했다(정확히는 이 특정 서브도메인·URL 조합에
   대해서만 no_capture, 같은 제품의 다른 호스트 표기는 recovered).
+
+## 2026-10-25 추가 조사 — KEYi Loona 10월 가격 인하(Oct 20, $499→$429) 캡처 조회 시도 (task-prelaunch-2.md §C)
+
+**목적**: Show HN 초안(`context/launch-showhn.md`)의 "다른 어떤 기록도 이 가격 인하를 안 잡았다"는
+문장을 내보내도 되는지 판정. 결론부터: **판정 불가 — Wayback CDX API 자체에 접근하지 못했다.**
+
+조회 시도 (2026-10-25 약 09:18~09:23 UTC, 우회 도구·프록시 없이 공식 CDX API만 직접 curl):
+
+```bash
+curl -s 'https://web.archive.org/cdx/search/cdx?url=us.keyirobot.com/products/petbot&matchType=prefix&from=20261001&to=20261031&output=json&fl=timestamp,original,statuscode'
+curl -s 'https://web.archive.org/cdx/search/cdx?url=us.keyirobot.com/products.json&matchType=prefix&from=20261001&to=20261031&output=json&fl=timestamp,original,statuscode'
+curl -s 'https://web.archive.org/cdx/search/cdx?url=us.keyirobot.com&matchType=domain&from=20261001&to=20261031&output=json&fl=timestamp,original,statuscode&limit=200'
+```
+
+결과: 세 요청 모두 TLS 핸드셰이크는 성공했지만(서버 인증서 정상, `*.archive.org`) 응답 바디가 오지
+않았다 — 20초 제한에서는 `curl: (28) Operation timed out`, 90초로 늘려 재시도한 한 번은 HTML로 **"Internet
+Archive services are temporarily offline"**(IA 공식 장애 안내 페이지)를 받았다. 같은 시각 `https://archive.org/`
+메인 페이지는 HTTP 200으로 정상 응답 — 그래서 이건 2026-09-25 조사 때 겪었던 "프록시가 web.archive.org를
+막는다"는 것과는 다른 문제로 보인다. **Wayback 검색(CDX) 백엔드 자체가 그 시점에 불안정하거나 다운**
+상태였던 것으로 판단한다.
+
+**처리**: "확인 못 하면 문장을 통째로 지운다"는 task-prelaunch-2.md §C의 원칙대로, 해당 문장을
+`context/launch-showhn.md`에서 삭제했다. IA가 복구되면 같은 3개 쿼리를 다시 돌려서, 10/19~10/21 구간에
+캡처가 있는지(있으면 문장 영구 삭제 + 그 캡처의 실제 가격 확인) / 전혀 없는지(있으면 문장 복원 가능)를
+마저 판정해야 한다.
+
+캡처 **없음**을 "그때 그 가격이 아니었다"로 해석하지 않는 이 문서의 원칙은 여기서도 그대로 적용된다 —
+다만 이번엔 "없음을 확인"조차 못 했다는 게 차이다.
