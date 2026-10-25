@@ -1,67 +1,125 @@
 # ohmlot-collector
 
+The collector behind **[ohmlot.com](https://www.ohmlot.com)** — a daily record of what personal
+robots (humanoids, robot dogs, desktop robots) cost in the US, whether they are actually in stock,
+and what their FCC authorization status is.
 
-**Ohmlot** (ohmlot.com) — the original marketplace for personal robots. 이 저장소는 그 데이터 기반을 매일 쌓습니다.
-개인 로봇(휴머노이드·로봇개·데스크톱 로봇)의 **제조사 판매가**와 **FCC 인증 기록**을 매일 자동으로 모으는 수집기입니다.
-결과는 이 저장소의 `data/`에 매일 커밋되므로, Git 이력 자체가 "2026년부터 모았다"는 날짜 증거가 됩니다.
+Every snapshot is committed to this repository the day it is taken, by GitHub Actions. That is the
+point of the repo being public: the site alone cannot prove that a price history is real, because a
+JSON file can be written at any time with any date in it. Commit timestamps cannot be backdated, so
+the git log is the evidence.
 
-## 구성
+Collection started **2026-09-22**.
 
-| 경로 | 내용 |
-| --- | --- |
-| `data/models.json` / `.csv` | 시드 모델 30종 (CC BY 출처는 `data/SOURCES.md`) |
-| `config/price-sources.json` | 가격 수집 대상 (Shopify `.js`/`.json` 상품 엔드포인트, 1X는 HTML 정규식) |
-| `config/fcc-grantees.json` | FCC grantee 코드 (Unitree = 2A5PE 등) |
-| `src/prices.ts` | 가격 수집 → `data/prices/YYYY-MM-DD.jsonl` |
-| `src/fcc.ts` | FCC 공식 API(KDB 953436 `getFCCIDList`)로 인증 수집 → `data/fcc/grants.json` (누적), 응답 원문 `data/fcc/raw/<날짜>-<코드>.json`, 새 인증은 `data/fcc/new-grants.log`, `data/models.json`의 `us_status` 갱신. 아무 코드도 응답하지 않으면 파일을 쓰지 않음. 조사 노트: `context/fcc-api-notes.md` |
-| `supabase/schema.sql` | Supabase 테이블 (models, price_snapshots, fcc_grants, latest_prices 뷰) |
-| `.github/workflows/daily.yml` | cron은 매일 00:17 UTC(09:17 KST)로 설정돼 있지만 **실제 시작 시각은 아니다** — GitHub Actions 스케줄 큐 자체가 지연되고(관측치: 05:20~05:56 UTC, 날마다 더 밀리는 추세) cron 값을 바꿔도 해결되지 않는다(`context/task-runtime-label.md`). 가격만 수집 후 `data/` 커밋, 마지막 스텝에서 Supabase를 한 번 건드려 7일-무활동 자동 일시정지를 막는다 |
-| `.github/workflows/fcc.yml` | FCC 인증 수집. 지금은 Actions **수동 실행(Run workflow)** 전용 — 러너에서 한 번 성공하면 매주 월요일 스케줄(`0 1 * * 1`)을 켠다 (파일 안 주석 참고) |
-| `web/` | ohmlot.com 사이트 v0 (Next.js). 빌드 시 `data/`를 읽어 정적 생성. 배포 방법은 `web/README.md` |
+---
 
-## 시작하기 (15분)
+## What gets collected
 
-1. GitHub에 **비공개** 저장소를 만들고 이 폴더를 올립니다. (현재: `lmy810209/ohmlot-collector`. `ohmlot` 조직을 만든 뒤 Settings → Danger Zone → Transfer 로 옮기면 Actions·이력이 그대로 따라갑니다.)
-   ```bash
-   git init && git add . && git commit -m "init" && git branch -M main
-   git remote add origin https://github.com/<you>/ohmlot-collector.git && git push -u origin main
-   ```
-2. 로컬에서 한 번 실행해 실제 사이트가 응답하는지 확인합니다.
-   ```bash
-   npm install
-   npm test
-   npm run collect         # 가격 + FCC 모두 (로컬 확인용)
-   npm run collect:prices  # 매일 실행과 동일. 실패한 소스는 data/logs/<날짜>.log 에 기록
-   npm run collect:fcc     # 수동 실행과 동일. 못 읽으면 종료 코드 1, 파일은 쓰지 않음
-   ```
-3. (선택) Supabase 연결
-   - SQL Editor에서 `supabase/schema.sql` 실행
-   - `SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx src/seed-models.ts`
-   - GitHub 저장소 Settings → Secrets → Actions 에 같은 두 값을 등록
-   - Supabase 없이도 파일(`data/`)로만 동작합니다.
-4. GitHub → Actions → `daily-collect` → **Run workflow** 로 첫 실행. 이후 매일 자동.
-5. FCC는 Actions → `fcc-collect` → **Run workflow** 로 직접 실행합니다. 러너에서 성공하는 것을 확인하면 주 1회(월요일) 스케줄을 켭니다. 매일 실행에는 들어 있지 않습니다.
+| What | Where it lands | How often |
+| --- | --- | --- |
+| Manufacturer list prices, per variant, pinned to the US market | `data/prices/YYYY-MM-DD.jsonl` | daily |
+| Raw store responses, kept verbatim | `data/prices/raw/<date>/` | daily |
+| A 6-hourly sample of three high-churn sources | `data/prices/intraday/` | every 6h |
+| FCC conditional-approval records | `data/fcc/` | weekly |
+| Changes derived by diffing consecutive snapshots | `data/events.jsonl` | daily |
+| Catalog of 32 robots, 15 of them price-tracked | `data/models.json` | manual |
 
-## 첫 실행 때 확인할 것
+The 17 robots that are not price-tracked are real, currently-sold products whose price is
+quote-only or behind a contact-sales form. They are listed with the reason rather than left blank or
+dropped.
 
-- `data/logs/<날짜>.log` 에 실패한 URL이 있으면 `config/price-sources.json`의 주소를 고칩니다 (상품 handle이 바뀌었을 수 있음).
-- Shopify `.js` 주소가 `got HTML instead of JSON`으로 실패하면 스토어가 `.js`를 마케팅 사이트로 301시키는 경우입니다 (KEYi가 그랬음). 같은 handle의 `.json` 주소로 바꾸면 되고, 파서는 두 형식을 모두 처리합니다.
-- Shopify 스토어는 요청 지역에 따라 통화와 재고가 달라질 수 있습니다 (Pollen은 미국 밖에서 EUR 가격을 내려줌). 수집기는 `?country=US`로 미국 시장을 고정하므로 로컬에서 돌려도 GitHub 러너와 같은 USD 값이 나옵니다. 로컬과 러너 값이 다르면 이 부분을 먼저 의심하세요.
-- `HTTP 403 (cloudflare challenge)`는 봇 차단입니다. 재시도해도 소용없고 우회하지 않습니다. RobotShop은 모든 요청에 챌린지를 걸어 소스에서 뺐습니다.
-- FCC는 매일 실행에서 빠져 있고 `fcc-collect`를 수동으로 돌립니다. 2026-09-24부터 `fccid.io` 스크래핑 대신 **FCC 공식 EAS Web API**(KDB 953436, `https://apps.fcc.gov/OETLabServices/getFCCIDList?fccId=<grantee 코드>`)를 읽습니다. 다만 이 엔드포인트는 한국 가정용 IP뿐 아니라 **GitHub Actions 미국 러너에서도 Akamai `Access Denied`(403)**입니다(2026-09-24 run 35890991314: 8개 코드 전부 403). 그래서 주간 스케줄은 아직 꺼 두었고, 러너에서 한 번 성공하면 켭니다. 봇 차단은 우회하지 않습니다. `got HTML instead of JSON`은 차단, `unexpected response shape`은 응답 스키마가 예상과 다른 경우입니다 — 후자는 `data/fcc/raw/`에 남은 원문을 보고 `parseFccIdList`를 맞추세요(스키마 메모: `context/fcc-api-notes.md`). 아무 코드도 응답하지 않은 실행은 Actions 로그에만 빨간색으로 표시되고 `data/`에는 아무것도 남기지 않습니다 (`data/logs`는 가격 실패 전용).
-- `flags: ["placeholder_price"]`는 Unitree가 "문의" 상품에 넣는 $90,000/$100,000 임시 가격입니다. 시세 계산에서 빼세요.
+## How it works
 
-## 지키는 규칙
+**Prices** (`src/prices.ts`) read each store's own product endpoint — Shopify `.js`/`.json` for most
+sellers, an HTML parse for 1X — with `?country=US` so the market is pinned. Collection is per
+variant, so a product with 15 variants produces 15 rows, each with its own price, availability and
+SKU. Sources are configured in `config/price-sources.json`, not hardcoded.
 
-- 소스당 하루 1회, 요청 간격 1.5~3초, 식별 가능한 User-Agent.
-- eBay 데이터는 수집하지 않습니다 (API 약관상 시세 계산·타 데이터와 혼합 금지).
-- 월말마다 `data/`를 Zenodo에 올려 DOI를 받으면 발행일이 찍힌 공개 기록이 됩니다.
+**FCC** (`src/fcc.ts`) reads the PSHSB public notices listed in `config/fcc-notices.json` as PDFs
+from `docs.fcc.gov`, keeps the PDF bytes verbatim under `data/fcc/raw/`, and extracts all three
+columns of Appendix B using a coordinate-based reader (`src/lib/pdf.ts`) that works off each text
+item's x/y position. The flattened `.txt` rendering that FCC also publishes merges the columns
+irrecoverably, which is why the PDF is parsed directly.
 
-## 알려진 공백
+`apps.fcc.gov` — the host that serves the equipment-authorization API — is Akamai-blocked from CI
+runners and from every other origin tried. That is recorded in `context/fcc-api-notes.md` and no
+workaround was used: no proxy service, no scraping-bypass tool. The result is that this repo has
+less FCC data than a bypass would produce, and says so.
 
-- FCC 인증 자동 수집: 공식 API로 교체했으나 러너에서의 첫 성공 전까지 `data/fcc/grants.json`은 비어 있음. `data/models.json`의 `us_status`는 시드 grant 날짜 + FCC 조건부 승인 공지(DA 26-957/996)로 계산했고, 수집이 성공하면 자동 갱신됨
-- FCC ID 미확인 19개 모델 (Booster, EngineAI, Fourier, Reachy, Petoi 등), 1X·Booster·Petoi·Pollen의 grantee 코드
-- R1(2A5PE-YUSHU010), H2(YUSHU012), AgiBot X2(2BTPT-LX2501)는 2차 출처 기준 — 원본 확인 필요
-- `unitree-h1` 가격(90,000)과 `unitree-h2` 최고가(100,000)는 임시 가격일 가능성
-- RobotShop(리셀러) 가격은 Cloudflare 차단으로 수집하지 않음. 리셀러가는 현재 Deep Robotics US만 포함
-- KEYi(Loona)는 `.json` 엔드포인트에 재고 필드가 없어 `available`이 항상 `null`
+**Events** (`src/events.ts`) are generated by comparing each day's snapshot to the previous one.
+Nothing is hand-entered.
+
+## Rules this repo follows
+
+These are not aspirations; they are why several things here are missing or marked unknown.
+
+- **Never invent a value.** If something cannot be read, it is `null` or `unknown`. There is no
+  "reasonable estimate" anywhere in `data/`.
+- **Separate instrumentation from the world.** When a field is observed for the first time, that is
+  recorded as `observation_started`, not as a change. Those events carry `observation_change: true`
+  and are shown separately on the site. The first 20 events in this repo are all of that kind.
+- **Separate observation from reconstruction.** Prices this collector saw are
+  `primary_observation`. Three changes found in the Internet Archive from before collection started
+  are kept in `data/historical-findings.jsonl` and deliberately never merged into `events.jsonl`.
+- **Don't route around a block.** An official source that refuses is logged and skipped.
+- **Prices with weak provenance are not displayed as numbers.** A price taken from a press release
+  or an unverified vendor page is excluded from the site's filters, sorting and comparisons.
+
+## What this is not
+
+- These are **manufacturer list prices, not transaction prices.** This records what a store is
+  asking, not what anyone paid.
+- The history is short. It starts 2026-09-22 and that is stated on the site rather than hidden.
+- There is no marketplace, no listings and no affiliate links.
+- FCC coverage is limited to what the public notices contain. New IDs need manual verification on
+  `apps.fcc.gov`.
+
+## Why it exists
+
+A Wayback Machine study (`context/recoverability.md`, run 2026-09-25) measured whether this data
+could just be recovered later instead of collected. The finding was the opposite of the starting
+assumption: where the Internet Archive has a capture, most fields come back fine — price recovered
+in 26 of 26 sampled snapshots, stock in 23 of 26.
+
+The gap is **coverage, not readability**. DEEP Robotics' Lite3 product page has never been crawled
+by the Internet Archive, not once, while two other products from the same store were. KEYi's Loona
+product URL has never been captured either; its store appears in the archive only inside a five-week
+window in May–June 2026 — and inside that narrow window its price changed three times. For some of
+these products there is no "look it up later."
+
+## Running it
+
+```bash
+npm install
+npm test
+npm run collect:prices    # same as the daily workflow
+npm run collect:fcc       # same as the weekly workflow
+npm run collect:intraday  # the 6-hourly sample
+```
+
+Failed sources are written to `data/logs/<date>.log`; a failure never silently produces a row.
+That directory does not exist in a clean checkout, because it is only created when something
+fails — which is also how a CI bug once went unnoticed for three days (`git add` on a path that
+only exists on error exits non-zero, and silently skipped the commit step after it).
+
+Scheduling lives in `.github/workflows/` (`daily.yml`, `fcc.yml`, `intraday.yml`). Note that the
+cron times in those files are **requests, not start times**. GitHub's scheduler delays these runs,
+and the delay is neither small nor predictable: measured starts have landed between roughly two and
+six hours after the requested time, varying run to run and workflow to workflow. Changing the cron
+value does not help, because the delay is queue-side. This is why the site displays the collection
+time read from the data itself rather than the time the workflow asked for.
+
+The site in `web/` is a Next.js app that reads `data/` at build time.
+
+## Sources and license
+
+Model metadata draws on Robot Price Index and humanoidrecord.com, both CC BY 4.0; attribution is in
+`data/SOURCES.md`. Prices come from manufacturer and official-reseller stores. FCC material is US
+government public record.
+
+Ohmlot is independent and not affiliated with any manufacturer or store.
+
+---
+
+Working notes in `context/` are written in Korean. They are the actual instructions the work was
+done from, including the ones that record mistakes and corrections.
