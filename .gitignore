@@ -1,3 +1,13 @@
 node_modules
 .env
 supabase/.temp
+
+# 비공개 문서 — 저장소를 공개해도 올라가지 않는다 (2026-10-25)
+# 전략·판단·런칭 준비물. 코드나 데이터가 아니므로 공개 저장소에 들어갈 이유가 없다.
+# 지금까지 커밋된 적 없음(히스토리 0건). 실수로 `git add -A` 해도 막기 위해 명시한다.
+context/kill-criteria.md
+context/review-round2.md
+context/launch-showhn.md
+context/task-runtime-label.md
+context/task-first-variant-event.md
+context/task-prelaunch-2.md
