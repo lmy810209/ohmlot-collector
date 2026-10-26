@@ -1,11 +1,11 @@
 {
-  "updated": "2026-10-19",
+  "updated": "2026-10-26",
   "notices": [
     {
       "da": "DA-26-786",
       "released": "2026-07-28",
       "url": "https://docs.fcc.gov/public/attachments/DA-26-786A1.pdf",
-      "fetched": "2026-10-19",
+      "fetched": "2026-10-26",
       "status": "no_appendix",
       "columns": {
         "uas": "no_appendix",
@@ -19,7 +19,7 @@
       "da": "DA-26-789",
       "released": "2026-07-28",
       "url": "https://docs.fcc.gov/public/attachments/DA-26-789A1.pdf",
-      "fetched": "2026-10-19",
+      "fetched": "2026-10-26",
       "status": "no_appendix",
       "columns": {
         "uas": "no_appendix",
@@ -33,7 +33,7 @@
       "da": "DA-26-957",
       "released": "2026-09-09",
       "url": "https://docs.fcc.gov/public/attachments/DA-26-957A1.pdf",
-      "fetched": "2026-10-19",
+      "fetched": "2026-10-26",
       "status": "ok",
       "columns": {
         "uas": "ok",
@@ -47,7 +47,7 @@
       "da": "DA-26-996",
       "released": "2026-09-18",
       "url": "https://docs.fcc.gov/public/attachments/DA-26-996A1.pdf",
-      "fetched": "2026-10-19",
+      "fetched": "2026-10-26",
       "status": "ok",
       "columns": {
         "uas": "ok",
