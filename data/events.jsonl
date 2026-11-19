@@ -44,3 +44,4 @@
 {"date":"2026-11-11","type":"price_changed","model_id":"keyi-loona","seller":"keyi-official","variant":"Buzzer Beater","from":488,"to":468,"source_url":"https://us.keyirobot.com/products/petbot","observation_change":false,"reason":null}
 {"date":"2026-11-11","type":"price_changed","model_id":"keyi-loona","seller":"keyi-official","variant":"Space Edition","from":644,"to":624,"source_url":"https://us.keyirobot.com/products/petbot","observation_change":false,"reason":null}
 {"date":"2026-11-18","type":"availability_changed","model_id":"ddl-vector-2","seller":"ddl-official","variant":"Pink (Open Box)","from":"in_stock","to":"out_of_stock","source_url":"https://anki.bot/products/vector-robot","observation_change":false,"reason":null}
+{"date":"2026-11-19","type":"price_changed","model_id":"keyi-loona","seller":"keyi-official","variant":"Premium","from":409,"to":404,"source_url":"https://us.keyirobot.com/products/petbot","observation_change":false,"reason":null}
